@@ -357,14 +357,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       ThetaArray = vtk.vtkFloatArray()
       ThetaArray.SetName("Theta (rad)")
               
-      R1Array = vtk.vtkFloatArray()
-      R1Array.SetName("R1 (mm)")
+      RmaxArray = vtk.vtkFloatArray()
+      RmaxArray.SetName("Rmax (mm)")
         
-      R2Array = vtk.vtkFloatArray()
-      R2Array.SetName("R2 (mm)")
+      RminArray = vtk.vtkFloatArray()
+      RminArray.SetName("Rmin (mm)")
       
       JxyArray = vtk.vtkFloatArray()
-      JxyArray.SetName("Iz (mm^4)")
+      JxyArray.SetName("Jna+fa (mm^4)")
         
       ImaxArray = vtk.vtkFloatArray()
       ImaxArray.SetName("Imax (mm^4)")
@@ -373,7 +373,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       IminArray.SetName("Imin (mm^4)")
       
       JzArray = vtk.vtkFloatArray()
-      JzArray.SetName("Jz (mm^4)")
+      JzArray.SetName("Jmax+min (mm^4)")
         
       ZmaxArray = vtk.vtkFloatArray()
       ZmaxArray.SetName("Zmax (mm^3)")
@@ -661,15 +661,15 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           
           
           # determine the max distance from each principal axis
-          maxRadMax = 0
-          maxRadMin = 0
+          Rmax = 0
+          Rmin = 0
           for i in range(Sn):
-            maxRadMin = max(maxRadMin, abs((coords_Ijk[0][i]-Cx)*np.cos(rot2) + (coords_Ijk[1][i]-Cy)*np.sin(rot2)))
-            maxRadMax = max(maxRadMax, abs((coords_Ijk[1][i]-Cy)*np.cos(rot2) - (coords_Ijk[0][i]-Cx)*np.sin(rot2)))
+            Rmax = max(Rmax, abs((coords_Ijk[1][i]-Cy)*np.cos(rot2) - (coords_Ijk[0][i]-Cx)*np.sin(rot2)))
+            Rmin = max(Rmin, abs((coords_Ijk[0][i]-Cx)*np.cos(rot2) + (coords_Ijk[1][i]-Cy)*np.sin(rot2)))
           
           # section moduli around principal axes
-          Zmax = Imax / maxRadMax
-          Zmin = Imin / maxRadMin
+          Zmax = Imax / Rmax
+          Zmin = Imin / Rmin
 
             
           if OrientationcheckBox == True: 
@@ -715,7 +715,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             RnaArray.InsertNextValue(np.around(maxRad1 * lengthofPixelMm,3))
             RfaArray.InsertNextValue(np.around(maxRad2 * lengthofPixelMm,3))
             IfaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
-            InaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,10))
+            InaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
             JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,3))        
             ZnaArray.InsertNextValue(np.around(Zna * volOfPixelMm3,3))
             ZfaArray.InsertNextValue(np.around(Zfa * volOfPixelMm3,3))
@@ -747,8 +747,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           
           ThetaArray.InsertNextValue(np.around(rot2,3))
           
-          R1Array.InsertNextValue(np.around(maxRadMax * lengthofPixelMm,3))
-          R2Array.InsertNextValue(np.around(maxRadMin * lengthofPixelMm,3))
+          RmaxArray.InsertNextValue(np.around(Rmax * lengthofPixelMm,3))
+          RminArray.InsertNextValue(np.around(Rmin * lengthofPixelMm,3))
           
           ImaxArray.InsertNextValue(np.around(Imax * unitOfPixelMm4,3))
           IminArray.InsertNextValue(np.around(Imin * unitOfPixelMm4,3))
@@ -797,51 +797,50 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       if CentroidcheckBox == True:
         tableNode.AddColumn(CxArray)
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "X-coordinate of the segment centroid in a given slice")  
+        tableNode.SetColumnDescription(areaArray.GetName(), "X-coordinate of the centroid")  
       
         tableNode.AddColumn(CyArray)
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "Y-coordinate of the segment centroid in a given slice")  
+        tableNode.SetColumnDescription(areaArray.GetName(), "Y-coordinate of the centroid")  
         
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaArray)
         tableNode.SetColumnUnitLabel(ThetaArray.GetName(), "rad")  # TODO: use length unit
-        tableNode.SetColumnDescription(ThetaArray.GetName(), "Angle of how far the minor axis is from the horizontal axis")
+        tableNode.SetColumnDescription(ThetaArray.GetName(), "Angle of the principal axis")
       
-      if RcheckBox == True:  
-        tableNode.AddColumn(R1Array)
-        tableNode.SetColumnUnitLabel(R1Array.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(R1Array.GetName(), "Max chord length perpendicular to the minor axis") 
+      if RcheckBox == True and (MODcheckBox_1 == True or SMAcheckBox_1 == True) == True:  
+        tableNode.AddColumn(RmaxArray)
+        tableNode.SetColumnUnitLabel(RmaxArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RmaxArray.GetName(), "Max chord length from the major principal axis") 
       
-        tableNode.AddColumn(R2Array)
-        tableNode.SetColumnUnitLabel(R2Array.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(R2Array.GetName(), "Max chord length perpendicular to the major axis") 
-
+        tableNode.AddColumn(RminArray)
+        tableNode.SetColumnUnitLabel(RminArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RminArray.GetName(), "Max chord length from the minor principal axis") 
        
       if SMAcheckBox_1 == True:  
-        tableNode.AddColumn(IminArray)
-        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
-        
         tableNode.AddColumn(ImaxArray)
         tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
+        
+        tableNode.AddColumn(IminArray)
+        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
+
+      if MODcheckBox_1 == True:
+        tableNode.AddColumn(ZmaxArray)
+        tableNode.SetColumnUnitLabel(ZmaxArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZmaxArray.GetName(), "Section modulus around the major principal axis")
+        
+        tableNode.AddColumn(ZminArray)
+        tableNode.SetColumnUnitLabel(ZminArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZminArray.GetName(), "Section modulus around the minor principal axis")
          
       if PolarcheckBox_1 == True:     
         tableNode.AddColumn(JzArray)
         tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia around the principal axes")
         
-      if MODcheckBox_1 == True:
-        tableNode.AddColumn(ZminArray)
-        tableNode.SetColumnUnitLabel(ZminArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZminArray.GetName(), "Section modulus around the minor principal axis")
-        
-        tableNode.AddColumn(ZmaxArray)
-        tableNode.SetColumnUnitLabel(ZmaxArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZmaxArray.GetName(), "Section modulus around the major principal axis")
-                
-      if RcheckBox == True and OrientationcheckBox == True:
+      if RcheckBox == True and OrientationcheckBox == True and (SMAcheckBox_2 == True or MODcheckBox_2 == True):
         tableNode.AddColumn(RnaArray)
         tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(RnaArray.GetName(), "Max chord length perpendicular to the neutral axis") 
@@ -859,11 +858,6 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IfaArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(IfaArray.GetName(), "Second moment of area around the force axis (perpendicular to the neutral axis)")
         
-      if OrientationcheckBox == True and PolarcheckBox_2 == True:  
-        tableNode.AddColumn(JxyArray)
-        tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and force axes")
-        
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
         tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm3")  # TODO: use length unit
@@ -872,7 +866,12 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ZfaArray)
         tableNode.SetColumnUnitLabel(ZfaArray.GetName(), "mm3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZfaArray.GetName(), "Section modulus around the force axis (perpendicular to the neutral axis)")
-      
+              
+      if OrientationcheckBox == True and PolarcheckBox_2 == True:  
+        tableNode.AddColumn(JxyArray)
+        tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and force axes")
+        
       if DoubecheckBox == True and CSAcheckBox == True:
         tableNode.AddColumn(areaArray_Doube)
         tableNode.SetColumnUnitLabel(areaArray_Doube.GetName(), "none")  # TODO: use length unit
