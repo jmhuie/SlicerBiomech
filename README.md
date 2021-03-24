@@ -29,6 +29,22 @@ first convert to a segmentation node.
 **Sample slices:** User has the option do calculations in percent intervals along the length of the segment. Enter zero 
 to do calculations for every slice.
 
+# Advanced Options
+
+**Edit selected calculations:** User can toggle main calculations on and off. Note: A volume node must be selected to calculatie voxel intensity.
+
+**Set the neutral axis:** User can set a custom neutral axis for calculating second moment of area, section modulus, and polar moment of inertia 
+by entering an angle (in degrees) that represents how much the neutral axis deviates from the horizontal axis. By default, the neutral axis is parallel to the horizontal axis and 
+the axis perpendicular to it is called the force axis.
+
+**Extra calculations:** User can toggle on and off extra calculations such segment length, centroid coordinates, theta, and chord length.
+
+**Calculate unitless values:** Two methods of converting some traits into unitless variables. 
+ - Doube Method described by Doube et al. (2012). Takes the respective roots needed to convert cross-sectional area, second moment of area, section modulus, and polar moment of inertia in linear dimensions 
+and then divides them the length of the segment. This is use to account for the effects of size. 
+ - Summers Method described by Summers et al. (2004). Takes the second moment of area of the segment on a given slice and divides it by the second moment of area of an circle with the same cross-sectional area as 
+the segment on that particular slice. This is used to assess how the distribution of material in the segment compares to that of an idealized beam.
+
 # Outputs
 - Segment: Segment name.
 
@@ -73,19 +89,3 @@ to do calculations for every slice.
 - Zfa: Section modulus around the force axis.
 
 - Jna+fa: Polar moment of area around the neutral and force axes.
-
-# Advanced Options
-
-**Edit selected calculations:** User can toggle main calculations on and off. Note: A volume node must be selected to calculatie voxel intensity.
-
-**Set the neutral axis:** User can set a custom neutral axis for calculating second moment of area, section modulus, and polar moment of inertia 
-by entering an angle (in degrees) that represents how much the neutral axis deviates from the horizontal axis. By default, the neutral axis is parallel to the horizontal axis and 
-the axis perpendicular to it is called the force axis.
-
-**Extra calculations:** User can toggle on and off extra calculations such segment length, centroid coordinates, theta, and chord length.
-
-**Calculate unitless values:** Two methods of converting some traits into unitless variables. 
- - Doube Method described by Doube et al. (2012). Takes the respective roots needed to convert cross-sectional area, second moment of area, section modulus, and polar moment of inertia in linear dimensions 
-and then divides them the length of the segment. This is use to account for the effects of size. 
- - Summers Method described by Summers et al. (2004). Takes the second moment of area of the segment on a given slice and divides it by the second moment of area of an circle with the same cross-sectional area as 
-the segment on that particular slice. This is used to assess how the distribution of material in the segment compares to that of an idealized beam.
