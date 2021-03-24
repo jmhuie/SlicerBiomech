@@ -2,12 +2,12 @@
 
 This is the repository for the Slicer SegmentSliceGeometry module for 3D Slicer.
 
-SegmentSliceGeometry calculates geometric properties from the cross-sections of a segment. These include: 
+SegmentSliceGeometry calculates geometric properties from segment cross-sections. These include: 
 cross-sectional area, mean voxel intensity, second moment of area, section modulus, and polar moment of inertia. 
-SegmentSliceGeometry is heavily inspired by BoneJ (Doube et al. 2010), but its primary goal is to 
-streamline workflows for users that already process data in 3D Slicer. The benefits to doing these calculations in 3D Slicer include 
-the ability to align oblique volumes with the XYZ images axes, perform computations on models (i.e., stl, obj, and ply file types), 
-and graphical plotting capabilities.
+SegmentSliceGeometry is inspired by BoneJ (Doube et al. 2010), but aims to reduce the number of necessary programs for users 
+that already use 3D Slicer. Additional benefits to doing these calculations in 3D Slicer include 
+the ability to easily align oblique volumes with the XYZ images axes, perform computations on models 
+(i.e., stl, obj, and ply file types), and plotting capabilities.
 
 # Installation
 
