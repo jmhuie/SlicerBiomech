@@ -160,44 +160,53 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation"):
+      self.ui.segmentationSelector.toolTip = "Select output table"
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
     else:
+      self.ui.segmentationSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Select input segmentation node"
       self.ui.applyButton.enabled = False
       
     if self._parameterNode.GetNodeReference("Volume"):
+      self.ui.volumeSelector.toolTip = "Select output table"
       self.ui.IntensitycheckBox.toolTip = "Compute mean voxel intensity"
       self.ui.IntensitycheckBox.enabled = True
     else:
-      self.ui.IntensitycheckBox.toolTip = "Select scalar volume"
+      self.ui.volumeSelector.toolTip = "Select volume node (optional)"
+      self.ui.IntensitycheckBox.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.enabled = False
+      
+    if self._parameterNode.GetNodeReference("ResultsTable"):
+      self.ui.tableSelector.toolTip = "Edit output table"
+    else:
+      self.ui.tableSelector.toolTip = "Select output node"
             
     if self.ui.OrientationcheckBox.checked == True:
-      self.ui.orientationspinBox.toolTip = "Enter the angle (degrees) of the neutral axis. By default, the neutral axis is parallel the horizontal axis"
+      self.ui.orientationspinBox.toolTip = "Enter the angle (degrees) of the neutral axis. By default, the neutral axis is set parallel to the horizontal"
       self.ui.orientationspinBox.enabled = True
       self.ui.SMAcheckBox_2.toolTip = "Compute second moment of area around the neutral and force axes"
       self.ui.SMAcheckBox_2.enabled = True
-      self.ui.MODcheckBox_2.toolTip = "Compute section moduli around the neutral and force axes"
+      self.ui.MODcheckBox_2.toolTip = "Compute section modulus around the neutral and force axes"
       self.ui.MODcheckBox_2.enabled = True
       self.ui.PolarcheckBox_2.toolTip = "Compute polar moment of inertia around the neutral and force axes"
       self.ui.PolarcheckBox_2.enabled = True
     else:
-      self.ui.orientationspinBox.toolTip = "Select option to set the neutral axis"
+      self.ui.orientationspinBox.toolTip = "Select option use the neutral axis"
       self.ui.orientationspinBox.enabled = False
-      self.ui.SMAcheckBox_2.toolTip = "Select option to set the neutral axis"
+      self.ui.SMAcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.SMAcheckBox_2.enabled = False
-      self.ui.MODcheckBox_2.toolTip = "Select option to set the neutral axis"
+      self.ui.MODcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.MODcheckBox_2.enabled = False
-      self.ui.PolarcheckBox_2.toolTip = "Select option to set the neutral axis"
+      self.ui.PolarcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.PolarcheckBox_2.enabled = False
       
     # other tooltips
-    self.ui.axisSelectorBox.toolTip = "Select the orthogonal axis to perform computations on"
-    self.ui.resamplespinBox.toolTip = "Option to perform computations in intervals along the length of the segment. Enter zero to compute values on every slice"
+    self.ui.axisSelectorBox.toolTip = "Select orthogonal axis to compute on"
+    self.ui.resamplespinBox.toolTip = "Perform computations in percent intervals along the the segment. Enter zero to compute values on every slice"
     self.ui.CSAcheckBox.toolTip = "Compute cross-sectional area"
     self.ui.SMAcheckBox_1.toolTip = "Compute second moment of area around the principal axes"
-    self.ui.MODcheckBox_1.toolTip = "Compute section moduli around the principal axes"
+    self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
     self.ui.PolarcheckBox_1.toolTip = "Compute polar moment of inertia around the principal axes"
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
     self.ui.CentroidcheckBox.toolTip = "Compute the XY coordinates of the segment on a given slice"
@@ -476,60 +485,68 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         segmentList = vtk.vtkStringArray()
         segmentList.InsertNextValue(segmentID)
         
+        volumesLogic = slicer.modules.volumes.logic()
         if volumeNode != None:   
           # Create volume for output
-          volumesLogic = slicer.modules.volumes.logic()
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume", False)
+          volumeNodeformasking = volumeNode
           
-          # Crop segment
-          maskExtent = [0] * 6
-          fillValue = 0
-          import SegmentEditorEffects
-          #import SegmentEditorMaskVolumeLib
-          #maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
-          maskVolumeWithSegment = SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment
-          maskVolumeWithSegment(segmentationNode, segmentID, "FILL_OUTSIDE", [fillValue], volumeNode, outputVolume, maskExtent) 
+        if volumeNode == None:
+          volumeNodeformasking = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "FullVolumeTemp")
+          slicer.modules.segmentations.logic().ExportAllSegmentsToLabelmapNode(segmentationNode, volumeNodeformasking, slicer.vtkSegmentation.EXTENT_REFERENCE_GEOMETRY)
+          outputVolume = volumesLogic.CloneVolumeGeneric(volumeNodeformasking.GetScene(), volumeNodeformasking, "TempMaskVolume", False)
           
-          # Calculate padded extent of segment
-          extent = [0] * 6
-          for i in range(len(extent)):
-            extent[i] = maskExtent[i]
+        # Crop segment
+        maskExtent = [0] * 6
+        fillValue = 0
+        #import SegmentEditorEffects
+        import SegmentEditorMaskVolumeLib
+        maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
+        #maskVolumeWithSegment = SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment
+        maskVolumeWithSegment(segmentationNode, segmentID, "FILL_OUTSIDE", [fillValue], volumeNodeformasking, outputVolume, maskExtent) 
           
-          # Calculate the new origin
-          ijkToRas = vtk.vtkMatrix4x4()
-          outputVolume.GetIJKToRASMatrix(ijkToRas)
-          origin_IJK = [extent[0], extent[2], extent[4], 1]
-          origin_RAS = ijkToRas.MultiplyPoint(origin_IJK)
+        # Calculate padded extent of segment
+        realextent=volumeNodeformasking.GetImageData().GetExtent()
+        if axisIndex == 0:
+          extent = [maskExtent[0],maskExtent[1],realextent[2],realextent[3],realextent[4],realextent[5]]
+        elif axisIndex == 1:
+          extent = [realextent[0],realextent[1],maskExtent[2],maskExtent[3],realextent[4],realextent[5]]
+        elif axisIndex == 2:
+          extent = [realextent[0],realextent[1],realextent[2],realextent[3],maskExtent[4],maskExtent[5]]
           
-          # Pad and crop
-          padFilter = vtk.vtkImageConstantPad()
-          padFilter.SetInputData(outputVolume.GetImageData())
-          padFilter.SetConstant(fillValue)
-          padFilter.SetOutputWholeExtent(extent)
-          padFilter.Update()
-          paddedImg = padFilter.GetOutput()
+        # Calculate the new origin
+        ijkToRas = vtk.vtkMatrix4x4()
+        outputVolume.GetIJKToRASMatrix(ijkToRas)
+        origin_IJK = [extent[0], extent[2], extent[4], 1]
+        origin_RAS = ijkToRas.MultiplyPoint(origin_IJK)
+          
+        # Pad and crop
+        padFilter = vtk.vtkImageConstantPad()
+        padFilter.SetInputData(outputVolume.GetImageData())
+        padFilter.SetOutputWholeExtent(extent)
+        padFilter.Update()
+        paddedImg = padFilter.GetOutput()
 
-          # Normalize output image
-          paddedImg.SetOrigin(0,0,0)
-          paddedImg.SetSpacing(1.0, 1.0, 1.0)
-          paddedImg.SetExtent(0, extent[1]-extent[0], 0, extent[3]-extent[2], 0, extent[5]-extent[4])
-          outputVolume.SetAndObserveImageData(paddedImg)
-          outputVolume.SetOrigin(origin_RAS[0], origin_RAS[1], origin_RAS[2])
+        # Normalize output image
+        paddedImg.SetOrigin(0,0,0)
+        paddedImg.SetSpacing(1.0, 1.0, 1.0)
+        paddedImg.SetExtent(0, extent[1]-extent[0], 0, extent[3]-extent[2], 0, extent[5]-extent[4])
+        outputVolume.SetAndObserveImageData(paddedImg)
+        outputVolume.SetOrigin(origin_RAS[0], origin_RAS[1], origin_RAS[2])
             
-          if not slicer.modules.segmentations.logic().ExportSegmentsToLabelmapNode(segmentationNode, segmentList, tempSegmentLabelmapVolumeNode, outputVolume):
-            continue
+        if not slicer.modules.segmentations.logic().ExportSegmentsToLabelmapNode(segmentationNode, segmentList, tempSegmentLabelmapVolumeNode, outputVolume):
+          continue
           
+        if volumeNode != None:  
           # create array to calculate intensity
           voxelArray = slicer.util.arrayFromVolume(outputVolume)  
           
-          # remove output volume node 
-          slicer.mrmlScene.RemoveNode(outputVolume)   
-          
-        else:
-          if not slicer.modules.segmentations.logic().ExportSegmentsToLabelmapNode(segmentationNode, segmentList, tempSegmentLabelmapVolumeNode):
-            continue
-            
-        segmentname = segmentationNode.GetSegmentation().GetNthSegmentID(0)
+        # remove output volume node 
+        slicer.mrmlScene.RemoveNode(outputVolume)
+        
+        if volumeNode == None:
+          slicer.mrmlScene.RemoveNode(volumeNodeformasking)
+
 
         # volumeExtents so first and last number of images in XYZ directions. Starts with 0 not 1	
         volumeExtents = tempSegmentLabelmapVolumeNode.GetImageData().GetExtent()
@@ -843,11 +860,11 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       if RcheckBox == True and OrientationcheckBox == True and (SMAcheckBox_2 == True or MODcheckBox_2 == True):
         tableNode.AddColumn(RnaArray)
         tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RnaArray.GetName(), "Max chord length perpendicular to the neutral axis") 
+        tableNode.SetColumnDescription(RnaArray.GetName(), "Max chord length from the neutral axis") 
       
         tableNode.AddColumn(RfaArray)
         tableNode.SetColumnUnitLabel(RfaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RfaArray.GetName(), "Max chord length perpendicular to the force axis") 
+        tableNode.SetColumnDescription(RfaArray.GetName(), "Max chord length from the force axis") 
       
       if OrientationcheckBox == True and SMAcheckBox_2 == True:  
         tableNode.AddColumn(InaArray)
@@ -856,7 +873,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         
         tableNode.AddColumn(IfaArray)
         tableNode.SetColumnUnitLabel(IfaArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IfaArray.GetName(), "Second moment of area around the force axis (perpendicular to the neutral axis)")
+        tableNode.SetColumnDescription(IfaArray.GetName(), "Second moment of area around the force axis")
         
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
@@ -865,7 +882,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         
         tableNode.AddColumn(ZfaArray)
         tableNode.SetColumnUnitLabel(ZfaArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZfaArray.GetName(), "Section modulus around the force axis (perpendicular to the neutral axis)")
+        tableNode.SetColumnDescription(ZfaArray.GetName(), "Section modulus around the force axis")
               
       if OrientationcheckBox == True and PolarcheckBox_2 == True:  
         tableNode.AddColumn(JxyArray)
@@ -889,7 +906,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       if DoubecheckBox == True and PolarcheckBox_1 == True:
         tableNode.AddColumn(JzArray_Doube)
         tableNode.SetColumnUnitLabel(JzArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(JzArray_Doube.GetName(), "Jz^(1/4)/Length")
+        tableNode.SetColumnDescription(JzArray_Doube.GetName(), "Jmax+min^(1/4)/Length")
         
       if DoubecheckBox == True and MODcheckBox_1 == True:
         tableNode.AddColumn(ZmaxArray_Doube)
@@ -912,7 +929,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       if DoubecheckBox == True and PolarcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(JxyArray_Doube)
         tableNode.SetColumnUnitLabel(JxyArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray_Doube.GetName(), "Jz^(1/4)/Length")
+        tableNode.SetColumnDescription(JxyArray_Doube.GetName(), "Jna+fa^(1/4)/Length")
         
       if DoubecheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(ZnaArray_Doube)
