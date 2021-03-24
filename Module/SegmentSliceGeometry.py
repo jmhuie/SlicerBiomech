@@ -711,28 +711,29 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             sxys = sum((yCosTheta - xSinTheta) * (xCosTheta + ySinTheta))
             pixelMoments = Sn * (np.cos(angle) * np.cos(angle) + np.sin(angle) * np.sin(angle)) / 12  
           
-            Ina = sxxs - (sxss * sxss / Sn) + Sn/12        
-            Ifa = syys - (sys * sys / Sn) + Sn/12
+            Ifa = sxxs - (sxss * sxss / Sn) + Sn/12        
+            Ina = syys - (sys * sys / Sn) + Sn/12
             Jxy = Ina + Ifa  
           
             # max distance from the user defined neutral axis and axis perpendicular to that 
             rot3 = angle * np.pi / 180
-            maxRad1 = 0
-            maxRad2 = 0
+            maxRadna = 0
+            maxRadfa = 0
             for i in range(Sn):
-              maxRad2 = max(maxRad2, abs((coords_Ijk[0][i]-Cx)*np.cos(rot3) + (coords_Ijk[1][i]-Cy)*np.sin(rot3)))
-              maxRad1 = max(maxRad1, abs((coords_Ijk[1][i]-Cy)*np.cos(rot3) - (coords_Ijk[0][i]-Cx)*np.sin(rot3)))
+              maxRadna = max(maxRadna, abs((coords_Ijk[1][i]-Cy)*np.cos(rot3) - (coords_Ijk[0][i]-Cx)*np.sin(rot3)))
+              maxRadfa = max(maxRadfa, abs((coords_Ijk[0][i]-Cx)*np.cos(rot3) + (coords_Ijk[1][i]-Cy)*np.sin(rot3)))
             
           
             # section moduli around horizontal and vertical axes
-            Zfa = Ina / maxRad2
-            Zna = Ifa / maxRad1
+            Zna = Ina / maxRadna
+            Zfa = Ifa / maxRadfa
+
             
             # add values to orientation calculations          
             RnaArray.InsertNextValue(np.around(maxRad1 * lengthofPixelMm,3))
             RfaArray.InsertNextValue(np.around(maxRad2 * lengthofPixelMm,3))
-            IfaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
-            InaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
+            IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
+            InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
             JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,3))        
             ZnaArray.InsertNextValue(np.around(Zna * volOfPixelMm3,3))
             ZfaArray.InsertNextValue(np.around(Zfa * volOfPixelMm3,3))
