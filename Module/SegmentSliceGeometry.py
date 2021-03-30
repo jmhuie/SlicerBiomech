@@ -730,8 +730,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
 
             
             # add values to orientation calculations          
-            RnaArray.InsertNextValue(np.around(maxRad1 * lengthofPixelMm,3))
-            RfaArray.InsertNextValue(np.around(maxRad2 * lengthofPixelMm,3))
+            RnaArray.InsertNextValue(np.around(maxRadna * lengthofPixelMm,3))
+            RfaArray.InsertNextValue(np.around(maxRadfa * lengthofPixelMm,3))
             IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
             InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
             JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,3))        
