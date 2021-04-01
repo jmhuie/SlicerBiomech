@@ -986,15 +986,16 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       
       # Make a plot series node for this column.
       plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", "Geometry")
+      plotSeriesNode.SetPlotType(plotSeriesNode.PlotTypeScatter)
       plotSeriesNode.SetAndObserveTableNodeID(tableNode.GetID())
       plotSeriesNode.SetXColumnName("Percent (%)")
       #plotChartNode.SetXAxisTitle("Percent of Length")
       if OrientationcheckBox == True and SMAcheckBox_2 == True: 
         plotSeriesNode.SetYColumnName("Ina (mm^4)")
-        plotChartNode.SetYAxisTitle('Ina (mm^4)')
+        plotChartNode.SetYAxisTitle('Neutral Axis Second Moment of Area (mm^4)')
       else: 
         plotSeriesNode.SetYColumnName("Imin (mm^4)")
-        plotChartNode.SetYAxisTitle('Imin (mm^4))
+        plotChartNode.SetYAxisTitle('Minor Axis Second Moment of Area (mm^4)')
       plotSeriesNode.SetUniqueColor()
 
       # Add this series to the plot chart node created above.
