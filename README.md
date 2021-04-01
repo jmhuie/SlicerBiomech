@@ -30,6 +30,14 @@ first convert to a segmentation node.
 to do calculations for every slice.
 
 # Outputs
+
+**Results Table:** A table with calculations. See below for a list of traits. See "Advanced Options" for enabling and disabling calculations.
+
+**Results Chart:** A plot of the table results. By default, Imin is plotted over percent of length. If the 
+option to use the neutral axis is enabled, then Ina is plotted instead.
+
+**List of Calculations:** 
+
 - Segment: Segment name.
 
 - Percent: Percent of length along the segment.
@@ -89,3 +97,15 @@ the axis perpendicular to it is called the force axis.
 and then divides them the length of the segment. This is use to account for the effects of size. 
  - Summers Method described by Summers et al. (2004). Takes the second moment of area of the segment on a given slice and divides it by the second moment of area of an circle with the same cross-sectional area as 
 the segment on that particular slice. This is used to assess how the distribution of material in the segment compares to that of an idealized beam.
+
+# What to do if your segment is not-aligned
+
+More often than not, volumes of interest are generated at oblique angles where the anatomical axes are not aligned with 
+the directional axes. This can be easily accounted for in 3D Slicer by applying a linear transformation to the segmentation node. A
+brief step-by-step protocol is outlined below. 
+
+1. Import and segment your volume as you normally would.
+2. In the "Transforms" module, create a linear transformation.
+3. Apply the transformation to your segmentation node. Note: it is recommended that you make a copy of your segmentation node first.
+4. In the "Segment Slice Geometry" module, choose your transformed segmentation node and original, untransformed volume as the inputs. 
+Note: At this time, a reference volume node is required for this procedure to work.

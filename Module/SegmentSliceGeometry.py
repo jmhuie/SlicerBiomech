@@ -78,6 +78,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.resamplespinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.tableSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.chartSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.OrientationcheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
 
@@ -157,6 +158,10 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     wasBlocked = self.ui.tableSelector.blockSignals(True)
     self.ui.tableSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsTable"))
     self.ui.tableSelector.blockSignals(wasBlocked)
+    
+    wasBlocked = self.ui.axisSelectorBox.blockSignals(True)
+    self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
+    self.ui.axisSelectorBox.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation"):
@@ -181,6 +186,11 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
       self.ui.tableSelector.toolTip = "Select output node"
+      
+    if self._parameterNode.GetNodeReference("ResultsChart"):
+      self.ui.tableSelector.toolTip = "Edit output chart"
+    else:
+      self.ui.tableSelector.toolTip = "Select output chart"
             
     if self.ui.OrientationcheckBox.checked == True:
       self.ui.orientationspinBox.toolTip = "Enter the angle (degrees) of the neutral axis. By default, the neutral axis is set parallel to the horizontal"
@@ -233,6 +243,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self._parameterNode.SetParameter("Axis", self.ui.axisSelectorBox.currentText)
     self._parameterNode.SetParameter("Resample", str(self.ui.resamplespinBox.value))
     self._parameterNode.SetNodeReferenceID("ResultsTable", self.ui.tableSelector.currentNodeID)
+    self._parameterNode.SetNodeReferenceID("ResultsChart", self.ui.chartSelector.currentNodeID)
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
 
@@ -256,9 +267,13 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       if not tableNode:
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Slice Geometry table")
         self.ui.tableSelector.setCurrentNode(tableNode)
+      plotChartNode = self.ui.chartSelector.currentNode()
+      if not plotChartNode:
+        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Slice Geometry plot")
+        self.ui.chartSelector.setCurrentNode(plotChartNode)
 
       self.logic.run(self.ui.segmentationSelector.currentNode(), self.ui.volumeSelector.currentNode(), self.ui.axisSelectorBox.currentText, 
-                     self.ui.resamplespinBox.value, tableNode, self.ui.LengthcheckBox.checked,
+                     self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
                      self.ui.MODcheckBox_2.checked, self.ui.PolarcheckBox_2.checked, self.ui.orientationspinBox.value, 
@@ -293,7 +308,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Axis", "slice")
 
 
-  def run(self, segmentationNode, volumeNode, axis, interval, tableNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
   DoubecheckBox, SummerscheckBox):
     """
@@ -331,7 +346,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
     # Make a table and set the first column as the slice number. 
     tableNode.RemoveAllColumns()
     table = tableNode.GetTable()
-
+    
+    # Make a plot chart node. Plot series nodes will be added to this in the
+    # loop below that iterates over each segment.
+    plotChartNode.SetTitle('Segment slice geometry')
+    plotChartNode.SetXAxisTitle("Percent of Length")
+    #plotChartNode.SetYAxisTitle('Area in mm^2')  # TODO: use length unit
+    
+    
     # do calculations
     try:
       # Create temporary volume node
@@ -513,6 +535,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           extent = [realextent[0],realextent[1],maskExtent[2],maskExtent[3],realextent[4],realextent[5]]
         elif axisIndex == 2:
           extent = [realextent[0],realextent[1],realextent[2],realextent[3],maskExtent[4],maskExtent[5]]
+
           
         # Calculate the new origin
         ijkToRas = vtk.vtkMatrix4x4()
@@ -533,6 +556,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         paddedImg.SetExtent(0, extent[1]-extent[0], 0, extent[3]-extent[2], 0, extent[5]-extent[4])
         outputVolume.SetAndObserveImageData(paddedImg)
         outputVolume.SetOrigin(origin_RAS[0], origin_RAS[1], origin_RAS[2])
+        
             
         if not slicer.modules.segmentations.logic().ExportSegmentsToLabelmapNode(segmentationNode, segmentList, tempSegmentLabelmapVolumeNode, outputVolume):
           continue
@@ -591,9 +615,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           volumePositionIncrement_Ras = (endPosition_Ras - startPosition_Ras) / (numSlices - 1.0)
 
         # If volume node is transformed, apply that transform to get volume's RAS coordinates
+        # doesn't work???
         transformVolumeRasToRas = vtk.vtkGeneralTransform()
         slicer.vtkMRMLTransformNode.GetTransformBetweenNodes(tempSegmentLabelmapVolumeNode.GetParentTransformNode(), None, transformVolumeRasToRas)
-        
 
         if interval > 0:
           for i in range(len(sampleSlices)):
@@ -960,16 +984,40 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IfaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(IfaArray_Summers.GetName(), "Ifa divided by the second moment of area of a circle with the same cross-sectional area") 
       
+      # Make a plot series node for this column.
+      plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", "Geometry")
+      plotSeriesNode.SetAndObserveTableNodeID(tableNode.GetID())
+      plotSeriesNode.SetXColumnName("Percent (%)")
+      #plotChartNode.SetXAxisTitle("Percent of Length")
+      if OrientationcheckBox == True and SMAcheckBox_2 == True: 
+        plotSeriesNode.SetYColumnName("Ina (mm^4)")
+        plotChartNode.SetYAxisTitle('Ina (mm^4)')
+      else: 
+        plotSeriesNode.SetYColumnName("Imin (mm^4)")
+        plotChartNode.SetYAxisTitle('Imin (mm^4))
+      plotSeriesNode.SetUniqueColor()
+
+      # Add this series to the plot chart node created above.
+      plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode.GetID())
     
     finally:
       # Remove temporary volume node
       slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
+      # Change layout to include plot and table
       layoutManager = slicer.app.layoutManager()
-      layoutWithPlot = slicer.modules.tables.logic().GetLayoutWithTable(layoutManager.layout)
+      layoutWithPlot = slicer.modules.plots.logic().GetLayoutWithPlot(layoutManager.layout)
       layoutManager.setLayout(layoutWithPlot)
       # Select chart in plot view
+      plotWidget = layoutManager.plotWidget(0)
+      plotViewNode = plotWidget.mrmlPlotViewNode()
+      plotViewNode.SetPlotChartNodeID(plotChartNode.GetID())
+      
+      layoutWithPlot = slicer.modules.tables.logic().GetLayoutWithTable(layoutManager.layout)
+      layoutManager.setLayout(layoutWithPlot)
+      # Select chart in table view
       tableWidget = layoutManager.tableWidget(0)
       tableWidget.tableView().setMRMLTableNode(tableNode)
+
 
 
     logging.info('Processing completed')
