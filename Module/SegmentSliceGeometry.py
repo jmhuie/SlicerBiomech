@@ -334,11 +334,11 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
     if visibleSegmentIds.GetNumberOfValues() == 0:
       raise ValueError("SliceAreaPlot will not return any results: there are no visible segments")
 
-    if axis=="row":
+    if axis=="R (Yellow)":
       axisIndex = 0
-    elif axis=="column":
+    elif axis=="A (Green)":
       axisIndex = 1
-    elif axis=="slice":
+    elif axis=="S (Red)":
       axisIndex = 2
     else:
       raise ValueError("Invalid axis name: "+axis)
@@ -630,36 +630,42 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             sliceNumberArray.InsertNextValue(i + 1) # adds slice number to the array
             SegmentNameArray.InsertNextValue(segName)
             percentLengthArray.InsertNextValue(percentLength[i])
-        
-        ###### SET UP UNITS ######
-        
-        # Convert number of voxels to area in mm2
-        spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
-        areaOfPixelMm2 = spacing[0] * spacing[1] * spacing[2] / spacing[axisIndex]
-        
-        volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
-        
-        unitOfPixelMm4 = spacing[0]**2 * (spacing[1]**2) * spacing[2]**2 / spacing[axisIndex]**2
-        
+
+
         ###### DO CALCULATIONS ######
+        spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
-        
         
         for i in sampleSlices:
           if axisIndex == 0:
-            lengthofPixelMm = spacing[1] # get mm for length
+            PixelDepthMm = spacing[0] # get mm for length
+            PixelHeightMm = spacing[1]
+            PixelWidthMm = spacing[2]
+            areaOfPixelMm2 = spacing[1] * spacing[2]
+            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
+            unitOfPixelMm4 = spacing[1]**2 * spacing[2]**2
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:, :, i]>0)]) 
           elif axisIndex == 1:
-            lengthofPixelMm = spacing[2] # get mm for length
+            PixelDepthMm = spacing[1] # get mm for length
+            PixelHeightMm = spacing[2]
+            PixelWidthMm = spacing[0]
+            areaOfPixelMm2 = spacing[0] * spacing[2]
+            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
+            unitOfPixelMm4 = spacing[0]**2 * spacing[2]**2
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:, i, :]>0)]) 
           elif axisIndex == 2:
-            lengthofPixelMm = spacing[0] # get mm for length
+            PixelDepthMm = spacing[2] # get mm for length
+            PixelHeightMm = spacing[1]
+            PixelWidthMm = spacing[0]
+            areaOfPixelMm2 = spacing[0] * spacing[1]
+            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
+            unitOfPixelMm4 = spacing[0]**2 * spacing[1]**2
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
             if volumeNode != None and IntensitycheckBox == True:
@@ -705,12 +711,12 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           Rmax = 0
           Rmin = 0
           for i in range(Sn):
-            Rmax = max(Rmax, abs((coords_Ijk[1][i]-Cy)*np.cos(rot2) - (coords_Ijk[0][i]-Cx)*np.sin(rot2)))
-            Rmin = max(Rmin, abs((coords_Ijk[0][i]-Cx)*np.cos(rot2) + (coords_Ijk[1][i]-Cy)*np.sin(rot2)))
+            Rmax = max(Rmax, abs((coords_Ijk[1][i]-Cy)*PixelHeightMm*np.cos(rot2) - (coords_Ijk[0][i]-Cx)*PixelWidthMm*np.sin(rot2)))
+            Rmin = max(Rmin, abs((coords_Ijk[0][i]-Cx)*PixelWidthMm*np.cos(rot2) + (coords_Ijk[1][i]-Cy)*PixelHeightMm*np.sin(rot2)))
           
           # section moduli around principal axes
-          Zmax = Imax / Rmax
-          Zmin = Imin / Rmin
+          Zmax = Imax * unitOfPixelMm4 / Rmax
+          Zmin = Imin * unitOfPixelMm4 / Rmin
 
             
           if OrientationcheckBox == True: 
@@ -744,23 +750,23 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             maxRadna = 0
             maxRadfa = 0
             for i in range(Sn):
-              maxRadna = max(maxRadna, abs((coords_Ijk[1][i]-Cy)*np.cos(rot3) - (coords_Ijk[0][i]-Cx)*np.sin(rot3)))
-              maxRadfa = max(maxRadfa, abs((coords_Ijk[0][i]-Cx)*np.cos(rot3) + (coords_Ijk[1][i]-Cy)*np.sin(rot3)))
+              maxRadna = max(maxRadna, abs((coords_Ijk[1][i]-Cy)*PixelHeightMm*np.cos(rot3) - (coords_Ijk[0][i]-Cx)*PixelWidthMm*np.sin(rot3)))
+              maxRadfa = max(maxRadfa, abs((coords_Ijk[0][i]-Cx)*PixelWidthMm*np.cos(rot3) + (coords_Ijk[1][i]-Cy)*PixelHeightMm*np.sin(rot3)))
             
           
             # section moduli around horizontal and vertical axes
-            Zna = Ina / maxRadna
-            Zfa = Ifa / maxRadfa
+            Zna = Ina * unitOfPixelMm4 / maxRadna
+            Zfa = Ifa * unitOfPixelMm4 / maxRadfa
 
             
             # add values to orientation calculations          
-            RnaArray.InsertNextValue(np.around(maxRadna * lengthofPixelMm,3))
-            RfaArray.InsertNextValue(np.around(maxRadfa * lengthofPixelMm,3))
+            RnaArray.InsertNextValue(np.around(maxRadna,3))
+            RfaArray.InsertNextValue(np.around(maxRadfa,3))
             IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
             InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
             JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,3))        
-            ZnaArray.InsertNextValue(np.around(Zna * volOfPixelMm3,3))
-            ZfaArray.InsertNextValue(np.around(Zfa * volOfPixelMm3,3))
+            ZnaArray.InsertNextValue(np.around(Zna,3))
+            ZfaArray.InsertNextValue(np.around(Zfa,3))
             
             # do Doube size correction
             if DoubecheckBox == True:
@@ -777,20 +783,20 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           
           
           # add computed values to the arrays
-          LengthArray.InsertNextValue(np.around(numSlices * lengthofPixelMm,3))
+          LengthArray.InsertNextValue(np.around(numSlices * PixelDepthMm,3))
           
           areaArray.InsertNextValue(np.around(CSA * areaOfPixelMm2,3))
           
           if volumeNode != None and IntensitycheckBox == True:
             meanIntensityArray.InsertNextValue(np.around(meanIntensity,3))
           
-          CxArray.InsertNextValue(np.around(Cx * spacing[2],3))
-          CyArray.InsertNextValue(np.around(Cy * spacing[1],3))
+          CxArray.InsertNextValue(np.around(Cx * PixelWidthMm,3))
+          CyArray.InsertNextValue(np.around(Cy * PixelHeightMm,3))
           
           ThetaArray.InsertNextValue(np.around(rot2,3))
           
-          RmaxArray.InsertNextValue(np.around(Rmax * lengthofPixelMm,3))
-          RminArray.InsertNextValue(np.around(Rmin * lengthofPixelMm,3))
+          RmaxArray.InsertNextValue(np.around(Rmax,3))
+          RminArray.InsertNextValue(np.around(Rmin,3))
           
           ImaxArray.InsertNextValue(np.around(Imax * unitOfPixelMm4,3))
           IminArray.InsertNextValue(np.around(Imin * unitOfPixelMm4,3))
@@ -800,8 +806,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             ImaxArray_Summers.InsertNextValue(np.around(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),3))
             IminArray_Summers.InsertNextValue(np.around(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),3))
           
-          ZmaxArray.InsertNextValue(np.around(Zmax * volOfPixelMm3,3))
-          ZminArray.InsertNextValue(np.around(Zmin * volOfPixelMm3,3))
+          ZmaxArray.InsertNextValue(np.around(Zmax,3))
+          ZminArray.InsertNextValue(np.around(Zmin,3))
             
           # do Doube size correction
           if DoubecheckBox == True:

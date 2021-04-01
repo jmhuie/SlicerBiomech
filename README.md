@@ -24,7 +24,7 @@ first convert to a segmentation node.
 
 **Volume:** Select the volume node associated with the segmentation node (optional). Used for calculating mean voxel intensity.
 
-**Slice:** Select which orthogonal axis to perform calculations on. Based on the 3D Slicer layout: Red = slice, Green = column, and Yellow = row.
+**Slice:** Select which orthogonal axis to perform calculations on.
 
 **Sample slices:** User has the option do calculations in percent intervals along the length of the segment. Enter zero 
 to do calculations for every slice.

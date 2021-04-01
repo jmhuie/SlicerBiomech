@@ -127,17 +127,17 @@
         </property>
         <item>
          <property name="text">
-          <string>row</string>
+          <string>R (Yellow)</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>column</string>
+          <string>A (Green)</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>slice</string>
+          <string>S (Red)</string>
          </property>
         </item>
        </widget>
