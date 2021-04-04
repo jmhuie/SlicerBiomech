@@ -760,21 +760,21 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
 
             
             # add values to orientation calculations          
-            RnaArray.InsertNextValue(np.around(maxRadna,3))
-            RfaArray.InsertNextValue(np.around(maxRadfa,3))
-            IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,3))
-            InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,3))
-            JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,3))        
-            ZnaArray.InsertNextValue(np.around(Zna,3))
-            ZfaArray.InsertNextValue(np.around(Zfa,3))
+            RnaArray.InsertNextValue(np.around(maxRadna,5))
+            RfaArray.InsertNextValue(np.around(maxRadfa,5))
+            IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,5))
+            InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,5))
+            JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,5))        
+            ZnaArray.InsertNextValue(np.around(Zna,5))
+            ZfaArray.InsertNextValue(np.around(Zfa,5))
             
             # do Doube size correction
             if DoubecheckBox == True:
-              InaArray_Doube.InsertNextValue(np.around(Ina**(1/4) / numSlices,3))
-              IfaArray_Doube.InsertNextValue(np.around(Ifa**(1/4) / numSlices,3))
-              JxyArray_Doube.InsertNextValue(np.around(Jxy**(1/4) / numSlices,3))
-              ZnaArray_Doube.InsertNextValue(np.around(Zna**(1/3) / numSlices,3))
-              ZfaArray_Doube.InsertNextValue(np.around(Zfa**(1/3) / numSlices,3))
+              InaArray_Doube.InsertNextValue(np.around(Ina**(1/4) / numSlices,5))
+              IfaArray_Doube.InsertNextValue(np.around(Ifa**(1/4) / numSlices,5))
+              JxyArray_Doube.InsertNextValue(np.around(Jxy**(1/4) / numSlices,5))
+              ZnaArray_Doube.InsertNextValue(np.around(Zna**(1/3) / numSlices,5))
+              ZfaArray_Doube.InsertNextValue(np.around(Zfa**(1/3) / numSlices,5))
               
             if SummerscheckBox == True:
               InaArray_Summers.InsertNextValue(np.around(Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4),3))
@@ -783,40 +783,40 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           
           
           # add computed values to the arrays
-          LengthArray.InsertNextValue(np.around(numSlices * PixelDepthMm,3))
+          LengthArray.InsertNextValue(np.around(numSlices * PixelDepthMm,5))
           
-          areaArray.InsertNextValue(np.around(CSA * areaOfPixelMm2,3))
+          areaArray.InsertNextValue(np.around(CSA * areaOfPixelMm2,5))
           
           if volumeNode != None and IntensitycheckBox == True:
-            meanIntensityArray.InsertNextValue(np.around(meanIntensity,3))
+            meanIntensityArray.InsertNextValue(np.around(meanIntensity,5))
           
-          CxArray.InsertNextValue(np.around(Cx * PixelWidthMm,3))
-          CyArray.InsertNextValue(np.around(Cy * PixelHeightMm,3))
+          CxArray.InsertNextValue(np.around(Cx * PixelWidthMm,5))
+          CyArray.InsertNextValue(np.around(Cy * PixelHeightMm,5))
           
-          ThetaArray.InsertNextValue(np.around(rot2,3))
+          ThetaArray.InsertNextValue(np.around(rot2,5))
           
-          RmaxArray.InsertNextValue(np.around(Rmax,3))
-          RminArray.InsertNextValue(np.around(Rmin,3))
+          RmaxArray.InsertNextValue(np.around(Rmax,5))
+          RminArray.InsertNextValue(np.around(Rmin,5))
           
-          ImaxArray.InsertNextValue(np.around(Imax * unitOfPixelMm4,3))
-          IminArray.InsertNextValue(np.around(Imin * unitOfPixelMm4,3))
-          JzArray.InsertNextValue(np.around(Jz * unitOfPixelMm4,3))
+          ImaxArray.InsertNextValue(np.around(Imax * unitOfPixelMm4,5))
+          IminArray.InsertNextValue(np.around(Imin * unitOfPixelMm4,5))
+          JzArray.InsertNextValue(np.around(Jz * unitOfPixelMm4,5))
           
           if SummerscheckBox == True:
-            ImaxArray_Summers.InsertNextValue(np.around(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),3))
-            IminArray_Summers.InsertNextValue(np.around(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),3))
+            ImaxArray_Summers.InsertNextValue(np.around(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),5))
+            IminArray_Summers.InsertNextValue(np.around(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),5))
           
-          ZmaxArray.InsertNextValue(np.around(Zmax,3))
-          ZminArray.InsertNextValue(np.around(Zmin,3))
+          ZmaxArray.InsertNextValue(np.around(Zmax,5))
+          ZminArray.InsertNextValue(np.around(Zmin,5))
             
           # do Doube size correction
           if DoubecheckBox == True:
-            areaArray_Doube.InsertNextValue(np.around(np.sqrt(CSA) / numSlices,3))
-            ImaxArray_Doube.InsertNextValue(np.around(Imax**(1/4) / numSlices,3))
-            IminArray_Doube.InsertNextValue(np.around(Imin**(1/4) / numSlices,3))
-            JzArray_Doube.InsertNextValue(np.around(Jz**(1/4) / numSlices,3))
-            ZmaxArray_Doube.InsertNextValue(np.around(Zmax**(1/3) / numSlices,3))
-            ZminArray_Doube.InsertNextValue(np.around(Zmin**(1/3) / numSlices,3))
+            areaArray_Doube.InsertNextValue(np.around(np.sqrt(CSA) / numSlices,5))
+            ImaxArray_Doube.InsertNextValue(np.around(Imax**(1/4) / numSlices,5))
+            IminArray_Doube.InsertNextValue(np.around(Imin**(1/4) / numSlices,5))
+            JzArray_Doube.InsertNextValue(np.around(Jz**(1/4) / numSlices,5))
+            ZmaxArray_Doube.InsertNextValue(np.around(Zmax**(1/3) / numSlices,5))
+            ZminArray_Doube.InsertNextValue(np.around(Zmin**(1/3) / numSlices,5))
         
       # adds table column for various arrays
       table.AddColumn(SegmentNameArray)

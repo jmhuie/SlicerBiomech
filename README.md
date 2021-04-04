@@ -108,4 +108,4 @@ brief step-by-step protocol is outlined below.
 2. In the "Transforms" module, create a linear transformation.
 3. Apply the transformation to your segmentation node. Note: it is recommended that you make a copy of your segmentation node first.
 4. In the "Segment Slice Geometry" module, choose your transformed segmentation node and original, untransformed volume as the inputs. 
-Note: At this time, a reference volume node is required for this procedure to work.
+Note: At this time, a reference volume node is required for this procedure to work. Also, calculating the mean voxel intensity does not work when applying a transform.
