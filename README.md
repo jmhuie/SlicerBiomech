@@ -3,11 +3,10 @@
 This is the repository for the Slicer SegmentSliceGeometry module for 3D Slicer.
 
 SegmentSliceGeometry calculates geometric properties from segment cross-sections. These include: 
-cross-sectional area, mean voxel intensity, second moment of area, section modulus, and polar moment of inertia. 
-SegmentSliceGeometry is inspired by BoneJ (Doube et al. 2010), but aims to reduce the number of necessary programs for users 
-that already use 3D Slicer. Additional benefits to doing these calculations in 3D Slicer include 
-the ability to easily align oblique volumes with the XYZ images axes, perform computations on models 
-(i.e., stl, obj, and ply file types), and plotting capabilities.
+cross-sectional area, mean voxel intensity (density), second moment of area, section modulus, and polar moment of inertia. 
+SegmentSliceGeometry is inspired by BoneJ (Doube et al. 2010), but aims to streamline the workflow for 3D Slicer users. Additional benefits to 
+using 3D Slicer include the ability to easily align oblique volumes with the XYZ images axes, resample volumes, perform computations on models 
+(i.e., stl, obj, and ply file types), and quick plotting capabilities.
 
 # Installation
 
@@ -24,11 +23,10 @@ first convert to a segmentation node.
 
 **Volume:** Select the volume node associated with the segmentation node (optional). Used for calculating mean voxel intensity.
 
-**Resample Volume:** Option to resample the volume using the segment's transformation node. This is needed when 
-calculating mean voxel intensity. Caution, this is a lossy and time consuming procedure, and it should only be done if necessary. 
-Note: running the analysis with this option enabled will create a new volume will be created called "Resampled Volume". This is the 
-result of the resampling and can be used as the volume input to reduce redundancy if analyses need to be performed again. The Resample Volume option 
-uses the Resample Scalar/Vector/DWI Volume module with linear interpolation.
+**Resample Volume:** Option to resample the volume, which is needed when calculating voxel intensity with a transformed segment. 
+Note: this option increases computation time but running the analysis once with this option enabled will create a new volume called "Resampled Volume". 
+As the name suggests, this is the resampled volume and can be used as the input volume instead of repeatedly resampling the volume. This is 
+useful when you need to redo calculations. Resample Volume uses the Resample Scalar/Vector/DWI Volume module with linear interpolation.
 
 **Slice:** Select which orthogonal axis to perform calculations on.
 
