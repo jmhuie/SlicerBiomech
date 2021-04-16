@@ -177,11 +177,14 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       self.ui.volumeSelector.toolTip = "Select output table"
       self.ui.IntensitycheckBox.toolTip = "Compute mean voxel intensity"
       self.ui.IntensitycheckBox.enabled = True
+      self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
+      self.ui.ResampleVolumecheckBox.enabled = True
     else:
       self.ui.volumeSelector.toolTip = "Select volume node (optional)"
       self.ui.IntensitycheckBox.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.enabled = False
-      
+      self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
+      self.ui.ResampleVolumecheckBox.enabled = False
     if self._parameterNode.GetNodeReference("ResultsTable"):
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
@@ -272,7 +275,8 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
         plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Slice Geometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)
 
-      self.logic.run(self.ui.segmentationSelector.currentNode(), self.ui.volumeSelector.currentNode(), self.ui.axisSelectorBox.currentText, 
+      self.logic.run(self.ui.segmentationSelector.currentNode(), self.ui.volumeSelector.currentNode(), 
+                     self.ui.ResampleVolumecheckBox.checked, self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
@@ -308,7 +312,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Axis", "slice")
 
 
-  def run(self, segmentationNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, volumeNode, ResampleVolume, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
   DoubecheckBox, SummerscheckBox):
     """
@@ -511,6 +515,25 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         if volumeNode != None:   
           # Create volume for output
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume", False)
+          
+          transformNode = segmentationNode.GetNodeReferenceID('transform')
+          if ResampleVolume == True and transformNode:
+            parameters = {}
+            parameters["inputVolume"] = volumeNode
+            parameters["outputVolume"] = outputVolume
+            parameters["referenceVolume"] = volumeNode
+            parameters["transformationFile"] = transformNode
+            resampleScalarVectorDWI = slicer.modules.resamplescalarvectordwivolume
+            cliNode = slicer.cli.runSync(resampleScalarVectorDWI, None, parameters)
+            if cliNode.GetStatus() & cliNode.ErrorsMask:
+              # error
+              errorText = cliNode.GetErrorText()
+              slicer.mrmlScene.RemoveNode(cliNode)
+              raise ValueError("CLI execution failed: " + errorText)
+  
+            slicer.mrmlScene.RemoveNode(cliNode)
+            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Resampled Volume",True)
+          volumeNode = outputVolume
           volumeNodeformasking = volumeNode
           
         if volumeNode == None:

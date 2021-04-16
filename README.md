@@ -20,9 +20,15 @@ obtain the most recent version of the module, you must re-download the contents 
 # Inputs
 
 **Segmentation:** Select a segmentation node. Calculations will be performed on a visible segments. If input is a model or binary labelmap, 
-first convert to a segmentation node.
+first convert to a segmentation node. 
 
 **Volume:** Select the volume node associated with the segmentation node (optional). Used for calculating mean voxel intensity.
+
+**Resample Volume:** Option to resample the volume using the segment's transformation node. This is needed when 
+calculating mean voxel intensity. Caution, this is a lossy and time consuming procedure, and it should only be done if necessary. 
+Note: running the analysis with this option enabled will create a new volume will be created called "Resampled Volume". This is the 
+result of the resampling and can be used as the volume input to reduce redundancy if analyses need to be performed again. The Resample Volume option 
+uses the Resample Scalar/Vector/DWI Volume module with linear interpolation.
 
 **Slice:** Select which orthogonal axis to perform calculations on.
 
@@ -46,7 +52,8 @@ option to use the neutral axis is enabled, then Ina is plotted instead.
 
 - CSA: Cross-sectional area.
 
-- Mean Intensity: Mean voxel intensity. Requires a volume node to calculate. Note: This currently does not work with a linear transformed segment.
+- Mean Intensity: Mean voxel intensity. Requires a volume node to calculate. Note: if the segment has a transformation node, then you will need resampled volume node. 
+Either enable Resample Volume or select an already resampled volume node as the input.
 
 - X Centroid: X-coordinate of the centroid. 
 
@@ -107,9 +114,10 @@ brief step-by-step protocol is outlined below.
 1. Import and segment your volume as you normally would.
 2. Turn on the 3D rendering of your segment. The recommended scene preview is "Conventional" or "Four-Up".
 3. In the "Transforms" module, create a linear transformation and apply it to your segmentation node.
-4. Under "Display", turn on "Visible in 3D view". This will create a box around your segment and allow you to rotate and translate you segment. 
-Use this and/or the sliders under "Edit" to align your segment to preferred axis. Caution: make sure the segment stays within the bounds of its original volume. 
-The purple bounding box should indicate this or you can turn on the AnnotationROI associated with the segment's native volume. If part of segment is outside of 
-the bounds of the native volume, calculations will not be performed on that section of the segment.
-5. In the "Segment Slice Geometry" module, choose your transformed segmentation node and original, untransformed volume as the inputs. 
-Note: At this time, a reference volume node is required for this procedure to work. Also, calculating the mean voxel intensity does not work when applying a transform.
+4. Under "Display" in the "Transforms" module, turn on "Visible in 3D view". This will create a box around your segment and allow you to rotate and translate you segment. 
+Use this and/or the sliders under "Edit" to align your segment to the preferred axis. Caution: make sure the segment stays within the bounds of its original volume. 
+The purple bounding box should indicate this or you can turn on the AnnotationROI associated with the segment's reference volume. If part of the segment is outside of 
+the bounds of the reference volume, calculations will not be performed on that section of the segment.
+5. In the "Segment Slice Geometry" module, choose your transformed segmentation node and original, untransformed reference volume as the inputs. 
+6. If you are calculating mean voxel intensity you must enable Resample Volume. Alternatively, you may select an already resampled volume as the input.
+7. Click Apply.

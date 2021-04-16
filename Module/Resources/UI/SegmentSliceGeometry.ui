@@ -113,14 +113,24 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="2" column="2">
+       <widget class="QCheckBox" name="ResampleVolumecheckBox">
+        <property name="text">
+         <string>Resample Volume</string>
+        </property>
+        <property name="unchecked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Segment axis:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QComboBox" name="axisSelectorBox">
         <property name="currentIndex">
          <number>2</number>
@@ -142,14 +152,14 @@
         </item>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Sample slices:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QSpinBox" name="resamplespinBox">
         <property name="maximum">
          <number>50</number>
