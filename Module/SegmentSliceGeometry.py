@@ -312,7 +312,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Axis", "slice")
 
 
-  def run(self, segmentationNode, volumeNode, ResampleVolume, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, volumeNode, ResamplecheckBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
   DoubecheckBox, SummerscheckBox):
     """
@@ -517,7 +517,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume", False)
           
           transformNode = segmentationNode.GetNodeReferenceID('transform')
-          if ResampleVolume == True and transformNode:
+          if ResamplecheckBox == True and transformNode:
             parameters = {}
             parameters["inputVolume"] = volumeNode
             parameters["outputVolume"] = outputVolume
@@ -533,7 +533,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
   
             slicer.mrmlScene.RemoveNode(cliNode)
             outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Resampled Volume",True)
-          volumeNode = outputVolume
+            volumeNode = outputVolume
           volumeNodeformasking = volumeNode
           
         if volumeNode == None:
