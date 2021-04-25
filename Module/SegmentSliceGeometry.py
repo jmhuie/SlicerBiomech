@@ -366,7 +366,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       
       #### CREATE ARRAYS FOR ALL COLUMNS ####
       sliceNumberArray = vtk.vtkIntArray()
-      sliceNumberArray.SetName("Slice")
+      sliceNumberArray.SetName("Slice Number")
           
       SegmentNameArray = vtk.vtkStringArray()
       SegmentNameArray.SetName("Segment")
@@ -601,17 +601,24 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         
         # determine how many slices to calculate statistics for
         if interval > 0:
-          resample = 100 / interval - 1
-          resample = int(resample)
-          sampleSlices = np.linspace(0,numSlices,num = resample+1, endpoint = False)
+          resample = np.rint(100/interval)
+          resample = np.linspace(interval,100,num = resample.astype(int)) 
+          sampleSlices = numSlices * (resample / 100)
+          sampleSlices = sampleSlices - 1
           sampleSlices = np.rint(sampleSlices)
           sampleSlices = sampleSlices.astype(int)
-          sampleSlices = sampleSlices[1:]
+          
+          #resample = 100 / interval
+          #resample = int(resample)
+          #sampleSlices = np.linspace(0,numSlices,num = resample, endpoint = False)
+          #sampleSlices = np.rint(sampleSlices)
+          #sampleSlices = sampleSlices.astype(int)
+          #sampleSlices = sampleSlices[1:]
           #sampleSlices = np.append(sampleSlices, (numSlices-1))
         elif interval == 0:
           resample = numSlices
           sampleSlices = np.asarray(list(range(0,numSlices)))
-        percentLength = np.around(sampleSlices / numSlices * 100,1)
+        percentLength = np.around((sampleSlices+1) / numSlices * 100,1)
           
         # determines centroid of the first and last slice. Identical if only one slice
         startPosition_Ijk = [
@@ -644,13 +651,13 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
 
         if interval > 0:
           for i in range(len(sampleSlices)):
-            sliceNumberArray.InsertNextValue(i + 1) # adds slice number to the array
+            sliceNumberArray.InsertNextValue(sampleSlices[i]+1) # adds slice number to the array
             SegmentNameArray.InsertNextValue(segName)
             percentLengthArray.InsertNextValue(percentLength[i])
               
         else:
           for i in range(numSlices):
-            sliceNumberArray.InsertNextValue(i + 1) # adds slice number to the array
+            sliceNumberArray.InsertNextValue(sampleSlices[i]+1) # adds slice number to the array
             SegmentNameArray.InsertNextValue(segName)
             percentLengthArray.InsertNextValue(percentLength[i])
 
@@ -783,70 +790,74 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
 
             
             # add values to orientation calculations          
-            RnaArray.InsertNextValue(np.around(maxRadna,5))
-            RfaArray.InsertNextValue(np.around(maxRadfa,5))
-            IfaArray.InsertNextValue(np.around(Ifa * unitOfPixelMm4,5))
-            InaArray.InsertNextValue(np.around(Ina * unitOfPixelMm4,5))
-            JxyArray.InsertNextValue(np.around(Jxy * unitOfPixelMm4,5))        
-            ZnaArray.InsertNextValue(np.around(Zna,5))
-            ZfaArray.InsertNextValue(np.around(Zfa,5))
+            RnaArray.InsertNextValue((maxRadna))
+            RfaArray.InsertNextValue((maxRadfa))
+            IfaArray.InsertNextValue((Ifa * unitOfPixelMm4))
+            InaArray.InsertNextValue((Ina * unitOfPixelMm4))
+            JxyArray.InsertNextValue((Jxy * unitOfPixelMm4))        
+            ZnaArray.InsertNextValue((Zna))
+            ZfaArray.InsertNextValue((Zfa))
             
             # do Doube size correction
             if DoubecheckBox == True:
-              InaArray_Doube.InsertNextValue(np.around(Ina**(1/4) / numSlices,5))
-              IfaArray_Doube.InsertNextValue(np.around(Ifa**(1/4) / numSlices,5))
-              JxyArray_Doube.InsertNextValue(np.around(Jxy**(1/4) / numSlices,5))
-              ZnaArray_Doube.InsertNextValue(np.around(Zna**(1/3) / numSlices,5))
-              ZfaArray_Doube.InsertNextValue(np.around(Zfa**(1/3) / numSlices,5))
+              InaArray_Doube.InsertNextValue((Ina**(1/4) / numSlices))
+              IfaArray_Doube.InsertNextValue((Ifa**(1/4) / numSlices))
+              JxyArray_Doube.InsertNextValue((Jxy**(1/4) / numSlices))
+              ZnaArray_Doube.InsertNextValue((Zna**(1/3) / numSlices))
+              ZfaArray_Doube.InsertNextValue((Zfa**(1/3) / numSlices))
               
             if SummerscheckBox == True:
-              InaArray_Summers.InsertNextValue(np.around(Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4),3))
+              InaArray_Summers.InsertNextValue((Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
           
-              IfaArray_Summers.InsertNextValue(np.around(Ifa*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4),3))
+              IfaArray_Summers.InsertNextValue((Ifa*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
           
           
           # add computed values to the arrays
-          LengthArray.InsertNextValue(np.around(numSlices * PixelDepthMm,5))
+          LengthArray.InsertNextValue((numSlices * PixelDepthMm))
           
-          areaArray.InsertNextValue(np.around(CSA * areaOfPixelMm2,5))
+          
+          areaArray.InsertNextValue((CSA * areaOfPixelMm2))
           
           if volumeNode != None and IntensitycheckBox == True:
-            meanIntensityArray.InsertNextValue(np.around(meanIntensity,5))
+            meanIntensityArray.InsertNextValue((meanIntensity))
           
-          CxArray.InsertNextValue(np.around(Cx * PixelWidthMm,5))
-          CyArray.InsertNextValue(np.around(Cy * PixelHeightMm,5))
+          CxArray.InsertNextValue((Cx * PixelWidthMm))
+          CyArray.InsertNextValue((Cy * PixelHeightMm))
           
-          ThetaArray.InsertNextValue(np.around(rot2,5))
+          ThetaArray.InsertNextValue((rot2))
           
-          RmaxArray.InsertNextValue(np.around(Rmax,5))
-          RminArray.InsertNextValue(np.around(Rmin,5))
+          RmaxArray.InsertNextValue((Rmax))
+          RminArray.InsertNextValue((Rmin))
           
-          ImaxArray.InsertNextValue(np.around(Imax * unitOfPixelMm4,5))
-          IminArray.InsertNextValue(np.around(Imin * unitOfPixelMm4,5))
-          JzArray.InsertNextValue(np.around(Jz * unitOfPixelMm4,5))
+          ImaxArray.InsertNextValue((Imax * unitOfPixelMm4))
+          IminArray.InsertNextValue((Imin * unitOfPixelMm4))
+          JzArray.InsertNextValue((Jz * unitOfPixelMm4))
           
           if SummerscheckBox == True:
-            ImaxArray_Summers.InsertNextValue(np.around(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),5))
-            IminArray_Summers.InsertNextValue(np.around(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4),5))
+            ImaxArray_Summers.InsertNextValue((Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
+            IminArray_Summers.InsertNextValue((Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
           
-          ZmaxArray.InsertNextValue(np.around(Zmax,5))
-          ZminArray.InsertNextValue(np.around(Zmin,5))
+          ZmaxArray.InsertNextValue((Zmax))
+          ZminArray.InsertNextValue((Zmin))
             
           # do Doube size correction
           if DoubecheckBox == True:
-            areaArray_Doube.InsertNextValue(np.around(np.sqrt(CSA) / numSlices,5))
-            ImaxArray_Doube.InsertNextValue(np.around(Imax**(1/4) / numSlices,5))
-            IminArray_Doube.InsertNextValue(np.around(Imin**(1/4) / numSlices,5))
-            JzArray_Doube.InsertNextValue(np.around(Jz**(1/4) / numSlices,5))
-            ZmaxArray_Doube.InsertNextValue(np.around(Zmax**(1/3) / numSlices,5))
-            ZminArray_Doube.InsertNextValue(np.around(Zmin**(1/3) / numSlices,5))
+            areaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
+            ImaxArray_Doube.InsertNextValue((Imax**(1/4) / numSlices))
+            IminArray_Doube.InsertNextValue((Imin**(1/4) / numSlices))
+            JzArray_Doube.InsertNextValue((Jz**(1/4) / numSlices))
+            ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
+            ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
+        
+        
+      np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
         
       # adds table column for various arrays
       table.AddColumn(SegmentNameArray)
       tableNode.SetColumnDescription(SegmentNameArray.GetName(), "Segment name")  
       
-      #table.AddColumn(sliceNumberArray)
-      #tableNode.SetColumnDescription(sliceNumberArray.GetName(), "Index of " + axis)
+      table.AddColumn(sliceNumberArray)
+      tableNode.SetColumnDescription(sliceNumberArray.GetName(), "Index of " + axis)
       
       tableNode.AddColumn(percentLengthArray)
       tableNode.SetColumnUnitLabel(percentLengthArray.GetName(), "%")  # TODO: use length unit
