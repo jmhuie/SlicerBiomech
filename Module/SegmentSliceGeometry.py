@@ -602,7 +602,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         # determine how many slices to calculate statistics for
         if interval > 0:
           resample = np.rint(100/interval)
-          resample = np.linspace(interval,100,num = resample.astype(int)) 
+          resample = np.linspace(interval,(100-interval),num = resample.astype(int)) 
           sampleSlices = numSlices * (resample / 100)
           sampleSlices = sampleSlices - 1
           sampleSlices = np.rint(sampleSlices)
@@ -849,8 +849,6 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
             ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
         
-        
-      np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
         
       # adds table column for various arrays
       table.AddColumn(SegmentNameArray)
