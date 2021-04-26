@@ -728,7 +728,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           if Mxy == 0:
             Theta = 0
           else:
-            Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy)**2 + 4 * (Mxy)**2)) / (2 * Mxy)) * 180 / np.pi
+            #Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy)**2 + 4 * (Mxy)**2)) / (2 * Mxy)) * 180 / np.pi
+            Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy) * (Mxx - Myy) + 4 * Mxy * Mxy)) / (2 * Mxy)) * 180 / np.pi
           rot2 = Theta * np.pi /180
           
           # determine second moment of area around the principal axes
@@ -760,7 +761,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             sxxs = 0
             syys = 0
             sxys = 0
-
+            
             xCosTheta = coords_Ijk[0] * np.cos(angle)
             yCosTheta = coords_Ijk[1] * np.cos(angle)
             xSinTheta = coords_Ijk[0] * np.sin(angle)
@@ -777,7 +778,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             Jxy = Ina + Ifa  
           
             # max distance from the user defined neutral axis and axis perpendicular to that 
-            rot3 = angle * np.pi / 180
+            rot3 = angle *  np.pi/180
             maxRadna = 0
             maxRadfa = 0
             for i in range(Sn):

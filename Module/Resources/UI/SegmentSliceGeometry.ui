@@ -113,12 +113,12 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
+      <item row="2" column="1">
        <widget class="QCheckBox" name="ResampleVolumecheckBox">
         <property name="text">
          <string>Resample Volume</string>
         </property>
-        <property name="unchecked">
+        <property name="unchecked" stdset="0">
          <bool>true</bool>
         </property>
        </widget>
@@ -174,6 +174,9 @@
    </item>
    <item row="6" column="0" colspan="2">
     <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_2" native="true">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="text" stdset="0">
       <string>Outputs</string>
      </property>
@@ -226,34 +229,34 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="qMRMLNodeComboBox" name="chartSelector">
+       <widget class="qMRMLNodeComboBox" name="chartSelector" native="true">
         <property name="toolTip">
          <string>Pick the input to the algorithm.</string>
         </property>
-        <property name="nodeTypes">
+        <property name="nodeTypes" stdset="0">
          <stringlist>
           <string>vtkMRMLPlotChartNode</string>
          </stringlist>
         </property>
-        <property name="showChildNodeTypes">
+        <property name="showChildNodeTypes" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="noneEnabled">
+        <property name="noneEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="addEnabled">
+        <property name="addEnabled" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="removeEnabled">
+        <property name="removeEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="editEnabled">
+        <property name="editEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="renameEnabled">
+        <property name="renameEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="noneDisplay">
+        <property name="noneDisplay" stdset="0">
          <string>Create new chart</string>
         </property>
        </widget>
@@ -310,11 +313,11 @@
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="9" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_1">
-        <property name="title">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_1" native="true">
+        <property name="title" stdset="0">
          <string>Edit selected calculations:</string>
         </property>
-        <property name = "collapsed">
+        <property name="collapsed" stdset="0">
          <bool>false</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_5">
@@ -379,11 +382,11 @@
        </widget>
       </item>
       <item row="11" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
-        <property name="title">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_2" native="true">
+        <property name="title" stdset="0">
          <string>Set the neutral axis:</string>
         </property>
-        <property name = "collapsed">
+        <property name="collapsed" stdset="0">
          <bool>false</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_6">
@@ -394,19 +397,6 @@
            </property>
            <property name="checkable">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QSpinBox" name="orientationspinBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="maximum">
-            <number>360</number>
-           </property>
-           <property name="value">
-            <number>0</number>
            </property>
           </widget>
          </item>
@@ -435,7 +425,7 @@
             <bool>true</bool>
            </property>
           </widget>
-         </item>    
+         </item>
          <item row="2" column="0">
           <widget class="QCheckBox" name="PolarcheckBox_2">
            <property name="enabled">
@@ -448,7 +438,23 @@
             <bool>false</bool>
            </property>
           </widget>
-         </item>     
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="orientationspinBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="maximum">
+            <double>360.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -459,51 +465,12 @@
         </property>
        </widget>
       </item>
-      <item row="15" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_3">
-        <property name="title">
-         <string>Calculate unitless values:</string>
-        </property>
-        <property name = "collapsed">
-         <bool>true</bool>
-        </property>
-        <layout class="QFormLayout" name="formLayout_8">
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="DoubecheckBox">
-           <property name="text">
-            <string>Doube Method</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="SummerscheckBox">
-           <property name="text">
-            <string>Summers Method</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item> 
-      <item row="14" column="0">
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
       <item row="13" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_4">
-        <property name="title">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_4" native="true">
+        <property name="title" stdset="0">
          <string>Extra calculations:</string>
         </property>
-        <property name = "collapsed">
+        <property name="collapsed" stdset="0">
          <bool>true</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_8">
@@ -549,7 +516,46 @@
          </item>
         </layout>
        </widget>
-      </item> 
+      </item>
+      <item row="14" column="0">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0" colspan="2">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_3" native="true">
+        <property name="title" stdset="0">
+         <string>Calculate unitless values:</string>
+        </property>
+        <property name="collapsed" stdset="0">
+         <bool>true</bool>
+        </property>
+        <layout class="QFormLayout" name="formLayout_8">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="DoubecheckBox">
+           <property name="text">
+            <string>Doube Method</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="SummerscheckBox">
+           <property name="text">
+            <string>Summers Method</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -572,6 +578,11 @@
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkCollapsibleGroupBox</class>
+   <extends>QWidget</extends>
+   <header>ctkcollapsiblegroupbox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
