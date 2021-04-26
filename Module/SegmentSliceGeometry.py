@@ -602,7 +602,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         # determine how many slices to calculate statistics for
         if interval > 0:
           resample = np.rint(100/interval)
-          resample = np.linspace(interval,(100-interval),num = resample.astype(int)) 
+          resample = np.arange(interval, stop = 101, step = interval)
+          #resample = np.linspace(interval,100,num = resample.astype(int),endpoint = True) 
           sampleSlices = numSlices * (resample / 100)
           sampleSlices = sampleSlices - 1
           sampleSlices = np.rint(sampleSlices)
