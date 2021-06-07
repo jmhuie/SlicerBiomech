@@ -355,7 +355,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
     # loop below that iterates over each segment.
     plotChartNode.SetTitle('Segment slice geometry')
     plotChartNode.SetXAxisTitle("Percent of Length")
-    #plotChartNode.SetYAxisTitle('Area in mm^2')  # TODO: use length unit
+    plotChartNode.SetYAxisTitle('Second Moment of Area (mm^4)')
     
     
     # do calculations
@@ -514,7 +514,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         volumesLogic = slicer.modules.volumes.logic()
         if volumeNode != None:   
           # Create volume for output
-          outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume", False)
+          volumetransformNode = volumeNode.GetTransformNodeID()
+          volumeNode.SetAndObserveTransformNodeID(None)
+          outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume")
           
           transformNode = segmentationNode.GetNodeReferenceID('transform')
           if ResamplecheckBox == True and transformNode:
@@ -533,8 +535,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
   
             slicer.mrmlScene.RemoveNode(cliNode)
             outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Resampled Volume",True)
-            volumeNode = outputVolume
-          volumeNodeformasking = volumeNode
+          volumeNodeformasking = outputVolume
+          volumeNode.SetAndObserveTransformNodeID(volumetransformNode)
           
         if volumeNode == None:
           volumeNodeformasking = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "FullVolumeTemp")
@@ -1025,22 +1027,43 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(IfaArray_Summers.GetName(), "Ifa divided by the second moment of area of a circle with the same cross-sectional area") 
       
       # Make a plot series node for this column.
-      plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", "Geometry")
-      plotSeriesNode.SetPlotType(plotSeriesNode.PlotTypeScatter)
-      plotSeriesNode.SetAndObserveTableNodeID(tableNode.GetID())
-      plotSeriesNode.SetXColumnName("Percent (%)")
+      plotChartNode.AddAndObservePlotSeriesNodeID
+      if SMAcheckBox_1 == True: 
+        if slicer.mrmlScene.GetFirstNodeByName("Imin (mm^4)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
+          if plotChartNode.GetNthPlotSeriesNode(0).GetName() == "Imin (mm^4)":
+            plotSeriesNode = plotChartNode.GetNthPlotSeriesNodeID(0)
+          if plotChartNode.GetNthPlotSeriesNode(1).GetName() == "Imin (mm^4)":
+            plotSeriesNode = plotChartNode.GetNthPlotSeriesNodeID(1)
+        else:
+          plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", "Imin (mm^4)")
+          plotSeriesNode.SetPlotType(plotSeriesNode.PlotTypeScatter)
+          plotSeriesNode.SetAndObserveTableNodeID(tableNode.GetID())
+          plotSeriesNode.SetYColumnName("Imin (mm^4)")
+          plotSeriesNode.SetXColumnName("Percent (%)")
+          plotSeriesNode.SetUniqueColor()
+
+          # Add this series to the plot chart node created above.
+          plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode.GetID())
+      
       #plotChartNode.SetXAxisTitle("Percent of Length")
       if OrientationcheckBox == True and SMAcheckBox_2 == True: 
-        plotSeriesNode.SetYColumnName("Ina (mm^4)")
-        plotChartNode.SetYAxisTitle('Neutral Axis Second Moment of Area (mm^4)')
-      else: 
-        plotSeriesNode.SetYColumnName("Imin (mm^4)")
-        plotChartNode.SetYAxisTitle('Minor Axis Second Moment of Area (mm^4)')
-      plotSeriesNode.SetUniqueColor()
-
-      # Add this series to the plot chart node created above.
-      plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode.GetID())
-    
+        if slicer.mrmlScene.GetFirstNodeByName("Ina (mm^4)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
+          if plotChartNode.GetNthPlotSeriesNode(0).GetName() == "Ina (mm^4)":
+            plotSeriesNode2 = plotChartNode.GetNthPlotSeriesNodeID(0)
+          if plotChartNode.GetNthPlotSeriesNode(1).GetName() == "Ina (mm^4)":
+            plotSeriesNode2 = plotChartNode.GetNthPlotSeriesNodeID(1)
+        else:
+          plotSeriesNode2 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", "Ina (mm^4)")
+          plotSeriesNode2.SetPlotType(plotSeriesNode2.PlotTypeScatter)
+          plotSeriesNode2.SetAndObserveTableNodeID(tableNode.GetID())
+          plotSeriesNode2.SetYColumnName("Ina (mm^4)")
+          plotSeriesNode2.SetXColumnName("Percent (%)")
+          plotSeriesNode2.SetUniqueColor()
+        
+          # Add this series to the plot chart node created above.
+          plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode2.GetID())
+       
+      
     finally:
       # Remove temporary volume node
       slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
