@@ -6,21 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
-    <height>954</height>
+    <width>548</width>
+    <height>977</height>
    </rect>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
   <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="parameterSetLabel">
-     <property name="text">
-      <string>Parameter set: </string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="qMRMLNodeComboBox" name="parameterNodeSelector" native="true">
      <property name="toolTip">
@@ -114,23 +107,69 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QCheckBox" name="ResampleVolumecheckBox">
-        <property name="text">
-         <string>Resample Volume</string>
-        </property>
-        <property name="unchecked" stdset="0">
-         <bool>true</bool>
-        </property>
+       <widget class="QFrame" name="frame_2">
+        <layout class="QGridLayout" name="gridLayout_6">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>0</number>
+         </property>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="ResampleVolumecheckBox">
+           <property name="text">
+            <string>Resample Volume</string>
+           </property>
+           <property name="unchecked" stdset="0">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="BoundingBoxButton">
+           <property name="text">
+            <string>Show/Hide Bounding Box</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Segment axis:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="axisSelectorBox">
         <property name="currentIndex">
          <number>2</number>
@@ -152,14 +191,14 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Sample slices:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="6" column="1">
        <widget class="QSpinBox" name="resamplespinBox">
         <property name="maximum">
          <number>50</number>
@@ -559,6 +598,13 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="parameterSetLabel">
+     <property name="text">
+      <string>Parameter set: </string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -583,6 +629,7 @@
    <class>ctkCollapsibleGroupBox</class>
    <extends>QWidget</extends>
    <header>ctkcollapsiblegroupbox.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

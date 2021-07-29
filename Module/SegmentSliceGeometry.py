@@ -81,6 +81,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.chartSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.OrientationcheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.BoundingBoxButton.connect("clicked(bool)", self.onBoundingBox)
 
 
     # Initial GUI update
@@ -165,7 +166,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation"):
-      self.ui.segmentationSelector.toolTip = "Select output table"
+      self.ui.segmentationSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
     else:
@@ -179,12 +180,18 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       self.ui.IntensitycheckBox.enabled = True
       self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
       self.ui.ResampleVolumecheckBox.enabled = True
+      self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
+      self.ui.BoundingBoxButton.enabled = True
     else:
-      self.ui.volumeSelector.toolTip = "Select volume node (optional)"
+      self.ui.volumeSelector.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.enabled = False
       self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
       self.ui.ResampleVolumecheckBox.enabled = False
+      self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
+      self.ui.BoundingBoxButton.enabled = False
+ 
+      
     if self._parameterNode.GetNodeReference("ResultsTable"):
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
@@ -231,7 +238,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
 
 
-
   def updateParameterNodeFromGUI(self, caller=None, event=None):
     """
     This method is called when the user makes any change in the GUI.
@@ -250,6 +256,84 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
 
+  
+  def onBoundingBox(self):
+    """
+    Run processing when user clicks "Bounding Box" button.
+    """  
+    import numpy as np
+    
+    roiNode = slicer.mrmlScene.GetFirstNodeByName("Slice Geometry Bounding Box")
+    if self.ui.BoundingBoxButton.checked == True:
+      if roiNode == None:
+        reconstructedVolumeNode = self.ui.volumeSelector.currentNode()
+        volumeExtent = reconstructedVolumeNode.GetImageData().GetExtent()
+        ijkToRas = vtk.vtkMatrix4x4()
+        reconstructedVolumeNode.GetIJKToRASMatrix(ijkToRas)
+        ras = ijkToRas.MultiplyPoint([volumeExtent[0],volumeExtent[2],volumeExtent[4],1])
+        volumeBounds = [ras[0], ras[0], ras[1], ras[1], ras[2], ras[2]]
+        for iCoord in [volumeExtent[0], volumeExtent[1]]:
+          for jCoord in [volumeExtent[2], volumeExtent[3]]:
+            for kCoord in [volumeExtent[4], volumeExtent[5]]:
+              ras = ijkToRas.MultiplyPoint([iCoord, jCoord, kCoord, 1])
+              for i in range(0,3):
+                volumeBounds[i*2] = min(volumeBounds[i*2], ras[i])
+                volumeBounds[i*2+1] = max(volumeBounds[i*2+1], ras[i])
+
+        
+        roiCenter = [0.0, 0.0, 0.0]
+        roiRadius = [0.0, 0.0, 0.0]
+        for i in range(0,3):
+          roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2
+          roiRadius[i] = (volumeBounds[i*2+1] - volumeBounds[i*2])/2
+        roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Slice Geometry Bounding Box")
+        roiNode.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
+        roiNode.SetRadiusXYZ(roiRadius[0], roiRadius[1], roiRadius[2])
+        roiNode.SetLocked(1) 
+        mDisplayNode = roiNode.GetDisplayNode()
+        mDisplayNode.SetSelectedColor(0,1,0)
+        mDisplayNode.SetFillOpacity(0.05)
+        mDisplayNode.SetPropertiesLabelVisibility(False)
+        mDisplayNode.SetGlyphScale(0)
+        mDisplayNode.SetHandlesInteractive(False)
+        roiNode.SetDisplayVisibility(1)
+               
+      if not roiNode == None: 
+        reconstructedVolumeNode = self.ui.volumeSelector.currentNode()
+        volumeExtent = reconstructedVolumeNode.GetImageData().GetExtent()
+        ijkToRas = vtk.vtkMatrix4x4()
+        reconstructedVolumeNode.GetIJKToRASMatrix(ijkToRas)
+        ras = ijkToRas.MultiplyPoint([volumeExtent[0],volumeExtent[2],volumeExtent[4],1])
+        volumeBounds = [ras[0], ras[0], ras[1], ras[1], ras[2], ras[2]]
+        for iCoord in [volumeExtent[0], volumeExtent[1]]:
+          for jCoord in [volumeExtent[2], volumeExtent[3]]:
+            for kCoord in [volumeExtent[4], volumeExtent[5]]:
+              ras = ijkToRas.MultiplyPoint([iCoord, jCoord, kCoord, 1])
+              for i in range(0,3):
+                volumeBounds[i*2] = min(volumeBounds[i*2], ras[i])
+                volumeBounds[i*2+1] = max(volumeBounds[i*2+1], ras[i])
+        roiCenter = [0.0, 0.0, 0.0]
+        roiRadius = [0.0, 0.0, 0.0]
+        for i in range(0,3):
+          roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2
+          roiRadius[i] = (volumeBounds[i*2+1] - volumeBounds[i*2])/2
+        #roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Slice Geometry Bounding Box")
+        roiNode.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
+        roiNode.SetRadiusXYZ(roiRadius[0], roiRadius[1], roiRadius[2])
+        roiNode.SetLocked(1) 
+        mDisplayNode = roiNode.GetDisplayNode()
+        mDisplayNode.SetSelectedColor(0,1,1)
+        mDisplayNode.SetFillOpacity(0.05)
+        mDisplayNode.SetPropertiesLabelVisibility(False)
+        mDisplayNode.SetGlyphScale(0)
+        mDisplayNode.SetHandlesInteractive(False)
+        roiNode.SetDisplayVisibility(1)
+        
+    if self.ui.BoundingBoxButton.checked == False:
+      roiNode.SetDisplayVisibility(0)
+        
+      
+      
 
   def onApplyButton(self):
     """
@@ -276,7 +360,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
         self.ui.chartSelector.setCurrentNode(plotChartNode)
 
       self.logic.run(self.ui.segmentationSelector.currentNode(), self.ui.volumeSelector.currentNode(), 
-                     self.ui.ResampleVolumecheckBox.checked, self.ui.axisSelectorBox.currentText, 
+                     self.ui.ResampleVolumecheckBox.checked, self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
@@ -312,7 +396,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Axis", "slice")
 
 
-  def run(self, segmentationNode, volumeNode, ResamplecheckBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
   DoubecheckBox, SummerscheckBox):
     """
