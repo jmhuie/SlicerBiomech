@@ -73,7 +73,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
-    self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.volumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.resamplespinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
@@ -98,15 +97,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     Adds observers to the selected parameter node. Observation is needed because when the
     parameter node is changed then the GUI must be updated immediately.
     """
-
-    if inputParameterNode:
-      self.logic.setDefaultParameters(inputParameterNode)
-      # TODO: uncomment this when nodeFromIndex method will be available in Python
-      # # Select first segmentation node by default
-      # if not inputParameterNode.GetNodeReference("Segmentation"):
-      #   segmentationNode = self.ui.segmentationSelector.nodeFromIndex(0)
-      #   if segmentationNode:
-      #     inputParameterNode.SetNodeReferenceID(segmentationNode.GetID())
 
     # Set parameter node in the parameter node selector widget
     wasBlocked = self.ui.parameterNodeSelector.blockSignals(True)
@@ -144,10 +134,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     # Need to temporarily block signals to prevent infinite recursion (MRML node update triggers
     # GUI update, which triggers MRML node update, which triggers GUI update, ...)
 
-    wasBlocked = self.ui.segmentationSelector.blockSignals(True)
-    self.ui.segmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.segmentationSelector.blockSignals(wasBlocked)
-    
     wasBlocked = self.ui.volumeSelector.blockSignals(True)
     self.ui.volumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("Volume"))
     self.ui.volumeSelector.blockSignals(wasBlocked)
@@ -165,14 +151,15 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.axisSelectorBox.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
-    if self._parameterNode.GetNodeReference("Segmentation"):
-      self.ui.segmentationSelector.toolTip = "Select segmentation node"
+    if not self.ui.regionSegmentSelector.currentSegmentID == None:
+      self.ui.regionSegmentSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
     else:
-      self.ui.segmentationSelector.toolTip = "Select segmentation node"
+      self.ui.regionSegmentSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Select input segmentation node"
       self.ui.applyButton.enabled = False
+
       
     if self._parameterNode.GetNodeReference("Volume"):
       self.ui.volumeSelector.toolTip = "Select output table"
@@ -247,7 +234,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     if self._parameterNode is None:
       return
 
-    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.segmentationSelector.currentNodeID)
     self._parameterNode.SetNodeReferenceID("Volume", self.ui.volumeSelector.currentNodeID)
     self._parameterNode.SetParameter("Axis", self.ui.axisSelectorBox.currentText)
     self._parameterNode.SetParameter("Resample", str(self.ui.resamplespinBox.value))
@@ -359,7 +345,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
         plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Slice Geometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)
 
-      self.logic.run(self.ui.segmentationSelector.currentNode(), self.ui.volumeSelector.currentNode(), 
+      self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.ResampleVolumecheckBox.checked, self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
@@ -396,7 +382,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Axis", "slice")
 
 
-  def run(self, segmentationNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, segmentID, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
   DoubecheckBox, SummerscheckBox):
     """
@@ -483,7 +469,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       RminArray.SetName("Rmin (mm)")
       
       JxyArray = vtk.vtkFloatArray()
-      JxyArray.SetName("Jna+fa (mm^4)")
+      JxyArray.SetName("Jna (mm^4)")
         
       ImaxArray = vtk.vtkFloatArray()
       ImaxArray.SetName("Imax (mm^4)")
@@ -492,7 +478,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       IminArray.SetName("Imin (mm^4)")
       
       JzArray = vtk.vtkFloatArray()
-      JzArray.SetName("Jmax+min (mm^4)")
+      JzArray.SetName("J (mm^4)")
         
       ZmaxArray = vtk.vtkFloatArray()
       ZmaxArray.SetName("Zmax (mm^3)")
@@ -530,7 +516,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         IfaArray_Doube.SetName("Ifa (Doube)")
       
         JxyArray_Doube = vtk.vtkFloatArray()
-        JxyArray_Doube.SetName("Iz (Doube)")
+        JxyArray_Doube.SetName("Jna (Doube)")
         
         ImaxArray_Doube = vtk.vtkFloatArray()
         ImaxArray_Doube.SetName("Imax (Doube)")
@@ -539,7 +525,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         IminArray_Doube.SetName("Imin (Doube)")
       
         JzArray_Doube = vtk.vtkFloatArray()
-        JzArray_Doube.SetName("Jz (Doube)")
+        JzArray_Doube.SetName("J (Doube)")
         
         ZmaxArray_Doube = vtk.vtkFloatArray()
         ZmaxArray_Doube.SetName("Zmax (Doube)")
@@ -561,7 +547,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         IfaArray_Summers.SetName("Ifa (Summers)")
       
         JxyArray_Summers = vtk.vtkFloatArray()
-        JxyArray_Summers.SetName("Iz (Summers)")
+        JxyArray_Summers.SetName("Jna (Summers)")
         
         ImaxArray_Summers = vtk.vtkFloatArray()
         ImaxArray_Summers.SetName("Imax (Summers)")
@@ -570,7 +556,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         IminArray_Summers.SetName("Imin (Summers)")
         
         JzArray_Summers = vtk.vtkFloatArray()
-        JzArray_Summers.SetName("Jz (Summers)")
+        JzArray_Summers.SetName("J (Summers)")
         
         ZmaxArray_Summers = vtk.vtkFloatArray()
         ZmaxArray_Summers.SetName("Zmax (Summers)")
@@ -584,10 +570,10 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         ZfaArray_Summers = vtk.vtkFloatArray()
         ZfaArray_Summers.SetName("Zfa (Summers)")
       
-    
-      
-      for segmentIndex in range(visibleSegmentIds.GetNumberOfValues()):
-        segmentID = visibleSegmentIds.GetValue(segmentIndex)
+      # leave in the capabilities to go back to multiple segments
+      #for segmentIndex in range(visibleSegmentIds.GetNumberOfValues()):
+      for segmentIndex in range(1):
+        #segmentID = visibleSegmentIds.GetValue(segmentIndex)
         
         segment = segmentationNode.GetSegmentation().GetSegment(segmentID)
         segName = segment.GetName()
@@ -618,7 +604,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
               raise ValueError("CLI execution failed: " + errorText)
   
             slicer.mrmlScene.RemoveNode(cliNode)
-            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Resampled Volume",True)
+            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Slice Geometry Resampled Volume",True)
           volumeNodeformasking = outputVolume
           volumeNode.SetAndObserveTransformNodeID(volumetransformNode)
           
@@ -954,14 +940,6 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(LengthArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(LengthArray.GetName(), "Segment Length")  
       
-      if CSAcheckBox == True:    
-        tableNode.AddColumn(areaArray)
-        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm2")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
-      
-      if volumeNode != None and IntensitycheckBox == True:
-        tableNode.AddColumn(meanIntensityArray)
-      
       if CentroidcheckBox == True:
         tableNode.AddColumn(CxArray)
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
@@ -969,30 +947,35 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       
         tableNode.AddColumn(CyArray)
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "Y-coordinate of the centroid")  
+        tableNode.SetColumnDescription(areaArray.GetName(), "Y-coordinate of the centroid")        
+
+      if volumeNode != None and IntensitycheckBox == True:
+        tableNode.AddColumn(meanIntensityArray)
+
+      if CSAcheckBox == True:    
+        tableNode.AddColumn(areaArray)
+        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm2")  # TODO: use length unit
+        tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
+      
+
+      if SMAcheckBox_1 == True:  
+        tableNode.AddColumn(IminArray)
+        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
+      
+        tableNode.AddColumn(ImaxArray)
+        tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
         
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaArray)
         tableNode.SetColumnUnitLabel(ThetaArray.GetName(), "rad")  # TODO: use length unit
         tableNode.SetColumnDescription(ThetaArray.GetName(), "Angle of the principal axis")
-      
-      if RcheckBox == True and (MODcheckBox_1 == True or SMAcheckBox_1 == True) == True:  
-        tableNode.AddColumn(RmaxArray)
-        tableNode.SetColumnUnitLabel(RmaxArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RmaxArray.GetName(), "Max chord length from the major principal axis") 
-      
-        tableNode.AddColumn(RminArray)
-        tableNode.SetColumnUnitLabel(RminArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RminArray.GetName(), "Max chord length from the minor principal axis") 
-       
-      if SMAcheckBox_1 == True:  
-        tableNode.AddColumn(ImaxArray)
-        tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
-        
-        tableNode.AddColumn(IminArray)
-        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
+                        
+      if PolarcheckBox_1 == True:     
+        tableNode.AddColumn(JzArray)
+        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia around the principal axes")
 
       if MODcheckBox_1 == True:
         tableNode.AddColumn(ZmaxArray)
@@ -1002,21 +985,16 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ZminArray)
         tableNode.SetColumnUnitLabel(ZminArray.GetName(), "mm3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZminArray.GetName(), "Section modulus around the minor principal axis")
-         
-      if PolarcheckBox_1 == True:     
-        tableNode.AddColumn(JzArray)
-        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia around the principal axes")
-        
-      if RcheckBox == True and OrientationcheckBox == True and (SMAcheckBox_2 == True or MODcheckBox_2 == True):
-        tableNode.AddColumn(RnaArray)
-        tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RnaArray.GetName(), "Max chord length from the neutral axis") 
       
-        tableNode.AddColumn(RfaArray)
-        tableNode.SetColumnUnitLabel(RfaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RfaArray.GetName(), "Max chord length from the force axis") 
+      if RcheckBox == True and (MODcheckBox_1 == True or SMAcheckBox_1 == True) == True:  
+        tableNode.AddColumn(RmaxArray)
+        tableNode.SetColumnUnitLabel(RmaxArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RmaxArray.GetName(), "Max distance from the major principal axis") 
       
+        tableNode.AddColumn(RminArray)
+        tableNode.SetColumnUnitLabel(RminArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RminArray.GetName(), "Max distance from the minor principal axis") 
+            
       if OrientationcheckBox == True and SMAcheckBox_2 == True:  
         tableNode.AddColumn(InaArray)
         tableNode.SetColumnUnitLabel(InaArray.GetName(), "mm4")  # TODO: use length unit
@@ -1025,6 +1003,11 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(IfaArray)
         tableNode.SetColumnUnitLabel(IfaArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(IfaArray.GetName(), "Second moment of area around the force axis")
+              
+      if OrientationcheckBox == True and PolarcheckBox_2 == True:  
+        tableNode.AddColumn(JxyArray)
+        tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and force axes")
         
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
@@ -1034,11 +1017,15 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ZfaArray)
         tableNode.SetColumnUnitLabel(ZfaArray.GetName(), "mm3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZfaArray.GetName(), "Section modulus around the force axis")
-              
-      if OrientationcheckBox == True and PolarcheckBox_2 == True:  
-        tableNode.AddColumn(JxyArray)
-        tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and force axes")
+        
+      if RcheckBox == True and OrientationcheckBox == True and (SMAcheckBox_2 == True or MODcheckBox_2 == True):
+        tableNode.AddColumn(RnaArray)
+        tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RnaArray.GetName(), "Max distance from the neutral axis") 
+      
+        tableNode.AddColumn(RfaArray)
+        tableNode.SetColumnUnitLabel(RfaArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RfaArray.GetName(), "Max distance from the force axis") 
         
       if DoubecheckBox == True and CSAcheckBox == True:
         tableNode.AddColumn(areaArray_Doube)
