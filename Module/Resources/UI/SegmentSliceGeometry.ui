@@ -340,7 +340,7 @@
       <item row="9" column="0" colspan="2">
        <widget class="ctkCollapsibleGroupBox" name="groupBox_1" native="true">
         <property name="title" stdset="0">
-         <string>Select calculations to compute:</string>
+         <string>Select computations:</string>
         </property>
         <property name="collapsed" stdset="0">
          <bool>false</bool>
@@ -470,7 +470,7 @@
       <item row="11" column="0" colspan="2">
        <widget class="ctkCollapsibleGroupBox" name="groupBox_2" native="true">
         <property name="title" stdset="0">
-         <string>Second moment of area with custom neutral axis:</string>
+         <string>Compute with custom neutral axis:</string>
         </property>
         <property name="collapsed" stdset="0">
          <bool>false</bool>

@@ -623,7 +623,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume")
           
           transformNode = segmentationNode.GetNodeReferenceID('transform')
-          if ResamplecheckBox == True and transformNode:
+          if ResamplecheckBox == True and transformNode and segmentID == segmentNode:
             parameters = {}
             parameters["inputVolume"] = volumeNode
             parameters["outputVolume"] = outputVolume
