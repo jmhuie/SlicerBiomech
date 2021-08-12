@@ -49,6 +49,33 @@
        </widget>
       </item>
       <item row="0" column="1">
+       <widget class="qMRMLNodeComboBox" name="segmentationSelector" native="true">
+        <property name="toolTip">
+         <string>Pick the output to the algorithm.</string>
+        </property>
+        <property name="nodeTypes" stdset="0">
+         <stringlist>
+          <string>vtkMRMLSegmentationNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="noneEnabled" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="addEnabled" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="removeEnabled" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="editEnabled" stdset="0">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="qMRMLSegmentSelectorWidget" name="regionSegmentSelector" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -57,10 +84,10 @@
          </sizepolicy>
         </property>
         <property name="segmentationNodeSelectorVisible" stdset="0">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
-      </item>
+      </item>      
       <item row="2" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -643,20 +670,20 @@
          <bool>true</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_7">
-         <item row="0" column="0">
+         <item row="0" column="1">
           <widget class="QCheckBox" name="DoubecheckBox">
            <property name="text">
-            <string>Doube Method</string>
+            <string>Doube Correction</string>
            </property>
            <property name="checked">
             <bool>false</bool>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="0" column="0">
           <widget class="QCheckBox" name="SummerscheckBox">
            <property name="text">
-            <string>Summers Method</string>
+            <string>Summers Correction</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -804,6 +831,22 @@
     <hint type="destinationlabel">
      <x>260</x>
      <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SegmentSliceGeometry</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>segmentationSelector</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>82</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>275</x>
+     <y>65</y>
     </hint>
    </hints>
   </connection>

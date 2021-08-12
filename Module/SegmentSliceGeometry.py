@@ -19,11 +19,10 @@ class SegmentSliceGeometry(ScriptedLoadableModule):
     self.parent.title = "Segment Slice Geometry"
     self.parent.categories = ["Quantification"]
     self.parent.dependencies = []
-    self.parent.contributors = ["Jonathan Huie (GWU)"]
-    self.parent.helpText = """This module computes segment slice geometries such as cross-sectional area, second moment of area, section modulus, and more."""
+    self.parent.contributors = ["Jonathan Huie"]
+    self.parent.helpText = """This module iterates slice-by-slice through a segment and computes geometric properties like second moment of area and more."""
     self.parent.acknowledgementText = """
-This file was developed by Jonathan Huie. Slice geometry equations from BoneJ (Doube et al. 2015). Module framework from the Segment Cross-Section Area module, initially 
-developed by Hollister Herhold (AMNH) and Andras Lasso (PerkLab)."""
+This file was developed by Jonathan Huie. Some equations were ported directly from BoneJ (Doube et al. 2015)."""
 
 
 #
@@ -73,6 +72,8 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
+    self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.regionSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     self.ui.volumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.resamplespinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
@@ -83,8 +84,8 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.BoundingBoxButton.connect("clicked(bool)", self.onBoundingBox)
     self.ui.TotalAreacheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
-
-
+    self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
+    
 
 
     # Initial GUI update
@@ -137,6 +138,14 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     # Update each widget from parameter node
     # Need to temporarily block signals to prevent infinite recursion (MRML node update triggers
     # GUI update, which triggers MRML node update, which triggers GUI update, ...)
+    
+    wasBlocked = self.ui.segmentationSelector.blockSignals(True)
+    self.ui.segmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    self.ui.segmentationSelector.blockSignals(wasBlocked)
+    
+    wasBlocked = self.ui.regionSegmentSelector.blockSignals(True)
+    self.ui.regionSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    self.ui.regionSegmentSelector.blockSignals(wasBlocked)
 
     wasBlocked = self.ui.volumeSelector.blockSignals(True)
     self.ui.volumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("Volume"))
@@ -153,6 +162,10 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     wasBlocked = self.ui.axisSelectorBox.blockSignals(True)
     self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
     self.ui.axisSelectorBox.blockSignals(wasBlocked)
+
+    wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
+    self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
     if not self.ui.regionSegmentSelector.currentSegmentID == None:
@@ -243,7 +256,8 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
     if self._parameterNode is None:
       return
-
+      
+    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.segmentationSelector.currentNodeID)  
     self._parameterNode.SetNodeReferenceID("Volume", self.ui.volumeSelector.currentNodeID)
     self._parameterNode.SetParameter("Axis", self.ui.axisSelectorBox.currentText)
     self._parameterNode.SetParameter("Resample", str(self.ui.resamplespinBox.value))
@@ -336,14 +350,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     """
       
     try:
-      import SegmentEditorEffects
-      if not hasattr(SegmentEditorEffects,'SegmentEditorMaskVolumeEffect'):
-      # Slicer 4.11 and earlier - Mask volume is in an extension
-        import SegmentEditorMaskVolumeLib
-        maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
-      else:
-        maskVolumeWithSegment = SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment
-
       # Create nodes for results
       segment = self.ui.regionSegmentSelector.currentNode().GetSegmentation().GetSegment(self.ui.regionSegmentSelector.currentSegmentID())
       segName = segment.GetName()
@@ -572,35 +578,18 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         ZfaArray_Doube.SetName("Zfa (Doube)")
       
       if SummerscheckBox == True:
-        InaArray_Summers = vtk.vtkFloatArray()
-        InaArray_Summers.SetName("Ina (Summers)")
-        
-        IfaArray_Summers = vtk.vtkFloatArray()
-        IfaArray_Summers.SetName("Ifa (Summers)")
-      
-        JxyArray_Summers = vtk.vtkFloatArray()
-        JxyArray_Summers.SetName("Jna (Summers)")
-        
         ImaxArray_Summers = vtk.vtkFloatArray()
-        ImaxArray_Summers.SetName("Imax (Summers)")
+        ImaxArray_Summers.SetName("Imax/Icircle")
         
         IminArray_Summers = vtk.vtkFloatArray()
-        IminArray_Summers.SetName("Imin (Summers)")
+        IminArray_Summers.SetName("Imin/Icircle")
         
-        JzArray_Summers = vtk.vtkFloatArray()
-        JzArray_Summers.SetName("J (Summers)")
+        InaArray_Summers = vtk.vtkFloatArray()
+        InaArray_Summers.SetName("Ina/Icircle")
         
-        ZmaxArray_Summers = vtk.vtkFloatArray()
-        ZmaxArray_Summers.SetName("Zmax (Summers)")
-        
-        ZminArray_Summers = vtk.vtkFloatArray()
-        ZminArray_Summers.SetName("Zmin (Summers)")
-        
-        ZnaArray_Summers = vtk.vtkFloatArray()
-        ZnaArray_Summers.SetName("Zna (Summers)")
-        
-        ZfaArray_Summers = vtk.vtkFloatArray()
-        ZfaArray_Summers.SetName("Zfa (Summers)")
+        IfaArray_Summers = vtk.vtkFloatArray()
+        IfaArray_Summers.SetName("Ifa/Icircle")        
+
       
       # leave in the capabilities to go back to multiple segments
       if TotalAreacheckBox == True or CompactnesscheckBox == True:
@@ -1002,14 +991,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness")    
       
       if SMAcheckBox_1 == True:  
-        tableNode.AddColumn(IminArray)
-        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
-      
         tableNode.AddColumn(ImaxArray)
         tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
         
+        tableNode.AddColumn(IminArray)
+        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
+      
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaArray)
         tableNode.SetColumnUnitLabel(ThetaArray.GetName(), "rad")  # TODO: use length unit
@@ -1177,6 +1166,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       # Remove temporary volume node
       slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentSliceGeometryTemp_ColorTable"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentSliceGeometryTemp_ColorTable"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
       # Change layout to include plot and table
       layoutManager = slicer.app.layoutManager()
       layoutWithPlot = slicer.modules.plots.logic().GetLayoutWithPlot(layoutManager.layout)

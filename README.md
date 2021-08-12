@@ -11,10 +11,11 @@ using 3D Slicer include the ability to easily align oblique volumes with the XYZ
 # Installation
 
 SegmentSliceGeometry is NOT currently available to the public and is still under development. To unofficially install SegmentSliceGeometry, 
-clone the contents of this repository and save it somewhere accessible. In 3D Slicer, go to Edit >> Application Settings >> Modules. Under 
+clone the contents of this repository and save it somewhere accessible. If you downloaded this repo from Google Drive, unzip the folder and save the contents somewhere accessible. 
+In 3D Slicer, go to Edit >> Application Settings >> Modules. Under 
 "Additional module paths" click "Add" and navigate to and select the "Module" folder in the the SegmentSliceGeometry folder. 
 Click OK and restart 3D Slicer. Now, the SegmentSliceGeometry module with automatically load in whenever to you open 3D Slicer. To 
-obtain the most recent version of the module, you must re-download the contents of this repository.
+obtain the most recent version of the module, you must re-download the contents of this repository. This module also requires on SlicerMorph and its dependencies to be installed.
 
 # Inputs
 
