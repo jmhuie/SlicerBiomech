@@ -4,14 +4,16 @@ This is the repository for Segment Geometry, an extension for 3D Slicer.
 
 Segment Geometry currently contains one module that iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. 
 
-<img width="1792" alt="Screen Shot 2021-08-18 at 10 44 58 PM" src="https://user-images.githubusercontent.com/52302862/130000723-9d29b0e3-b973-4d62-bca4-633c4c207ae7.png">
+<img width="1792" alt="Scene Schreenshot" src="https://user-images.githubusercontent.com/52302862/130000723-9d29b0e3-b973-4d62-bca4-633c4c207ae7.png">
 
 # Installation
 
 Segment Geometry is still under development. To unofficially install Segment Geometry, you may clone the contents of this repository and save it somewhere accessible. If you downloaded this repo from Google Drive, unzip the folder and save the contents somewhere. In 3D Slicer, go to Edit >> Application Settings >> Modules. Under "Additional module paths" click the little arrow point right, and then click "Add" and navigate to and select the "SegmentGeometry" folder in the the SegmentSliceGeometry folder. Click OK and restart 3D Slicer. Now, the Segment Geometry module with automatically load in whenever you open 3D Slicer. To 
 obtain the most recent version of the module, you must re-download the contents of this repository. This module is dependent on the ExtraSegmentEditorEffects extension. Official release coming soon.
 
-# Typical Workflow
+Segment Geometry is dependent on the ExtraSegmentEditorEffects extension
+
+# Workflow
 
 1. Start 3D Slicer.
 2. Load in CT Data.
@@ -44,7 +46,7 @@ obtain the most recent version of the module, you must re-download the contents 
 
 18. If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations. By default the netural axis is parallel to the horizontal. Enter an angle to determine how much the neutral axis deviates from the horizontal. Rotates the neutral axis in counter clockwise direction.
 
-**Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required.
+**Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required. Recommend using the WrapSolidify tool in the Segment Editor module. Requires the ExtraSegmentEditorEffects and WrapSolidify extensions.
 
 19. Click Apply
 
@@ -97,3 +99,8 @@ obtain the most recent version of the module, you must re-download the contents 
 Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
 
 Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
+
+# Funding Acknowledgement
+
+Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914).
+
