@@ -24,42 +24,49 @@ Some source code was ported from BoneJ to perfom computations. To cite BoneJ or 
 * Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
 * Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
 
-# Workflow
-###General Use Cas
+# Workflows
+### General Use Case
 1. Start 3D Slicer.
 2. Load in CT Data.
-3. Go to the Segment Editor module.
-4. Segment bone or structure of interest. 
-
-**Note:** Workflow assumes that your segment is not already orientated along the desired long axis. If it is, skip to Step 10.
-
-5. Go to the Transforms module.
-6. Create a new Linear Transform. 
-7. Move your Segmentation and the Volume from the "Transformable" column to the "Transformed" column.
-8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment.
-9. Align your segment with the three slice views based on how you would like to interatively slice through the segment. 
-
-**Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
+3. Segment bone or structure of interest in the Segement Editor module.
+6. Create a new Linear Transform in the Transforms module.
+7. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
+8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your segment with the three slice views based on how you would like to interatively slice through the segment. You should be able to scroll through one of the slice views and see the cross-sections you want to compute on.
+* **Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you'll get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
 
 10. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
 11. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
-
-**Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounds of its untransformed Volume Node. The "Snap to Center" and "Toggle Bounding Box" buttons have been added to make this easier.
-
 12. Click the "Snap to Center" to automatically move your segment to the center of the untransformed Volume node.
 13. Click the "Toggle Bounding Box" to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
-14. Select the "Segment Axis". This is the slice view that is perpendicular to the long axis and contains the cross-sections you want to compute on.
-15. Choose how frequently to sample along the length of the axis (percent intervals). By default will sample in 1% intervals along the length of the segment. Enter zero to compute on every slice in the segment.
-16. Select an output table and chart for the results. By default, a new table and chart will be made automatically if one does not already exist for that segment.
-17. Under "Advanced" choose which computations should be performed.
+* **Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounding box.
 
-**Note:** If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
-
-18. If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations. By default the netural axis is parallel to the horizontal. Enter an angle to determine how much the neutral axis deviates from the horizontal. Rotates the neutral axis in counter clockwise direction.
-
-**Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required. Recommend using the WrapSolidify tool in the Segment Editor module. Requires the ExtraSegmentEditorEffects and WrapSolidify extensions.
-
+15. Select the "Segment Axis". This is the slice view that contains the cross-sections you want to compute on.
+16. Choose how much of the segment to sample. By default, it will sample every 1% of the segment's length. Enter "0" to compute on every slice in the segment.
+17. Select an output table and chart for the results. A new table and chart will be created automatically by default.
+18. Under "Advanced" choose which computations should be performed.
 19. Click Apply
+
+### Compute Mean Pixel Brightness
+If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if you need to re-run the analysis.
+
+### Use Custom Neutral Axis
+If the direction of the loading axis is known, a custom neutral axis can be to calculate second moment of area, polar moment of inertia, and section modulus. First, check the "Use custom neutral axis" box. By default, the netural axis is set parallel to the horizontal. Enter an angle (in degrees) that represents how much the desired neutral axis deviates from the horizontal in the counter clockwise direction. **Note:** In most cases, it is easier to rotate your segment with the Transforms module so that the neutral axis lines up with the horizontal.
+
+### Compute Total CSA or Global Compactness
+Calculating total cross-sectional area and global compactness (CSA/TCSA) is not automated in Segment Geometry. To calculate total cross-sectional area or global compactness, a separate segment that contains the full or "total" structure needs to be provided. The recommend workflow is to use the Surface Wrap Solidify tool in the Segment Editor module. 
+1. In the Segment Editor module, select your hollow out segment.
+2. Click the Wrap Solidify tool.
+3. Under "Region" select "Outer Surface", under "Create Shell" select nothing, and under "Output" select "New Segment"
+4. Click Apply
+5. Select the newly created segment and use the Logical Operator tool to substract the hollow segment from the solid one.
+6. Use the Islands tool to remove small islands less then 5-10 voxels.
+7. Use the Logical Operator tool to add the hollow segment back to the solid one.
+8. Turn on the segment 3D view and inspect the two segments. You should see your holllow segment over the solid one. **Note:** you may need to toggle the hollow segment on and back off if it's not on top of the solid segment.
+9. Remove any small bits of the solid segment that are still visible. It's easiest to inspect the 3D, find the bit in the slice view, and remove it with the "Remove Selected Island" effect from the Islands tool.
+10. Make sure there are no empty areas inside of the solid segment. If there are, manually fill them in with the Paint tool.
+11. Click Apply.
+
+**Note** Steps 5-10 are optional, but I have found that in addition to filling the hollow segment, Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, increasing the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
 
 # Output Details
 
