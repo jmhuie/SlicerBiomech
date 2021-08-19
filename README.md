@@ -1,5 +1,3 @@
-![Picture2b](https://user-images.githubusercontent.com/52302862/130150120-445deb5d-a98d-459e-b6e0-2f5d2943a382.png)
-
 # Segment Geometry
 
 This is the repository for Segment Geometry, an extension for 3D Slicer.
