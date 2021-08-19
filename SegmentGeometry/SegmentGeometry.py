@@ -16,7 +16,7 @@ class SegmentGeometry(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "Segment Cross-Sectional Geometry"
+    self.parent.title = "Segment Geometry"
     self.parent.categories = ["Quantification"]
     self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]

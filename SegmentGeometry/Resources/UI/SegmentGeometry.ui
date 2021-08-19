@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SecondMoment</class>
- <widget class="qMRMLWidget" name="SecondMoment">
+ <class>SegmentGeometry</class>
+ <widget class="qMRMLWidget" name="SegmentGeometry">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -28,7 +28,7 @@
       <bool>true</bool>
      </property>
      <property name="baseName" stdset="0">
-      <string>SecondMoment</string>
+      <string>SegmentGeometry</string>
      </property>
      <property name="renameEnabled" stdset="0">
       <bool>true</bool>
@@ -754,7 +754,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>volumeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -770,7 +770,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>parameterNodeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -786,7 +786,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>tableSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -802,7 +802,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>chartSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -818,7 +818,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>regionSegmentSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -834,7 +834,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>areaSegmentSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -850,7 +850,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>SecondMoment</sender>
+   <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>segmentationSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
