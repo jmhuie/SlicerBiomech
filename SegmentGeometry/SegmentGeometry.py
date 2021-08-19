@@ -21,7 +21,7 @@ class SegmentGeometry(ScriptedLoadableModule):
     self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
-    For more information please see the online documentation."""
+    For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
     self.parent.acknowledgementText = """This file was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
 
 
