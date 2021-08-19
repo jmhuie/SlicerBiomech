@@ -25,7 +25,7 @@ Some source code was ported from BoneJ to perfom computations. To cite BoneJ or 
 * Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
 
 # Workflow
-<h2>General Use Case</2>
+###General Use Cas
 1. Start 3D Slicer.
 2. Load in CT Data.
 3. Go to the Segment Editor module.
