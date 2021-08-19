@@ -20,15 +20,16 @@ Citable paper for Segment Geometry is still a work in progress. Below are other 
 To cite 3D Slicer as a general image analysis platform, please use: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
 
-Some source code was ported from BoneJ to perfom computations. To cite BoneJ or find out more, please use:
-* Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
-* Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
-
 To cite the material normalization method, please use: 
 * Summers AP, Ketcham RA, Rowe T. (2004) Structure and function of the horn shark (Heterodontus francisci) cranium through ontogeny: development of a hard prey specialist. Journal of Morphology. 260(1):1-2. https://doi.org/10.1002/jmor.10141
 
 To cite the length normalization method, please use: 
 * Doube M, Yen SC, Kłosowski MM, Farke AA, Hutchinson JR, Shefelbine SJ. (2012) Whole‐bone scaling of the avian pelvic limb. Journal of Anatomy. 221(1):21-9. https://doi.org/10.1111/j.1469-7580.2012.01514.x
+
+Some source code was ported from BoneJ. To cite BoneJ or find out more, please use:
+* Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
+* Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
+
 
 # Workflows
 ### General Use Case
