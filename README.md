@@ -1,121 +1,99 @@
-# Slicer SegmentSliceGeometry
+# Segment Geometry
 
-This is the repository for the Slicer SegmentSliceGeometry module for 3D Slicer.
+This is the repository for Segment Geometry, an extension for 3D Slicer.
 
-SegmentSliceGeometry calculates geometric properties from segment cross-sections. These include: 
-second moment of area, cross-sectional area, section modulus, polar moment of inertia, and more. 
-SegmentSliceGeometry is inspired by BoneJ (Doube et al. 2010), but aims to streamline the workflow for 3D Slicer users. Additional benefits to 
-using 3D Slicer include the ability to easily align oblique volumes with the XYZ images axes, resampling volumes, perform computations on models 
-(i.e., stl, obj, and ply file types), and quick plotting capabilities.
+Segment Geometry currently contains one module that iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. 
+
+<img width="1792" alt="Screen Shot 2021-08-18 at 10 44 58 PM" src="https://user-images.githubusercontent.com/52302862/130000723-9d29b0e3-b973-4d62-bca4-633c4c207ae7.png">
 
 # Installation
 
-SegmentSliceGeometry is NOT currently available to the public and is still under development. To unofficially install SegmentSliceGeometry, 
-clone the contents of this repository and save it somewhere accessible. If you downloaded this repo from Google Drive, unzip the folder and save the contents somewhere accessible. 
-In 3D Slicer, go to Edit >> Application Settings >> Modules. Under 
-"Additional module paths" click "Add" and navigate to and select the "Module" folder in the the SegmentSliceGeometry folder. 
-Click OK and restart 3D Slicer. Now, the SegmentSliceGeometry module with automatically load in whenever to you open 3D Slicer. To 
-obtain the most recent version of the module, you must re-download the contents of this repository. This module also requires on SlicerMorph and its dependencies to be installed.
+Segment Geometry is still under development. To unofficially install Segment Geometry, you may clone the contents of this repository and save it somewhere accessible. If you downloaded this repo from Google Drive, unzip the folder and save the contents somewhere. In 3D Slicer, go to Edit >> Application Settings >> Modules. Under "Additional module paths" click the little arrow point right, and then click "Add" and navigate to and select the "SegmentGeometry" folder in the the SegmentSliceGeometry folder. Click OK and restart 3D Slicer. Now, the Segment Geometry module with automatically load in whenever you open 3D Slicer. To 
+obtain the most recent version of the module, you must re-download the contents of this repository. This module is dependent on the ExtraSegmentEditorEffects extension. Official release coming soon.
 
-# Inputs
+# Typical Workflow
 
-**Segmentation:** Select a segmentation node. If input is a model or binary labelmap, 
-first convert to a segmentation node. 
+1. Start 3D Slicer.
+2. Load in CT Data.
+3. Go to the Segment Editor module.
+4. Segment bone or structure of interest. 
 
-**Segment:** Select a segment to perfom computations on. 
+**Note:** Workflow assumes that your segment is not already orientated along the desired long axis. If it is, skip to Step 10.
 
-**Volume:** Select the volume node associated with the segmentation node. Necessary if the segmentation node has been transformed. 
+5. Go to the Transforms module.
+6. Create a new Linear Transform. 
+7. Move your Segmentation and the Volume from the "Transformable" column to the "Transformed" column.
+8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment.
+9. Align your segment with the three slice views based on how you would like to interatively slice through the segment. 
 
-**Resample Volume:** Option to resample the volume. Needed when measuring mean pixel brightness from a transformed segment. 
-Note: this option increases computation time but the resampled volume will be saved after the initial run and can be used in subsequent re-runs. Resample Volume uses the Resample Scalar/Vector/DWI Volume module with linear interpolation.
+**Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
 
-**Show/Hide Bounding Box:** Click button to display a blue bounding box that represents the bounds of the original, untransformed volume node. When computing on a transformed segment, the segment must be contained within the bounds of the bounding box. If the segment falls outside of the box, use the the Transforms Module to translate the segment into the bounds of the box. Click button again to hide box.
+10. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
+11. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
 
-**Slice:** Select which orthogonal axis to perform computations on.
+**Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounds of its untransformed Volume Node. The "Snap to Center" and "Toggle Bounding Box" buttons have been added to make this easier.
 
-**Sample slices:** User has the option do calculations in percent intervals along the length of the segment. Enter zero 
-to compute on every slice.
+12. Click the "Snap to Center" to automatically move your segment to the center of the untransformed Volume node.
+13. Click the "Toggle Bounding Box" to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
+14. Select the "Segment Axis". This is the slice view that is perpendicular to the long axis and contains the cross-sections you want to compute on.
+15. Choose how frequently to sample along the length of the axis (percent intervals). By default will sample in 1% intervals along the length of the segment. Enter zero to compute on every slice in the segment.
+16. Select an output table and chart for the results. By default, a new table and chart will be made automatically if one does not already exist for that segment.
+17. Under "Advanced" choose which computations should be performed.
 
-# Outputs
+**Note:** If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
 
-**Results Table:** A table with the results. See below for a list of computations. See "Advanced Options" for enabling and disabling computations.
+18. If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations. By default the netural axis is parallel to the horizontal. Enter an angle to determine how much the neutral axis deviates from the horizontal. Rotates the neutral axis in counter clockwise direction.
 
-**Results Plot:** A plot of the results. By default, second moment of area (Imin) is plotted with percent of segment length. If the option to use the neutral axis is enabled, then Ina is plotted as well.
+**Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required.
 
-**List of Calculations:** 
+19. Click Apply
+
+# List of Outputs
 
 - Segment: Segment name.
 
-- Percent: Percent of length along the segment.
+- Percent: Percent of segment length.
 
 - Length: Length of segment along the defined segmentation length.
 
-- X Centroid: X-coordinate of the segment centroid. 
-
-- Y Centroid: Y-coordinate of the segment centroid. 
-
-- Mean Intensity: Mean pixel brightness. Requires a volume node to calculate. Note: if the segment has a transformation node, you will need to use a resampled volume node. Either enable Resample Volume or select an already resampled volume node as the input.
+- Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
 
 - CSA: Cross-sectional area.
 
-- Total CSA: Total cross-sectional area. Requires a separate solid segment node.
+- Total CSA: Total cross-sectional area.
 
-- Compactness: Global compactness or the ratio between CSA and Total CSA. Requires a separate solid segment node.
-
-- Imin: Second moment of area around the minor principal axis.
+- Compactness: Global compactness calculated as CSA/Total CSA.
 
 - Imax: Second moment of area around the major principal axis.
 
-- Theta: Angle (radians) of how much the minor principal axis deviates from the horizontal axis.
+- Imin: Second moment of area around the minor principal axis.
 
-- J: Polar moment of area around the principal axes. Assumes the slice is annular and is calculated as Imin + Imax.
+- Theta: Angle (radians) between the minor principal axis and the horizontal axis.
 
-- Zmax: Section modulus around the major principal axis.
+- J: Polar moment of area using the principal axes. Calculated as Imin + Imax.
+
+- Zmax: Section modulus around the major principal axis. 
 
 - Zmin: Section modulus around the minor principal axis.
 
-- Rmax: Distance of the furthest pixel from the major principal axis.
+- Rmax: Distance to the furthest pixel from the major principal axis.
 
-- Rmin: Distance of the furthest pixel from the minor principal axis.
+- Rmin: Distance to the furthest pixel from the minor principal axis.
 
 - Ina: Second moment of area around the neutral axis.
 
-- Ifa: Second moment of area around the force axis.
+- Ila: Second moment of area around the loading axis.
 
-- Jna: Polar moment of area around the neutral and force axes. Assumes the slice is annular and is calculated as Ina + Ifa.
+- Jna: Polar moment of area around the neutral and loading axes. Calculated as Ina + Ifa.
 
 - Zna: Section modulus around the neutral axis.
 
-- Zfa: Section modulus around the force axis.
+- Zla: Section modulus around the loading axis.
 
-- Rna: Distance of the furthest pixel from the neutral axis.
+- Rna: Distance to the furthest pixel from the neutral axis.
 
-- Rfa: Distance of the furthest pixel from the force axis.
+- Rla: Distance to the furthest pixel from the force axis.
 
+Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
 
-# Advanced Options
-
-**Select computations:** User can toggle computations on and off. Note: A volume node must be selected to calculatie voxel intensity.
-
-**Compute with custom neutral axis:** User can set a custom neutral axis for calculating second moment of area, polar moment of inertia, and section modulus
-by entering an angle (in degrees) that represents how much the neutral axis deviates from the horizontal axis. By default, the neutral axis is set to the horizontal axis the vertical axis is considered the force axis.
-
-**Total cross-sectional area and global compactness:** User can compute the total cross-sectional area and global compactness of their segment. Currently, this module does not automate these calculations and a separate solid segment is required. The recommended procedure is to use the Wrap Solidify tool in the Segment Editor Module to make a copy of their segment of interest and fill in the gaps.
-
-**Calculate unitless values:** Two methods of converting some traits into unitless variables are available. 
- - Doube Method described by Doube et al. (2012). Takes the respective roots needed to convert cross-sectional area, second moment of area, section modulus, and polar moment of inertia into linear dimensions and then divides them by the length of the segment. This is effectively a size-correction. 
- - Summers Method described by Summers et al. (2004). Takes the second moment of area of the segment on a given slice and divides it by the second moment of area of an circle with the same cross-sectional area as the segment on that particular slice. This is used to assess how the distribution of material in the segment compares to that of an idealized beam.
-
-# What to do if your segment is not-aligned
-
-More often than not, volumes of interest are generated at oblique angles where the anatomical axes are not aligned with 
-the directional axes. This can be easily accounted for in 3D Slicer by applying a linear transformation to the segmentation node. A
-brief step-by-step protocol is outlined below. 
-
-1. Import and segment your volume as you normally would.
-2. Turn on the 3D rendering of your segment. The recommended scene preview is "Conventional" or "Four-Up".
-3. In the "Transforms" module, create a linear transformation and apply it to your segmentation node and its corresponding volume node.
-4. Under "Display" in the "Transforms" module, turn on "Visible in 3D view". This will create a box around your segment and allow you to rotate and translate you segment. Use this and/or the sliders under "Edit" to align your segment to the preferred axis. Caution: make sure the segment stays within the bounds of its original volume. Use the "Show/Hide Bounding Box" button in the "Segment Slice Geometry" Module as a reference. If part of the segment is outside of bounding box, computations will not be performed on that portion of the segment.
-5. In the "Segment Slice Geometry" module, choose your transformed segmentation and volume nodes as the inputs. Note: the volume node does not need to be transformed for this to work, but the segmentation node does.
-6. If you are calculating mean voxel intensity you must check Resample Volume. Alternatively, you may select an already resampled volume as the input.
-7. Click Apply.
+Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
