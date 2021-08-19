@@ -1,4 +1,4 @@
-**Copyright (c) 2021, Jonathan Huie**\
+**Copyright (c) 2021, Jonathan M. Huie**\
 All rights reserved.
 
 
