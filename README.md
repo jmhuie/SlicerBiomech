@@ -31,7 +31,7 @@ To cite the length normalization method, please use:
 * Doube M, Yen SC, Kłosowski MM, Farke AA, Hutchinson JR, Shefelbine SJ. (2012) Whole‐bone scaling of the avian pelvic limb. Journal of Anatomy. 221(1):21-9. https://doi.org/10.1111/j.1469-7580.2012.01514.x
 
 # Workflows
-### General Use Case
+## General Use Case
 1. Start 3D Slicer.
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segement Editor module.
@@ -52,13 +52,13 @@ To cite the length normalization method, please use:
 18. Under "Advanced" choose which computations should be performed.
 19. Click Apply.
 
-### Compute Mean Pixel Brightness
+## Compute Mean Pixel Brightness
 If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if you need to re-run the analysis.
 
-### Use Custom Neutral Axis
+## Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be to calculate second moment of area, polar moment of inertia, and section modulus. First, check the "Use custom neutral axis" box. By default, the netural axis is set parallel to the horizontal. Enter an angle (in degrees) that represents how much the desired neutral axis deviates from the horizontal in the counter clockwise direction. **Note:** In most cases, it is easier to rotate your segment with the Transforms module so that the neutral axis lines up with the horizontal.
 
-### Compute Total CSA or Global Compactness
+## Compute Total CSA or Global Compactness
 Calculating total cross-sectional area and global compactness (CSA/TCSA) is not automated in Segment Geometry. To calculate total cross-sectional area or global compactness, a separate segment that contains the full or "solid" structure needs to be provided. The recommend workflow is to use the Surface Wrap Solidify tool in the Segment Editor module. 
 1. In the Segment Editor module, select your main segment used for Segment Geometry that needs to be filled in. We'll call this the "hollow" segment.
 2. Click the Wrap Solidify tool.
@@ -74,7 +74,7 @@ Calculating total cross-sectional area and global compactness (CSA/TCSA) is not 
 
 **Note** Steps 5-10 are optional, but I have found that filling the hollow segment with Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, which would increase the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
 
-### Compute Unitless Variables
+## Compute Unitless Variables
 Two methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
 * First is a material normalization from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. The purpose is investigate how well the structure's material is distributed to maximize bending resistance relative to an idealized beam, and make comparisons between individuals or species without the effects of size.
 * Second is a length normalization from Doube et al. (2012). With this method, cross-sectional area, second moment of area, polar moment of inertia, and section modulus are corrected based on the length of the segment. First the respective root of the variables are taken to make them linear, then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
