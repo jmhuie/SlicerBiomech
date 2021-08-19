@@ -53,8 +53,8 @@ If you selected "Mean Pixel Brightness" and transformed your segment, you must c
 If the direction of the loading axis is known, a custom neutral axis can be to calculate second moment of area, polar moment of inertia, and section modulus. First, check the "Use custom neutral axis" box. By default, the netural axis is set parallel to the horizontal. Enter an angle (in degrees) that represents how much the desired neutral axis deviates from the horizontal in the counter clockwise direction. **Note:** In most cases, it is easier to rotate your segment with the Transforms module so that the neutral axis lines up with the horizontal.
 
 ### Compute Total CSA or Global Compactness
-Calculating total cross-sectional area and global compactness (CSA/TCSA) is not automated in Segment Geometry. To calculate total cross-sectional area or global compactness, a separate segment that contains the full or "total" structure needs to be provided. The recommend workflow is to use the Surface Wrap Solidify tool in the Segment Editor module. 
-1. In the Segment Editor module, select your hollow out segment.
+Calculating total cross-sectional area and global compactness (CSA/TCSA) is not automated in Segment Geometry. To calculate total cross-sectional area or global compactness, a separate segment that contains the full or "solid" structure needs to be provided. The recommend workflow is to use the Surface Wrap Solidify tool in the Segment Editor module. 
+1. In the Segment Editor module, select your main segment used for Segment Geometry that needs to be filled in. We'll call this the "hollow" segment.
 2. Click the Wrap Solidify tool.
 3. Under "Region" select "Outer Surface", under "Create Shell" select nothing, and under "Output" select "New Segment"
 4. Click Apply
