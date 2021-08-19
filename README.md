@@ -11,7 +11,14 @@ Segment Geometry currently contains one module that iterates slice-by-slice thro
 Segment Geometry is still under development. To unofficially install Segment Geometry, you may clone the contents of this repository and save it somewhere accessible. If you downloaded this repo from Google Drive, unzip the folder and save the contents somewhere. In 3D Slicer, go to Edit >> Application Settings >> Modules. Under "Additional module paths" click the little arrow point right, and then click "Add" and navigate to and select the "SegmentGeometry" folder in the the SegmentSliceGeometry folder. Click OK and restart 3D Slicer. Now, the Segment Geometry module with automatically load in whenever you open 3D Slicer. To 
 obtain the most recent version of the module, you must re-download the contents of this repository. This module is dependent on the ExtraSegmentEditorEffects extension. Official release coming soon.
 
-Segment Geometry is dependent on the ExtraSegmentEditorEffects extension
+Segment Geometry is dependent on the ExtraSegmentEditorEffects extension.
+
+# How to Cite
+
+Citable paper for Segment Geometry is still a work in progress.
+
+To cite 3D Slicer as a general image analysis platform, please use: 
+  Kikinis, R., Pieper, S. D., & Vosburgh, K. G. (2014). 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
 
 # Workflow
 
