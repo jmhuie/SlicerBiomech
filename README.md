@@ -19,7 +19,7 @@ Citable paper for Segment Geometry is still a work in progress.
 
 To cite 3D Slicer as a general image analysis platform, please use: Kikinis, R., Pieper, S. D., & Vosburgh, K. G. (2014). 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
 
-Some source code was ported from BoneJ to perfom computations. To read more or cite BoneJ, plase use: Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://10.1016/j.bone.2010.08.023 
+Some source code was ported from BoneJ to perfom computations. To read more or cite BoneJ, please use: Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://10.1016/j.bone.2010.08.023 
 
 # Workflow
 
