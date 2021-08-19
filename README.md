@@ -2,7 +2,7 @@
 
 This is the repository for Segment Geometry, an extension for 3D Slicer.
 
-Segment Geometry currently contains one module that iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. 
+Segment Geometry currently contains one module that iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported as a table and plotted for quick visualizations.
 
 <img width="1792" alt="Scene Schreenshot" src="https://user-images.githubusercontent.com/52302862/130000723-9d29b0e3-b973-4d62-bca4-633c4c207ae7.png">
 
