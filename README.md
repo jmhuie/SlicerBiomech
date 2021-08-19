@@ -1,4 +1,4 @@
-![Picture2b](https://user-images.githubusercontent.com/52302862/130150026-e25f6c21-ad81-423b-b77c-dbb8307d7c79.png)
+![Picture2b](https://user-images.githubusercontent.com/52302862/130150120-445deb5d-a98d-459e-b6e0-2f5d2943a382.png)
 
 # Segment Geometry
 
