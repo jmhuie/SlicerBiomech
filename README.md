@@ -24,6 +24,10 @@ Some source code was ported from BoneJ to perfom computations. To cite BoneJ or 
 * Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
 * Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
 
+To cite the material normalization method, please use: Summers AP, Ketcham RA, Rowe T. (2004) Structure and function of the horn shark (Heterodontus francisci) cranium through ontogeny: development of a hard prey specialist. Journal of Morphology. 260(1):1-2. https://doi.org/10.1002/jmor.10141
+
+To cite the length normalization method, please use: Doube M, Yen SC, Kłosowski MM, Farke AA, Hutchinson JR, Shefelbine SJ. (2012) Whole‐bone scaling of the avian pelvic limb. Journal of Anatomy. 221(1):21-9. https://doi.org/10.1111/j.1469-7580.2012.01514.x
+
 # Workflows
 ### General Use Case
 1. Start 3D Slicer.
@@ -44,7 +48,7 @@ Some source code was ported from BoneJ to perfom computations. To cite BoneJ or 
 16. Choose how much of the segment to sample. By default, it will sample every 1% of the segment's length. Enter "0" to compute on every slice in the segment.
 17. Select an output table and chart for the results. A new table and chart will be created automatically by default.
 18. Under "Advanced" choose which computations should be performed.
-19. Click Apply
+19. Click Apply.
 
 ### Compute Mean Pixel Brightness
 If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if you need to re-run the analysis.
@@ -66,7 +70,14 @@ Calculating total cross-sectional area and global compactness (CSA/TCSA) is not 
 10. Make sure there are no empty areas inside of the solid segment. If there are, manually fill them in with the Paint tool.
 11. Click Apply.
 
-**Note** Steps 5-10 are optional, but I have found that in addition to filling the hollow segment, Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, increasing the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
+**Note** Steps 5-10 are optional, but I have found that filling the hollow segment with Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, which would increase the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
+
+### Compute Unitless Variables
+Two methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
+* First is a material normalization from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. The purpose is investigate how well the structure's material is distributed to maximize bending resistance relative to an idealized beam, and make comparisons between individuals or species without the effects of size.
+* Second is a length normalization from Doube et al. (2012). With this method, cross-sectional area, second moment of area, polar moment of inertia, and section modulus are corrected based on the length of the segment. First the respective root of the variables are taken to make them linear, then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
+The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
+To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
 
@@ -112,9 +123,9 @@ Calculating total cross-sectional area and global compactness (CSA/TCSA) is not 
 
 - Rla: Distance to the furthest pixel from the force axis.
 
-Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
+- Material Normalization: Material normalized values are indicated with "MatNorm"
 
-Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
+- Length Normalization: Length normalized values are indicated with "LenNorm"
 
 # Funding Acknowledgement
 
