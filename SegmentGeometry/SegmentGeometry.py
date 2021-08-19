@@ -569,14 +569,14 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       ZnaArray = vtk.vtkFloatArray()
       ZnaArray.SetName("Zna (mm^3)")
         
-      ZfaArray = vtk.vtkFloatArray()
-      ZfaArray.SetName("Zfa (mm^3)")
+      ZlaArray = vtk.vtkFloatArray()
+      ZlaArray.SetName("Zla (mm^3)")
       
       RnaArray = vtk.vtkFloatArray()
       RnaArray.SetName("Rna (mm)")
       
-      RfaArray = vtk.vtkFloatArray()
-      RfaArray.SetName("Rfa (mm)")
+      RlaArray = vtk.vtkFloatArray()
+      RlaArray.SetName("Rla (mm)")
       
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("Total CSA (mm^2)")
@@ -616,8 +616,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         ZnaArray_Doube = vtk.vtkFloatArray()
         ZnaArray_Doube.SetName("Zna (LenNorm)")
         
-        ZfaArray_Doube = vtk.vtkFloatArray()
-        ZfaArray_Doube.SetName("Zfa (LenNorm)")
+        ZlaArray_Doube = vtk.vtkFloatArray()
+        ZlaArray_Doube.SetName("Zla (LenNorm)")
       
       if SummerscheckBox == True:
         ImaxArray_Summers = vtk.vtkFloatArray()
@@ -751,7 +751,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           sampleSlices = sampleSlices - 1
           sampleSlices = np.rint(sampleSlices)
           sampleSlices = sampleSlices.astype(int)
-          
+          if numSlices < 0:
+            resample = numSlices
+            sampleSlices = np.asarray(list(range(0,numSlices)))
 
         elif interval == 0:
           resample = numSlices
@@ -972,24 +974,24 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             # max distance from the user defined neutral axis and axis perpendicular to that 
             rot3 = angle *  np.pi/180
             maxRadna = 0
-            maxRadfa = 0
+            maxRadla = 0
             for j in range(Sn):
               maxRadna = max(maxRadna, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot3) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot3)))
-              maxRadfa = max(maxRadfa, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot3) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot3)))
+              maxRadla = max(maxRadfa, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot3) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot3)))
           
             # section moduli around horizontal and vertical axes
             Zna = Ina * unitOfPixelMm4 / maxRadna
-            Zfa = Ila * unitOfPixelMm4 / maxRadfa
+            Zla = Ila * unitOfPixelMm4 / maxRadfa
 
             if segmentID == segmentNode:
               # add values to orientation calculations          
               RnaArray.InsertNextValue((maxRadna))
-              RfaArray.InsertNextValue((maxRadfa))
+              RlaArray.InsertNextValue((maxRadla))
               IlaArray.InsertNextValue((Ila * unitOfPixelMm4))
               InaArray.InsertNextValue((Ina * unitOfPixelMm4))
               JxyArray.InsertNextValue((Jxy * unitOfPixelMm4))        
               ZnaArray.InsertNextValue((Zna))
-              ZfaArray.InsertNextValue((Zfa))
+              ZlaArray.InsertNextValue((Zla))
             
               # do Doube size correction
               if DoubecheckBox == True:
@@ -997,7 +999,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IlaArray_Doube.InsertNextValue((Ila**(1/4) / numSlices))
                 JxyArray_Doube.InsertNextValue((Jxy**(1/4) / numSlices))
                 ZnaArray_Doube.InsertNextValue((Zna**(1/3) / numSlices))
-                ZfaArray_Doube.InsertNextValue((Zfa**(1/3) / numSlices))
+                ZlaArray_Doube.InsertNextValue((Zla**(1/3) / numSlices))
               
               if SummerscheckBox == True:
                 InaArray_Summers.InsertNextValue((Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
@@ -1098,18 +1100,18 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray.GetName(), "Section modulus around the neutral axis")
         
-        tableNode.AddColumn(ZfaArray)
-        tableNode.SetColumnUnitLabel(ZfaArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZfaArray.GetName(), "Section modulus around the force axis")
+        tableNode.AddColumn(ZlaArray)
+        tableNode.SetColumnUnitLabel(ZlaArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZlaArray.GetName(), "Section modulus around the force axis")
         
       if RcheckBox == True and OrientationcheckBox == True and (SMAcheckBox_2 == True or MODcheckBox_2 == True):
         tableNode.AddColumn(RnaArray)
         tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(RnaArray.GetName(), "Max distance from the neutral axis") 
       
-        tableNode.AddColumn(RfaArray)
-        tableNode.SetColumnUnitLabel(RfaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RfaArray.GetName(), "Max distance from the force axis") 
+        tableNode.AddColumn(RlaArray)
+        tableNode.SetColumnUnitLabel(RlaArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RlaArray.GetName(), "Max distance from the force axis") 
         
       if DoubecheckBox == True and CSAcheckBox == True:
         tableNode.AddColumn(areaArray_Doube)
@@ -1158,9 +1160,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ZnaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray_Doube.GetName(), "Zna^(1/3)/Length")
         
-        tableNode.AddColumn(ZfaArray_Doube)
-        tableNode.SetColumnUnitLabel(ZfaArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZfaArray_Doube.GetName(), "Zfa^(1/3)/Length")  
+        tableNode.AddColumn(ZlaArray_Doube)
+        tableNode.SetColumnUnitLabel(ZlaArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZlaArray_Doube.GetName(), "Zla^(1/3)/Length")  
         
       if SummerscheckBox == True and SMAcheckBox_1 == True:
         tableNode.AddColumn(ImaxArray_Summers)
