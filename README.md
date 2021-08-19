@@ -19,27 +19,31 @@ obtain the most recent version of the module, you must re-download the contents 
 4. Segment bone or structure of interest. 
 
 **Note:** Workflow assumes that your segment is not already orientated along the desired long axis. If it is, skip to Step 10.
+
 5. Go to the Transforms module.
 6. Create a new Linear Transform. 
 7. Move your Segmentation and the Volume from the "Transformable" column to the "Transformed" column.
 8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment.
 9. Align your segment with the three slice views based on how you would like to interatively slice through the segment. 
 
-Note: If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
+**Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
+
 10. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
 11. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
 
-Note: If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounds of its untransformed Volume Node. The "Snap to Center" and "Toggle Bounding Box" buttons have been added to make this easier.
+**Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounds of its untransformed Volume Node. The "Snap to Center" and "Toggle Bounding Box" buttons have been added to make this easier.
+
 12. Click the "Snap to Center" to automatically move your segment to the center of the untransformed Volume node.
 13. Click the "Toggle Bounding Box" to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
 14. Select an output table and chart for the results. By default, a new table and chart will be made automatically if one does not already exist for that segment.
 15. Under "Advanced" choose which computations should be performed.
 
-Note: If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
+**Note:** If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
 
-Note: If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations.
+**Note:** If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations.
 
-Note: To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required.
+**Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required.
+
 16. Click Apply
 
 # List of Computations
