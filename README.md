@@ -94,6 +94,6 @@ obtain the most recent version of the module, you must re-download the contents 
 
 - Rla: Distance to the furthest pixel from the force axis.
 
-**Note:** Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
+Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
 
-**Note:** Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
+Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
