@@ -50,12 +50,10 @@ Segment Geometry is dependent on the ExtraSegmentEditorEffects extension
 
 19. Click Apply
 
-# List of Outputs
+# Output Details
 
 - Segment: Segment name.
-
 - Percent: Percent of segment length.
-
 - Length: Length of segment along the defined segmentation length.
 
 - Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
