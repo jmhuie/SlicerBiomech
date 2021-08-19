@@ -35,74 +35,65 @@ obtain the most recent version of the module, you must re-download the contents 
 
 12. Click the "Snap to Center" to automatically move your segment to the center of the untransformed Volume node.
 13. Click the "Toggle Bounding Box" to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
-14. Select an output table and chart for the results. By default, a new table and chart will be made automatically if one does not already exist for that segment.
-15. Under "Advanced" choose which computations should be performed.
+14. Select the "Segment Axis". This is the slice view that is perpendicular to the long axis and contains the cross-sections you want to compute on.
+15. Choose how frequently to sample along the length of the axis (percent intervals). By default will sample in 1% intervals along the length of the segment. Enter zero to compute on every slice in the segment.
+16. Select an output table and chart for the results. By default, a new table and chart will be made automatically if one does not already exist for that segment.
+17. Under "Advanced" choose which computations should be performed.
 
-**Note:** If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
+**Note:** If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if analyses need to be re-run.
 
-**Note:** If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations.
+18. If the direction of the loading axis is known, a custom neutral axis can be used for relevant computations. By default the netural axis is parallel to the horizontal. Enter an angle to determine how much the neutral axis deviates from the horizontal. Rotates the neutral axis in counter clockwise direction.
 
 **Note:** To calculate total cross-sectional area or global compactness, a separate solid segment that contains the full structure is required.
 
-16. Click Apply
+19. Click Apply
 
-# List of Computations
+# List of Outputs
 
 - Segment: Segment name.
 
-- Percent: Percent of length along the segment.
+- Percent: Percent of segment length.
 
 - Length: Length of segment along the defined segmentation length.
 
-- Mean Intensity: Mean pixel brightness. Requires a volume node to calculate. Note: if the segment has a transformation node, you will need to use a resampled volume node. Either enable Resample Volume or select an already resampled volume node as the input.
+- Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
 
 - CSA: Cross-sectional area.
 
-- Total CSA: Total cross-sectional area. Requires a separate solid segment node.
+- Total CSA: Total cross-sectional area.
 
-- Compactness: Global compactness or the ratio between CSA and Total CSA. Requires a separate solid segment node.
-
-- Imin: Second moment of area around the minor principal axis.
+- Compactness: Global compactness calculated as CSA/Total CSA.
 
 - Imax: Second moment of area around the major principal axis.
 
-- Theta: Angle (radians) of how much the minor principal axis deviates from the horizontal axis.
+- Imin: Second moment of area around the minor principal axis.
 
-- J: Polar moment of area around the principal axes. Assumes the slice is annular and is calculated as Imin + Imax.
+- Theta: Angle (radians) between the minor principal axis and the horizontal axis.
 
-- Zmax: Section modulus around the major principal axis.
+- J: Polar moment of area using the principal axes. Calculated as Imin + Imax.
+
+- Zmax: Section modulus around the major principal axis. 
 
 - Zmin: Section modulus around the minor principal axis.
 
-- Rmax: Distance of the furthest pixel from the major principal axis.
+- Rmax: Distance to the furthest pixel from the major principal axis.
 
-- Rmin: Distance of the furthest pixel from the minor principal axis.
+- Rmin: Distance to the furthest pixel from the minor principal axis.
 
 - Ina: Second moment of area around the neutral axis.
 
-- Ifa: Second moment of area around the force axis.
+- Ila: Second moment of area around the loading axis.
 
-- Jna: Polar moment of area around the neutral and force axes. Assumes the slice is annular and is calculated as Ina + Ifa.
+- Jna: Polar moment of area around the neutral and loading axes. Calculated as Ina + Ifa.
 
 - Zna: Section modulus around the neutral axis.
 
-- Zfa: Section modulus around the force axis.
+- Zla: Section modulus around the loading axis.
 
-- Rna: Distance of the furthest pixel from the neutral axis.
+- Rna: Distance to the furthest pixel from the neutral axis.
 
-- Rfa: Distance of the furthest pixel from the force axis.
+- Rla: Distance to the furthest pixel from the force axis.
 
+**Note:** Material normalized second moment of area variables are indicated with "MatNorm". These are calculated by dividing the calculated second moment of area value by the second moment of area of solid with the same cross-sectional area. The purpose is investigate how well the material is distributed to maximize bending resistance (Summers et al. 2004).
 
-# Advanced Options
-
-**Select computations:** User can toggle computations on and off. Note: A volume node must be selected to calculatie voxel intensity.
-
-**Compute with custom neutral axis:** User can set a custom neutral axis for calculating second moment of area, polar moment of inertia, and section modulus
-by entering an angle (in degrees) that represents how much the neutral axis deviates from the horizontal axis. By default, the neutral axis is set to the horizontal axis the vertical axis is considered the force axis.
-
-**Total cross-sectional area and global compactness:** User can compute the total cross-sectional area and global compactness of their segment. Currently, this module does not automate these calculations and a separate solid segment is required. The recommended procedure is to use the Wrap Solidify tool in the Segment Editor Module to make a copy of their segment of interest and fill in the gaps.
-
-**Calculate unitless values:** Two methods of converting some traits into unitless variables are available. 
- - Doube Method described by Doube et al. (2012). Takes the respective roots needed to convert cross-sectional area, second moment of area, section modulus, and polar moment of inertia into linear dimensions and then divides them by the length of the segment. This is effectively a size-correction. 
- - Summers Method described by Summers et al. (2004). Takes the second moment of area of the segment on a given slice and divides it by the second moment of area of an circle with the same cross-sectional area as the segment on that particular slice. This is used to assess how the distribution of material in the segment compares to that of an idealized beam.
-
+**Note:** Length normalized variables are indicated with "LenNorm". These are calculated by taking the respective root of variable to make in linear and then dividing it by the length of the segment. The purpose is make comparisons between individuals or species while removing the effects of size (Doube et al. 2012)
