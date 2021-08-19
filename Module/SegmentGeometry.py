@@ -6,30 +6,30 @@ from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 
 #
-# SegmentSliceGeometry
+# SegmentGeometry
 #
 
-class SegmentSliceGeometry(ScriptedLoadableModule):
+class SegmentGeometry(ScriptedLoadableModule):
   """Uses ScriptedLoadableModule base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "Segment Slice Geometry"
+    self.parent.title = "Segment Cross-Sectional Geometry"
     self.parent.categories = ["Quantification"]
     self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]
-    self.parent.helpText = """This module iterates slice-by-slice through a segment and computes geometric properties like second moment of area and more."""
-    self.parent.acknowledgementText = """
-This file was developed by Jonathan Huie. Some equations were ported directly from BoneJ (Doube et al. 2015)."""
+    self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
+    For more information please see the online documentation."""
+    self.parent.acknowledgementText = """This file was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
 
 
 #
-# SegmentSliceGeometryWidget
+# SegmentGeometryWidget
 #
 
-class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
+class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
   """Uses ScriptedLoadableModuleWidget base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
@@ -50,7 +50,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     ScriptedLoadableModuleWidget.setup(self)
 
     # Load widget from .ui file (created by Qt Designer)
-    uiWidget = slicer.util.loadUI(self.resourcePath('UI/SegmentSliceGeometry.ui'))
+    uiWidget = slicer.util.loadUI(self.resourcePath('UI/SegmentGeometry.ui'))
     self.layout.addWidget(uiWidget)
     self.ui = slicer.util.childWidgetVariables(uiWidget)
 
@@ -62,7 +62,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     # Create a new parameterNode
     # This parameterNode stores all user choices in parameter values, node selections, etc.
     # so that when the scene is saved and reloaded, these settings are restored.
-    self.logic = SegmentSliceGeometryLogic()
+    self.logic = SegmentGeometryLogic()
     self.ui.parameterNodeSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
     self.setParameterNode(self.logic.getParameterNode())
 
@@ -81,6 +81,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.chartSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.OrientationcheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.CenterSegButton.connect("clicked(bool)", self.onCenterSeg)
     self.ui.BoundingBoxButton.connect("clicked(bool)", self.onBoundingBox)
     self.ui.TotalAreacheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
@@ -168,7 +169,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
-    if not self.ui.regionSegmentSelector.currentSegmentID == None:
+    if self._parameterNode.GetNodeReference("Volume") and not self.ui.regionSegmentSelector.currentSegmentID == None:
       self.ui.regionSegmentSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
@@ -184,7 +185,6 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       self.ui.IntensitycheckBox.enabled = True
       self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
       self.ui.ResampleVolumecheckBox.enabled = True
-      self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
       self.ui.BoundingBoxButton.enabled = True
     else:
       self.ui.volumeSelector.toolTip = "Select input volume node"
@@ -192,9 +192,12 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       self.ui.IntensitycheckBox.enabled = False
       self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
       self.ui.ResampleVolumecheckBox.enabled = False
-      self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
       self.ui.BoundingBoxButton.enabled = False
  
+    if self._parameterNode.GetNodeReference("Volume") and self._parameterNode.GetNodeReference("Segmentation") and self.ui.regionSegmentSelector.currentSegmentID != None:
+      self.ui.CenterSegButton.enabled = True
+    else:
+      self.ui.CenterSegButton.enabled = False
       
     if self._parameterNode.GetNodeReference("ResultsTable"):
       self.ui.tableSelector.toolTip = "Edit output table"
@@ -240,12 +243,13 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
     self.ui.PolarcheckBox_1.toolTip = "Compute polar moment of inertia around the principal axes"
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
-    self.ui.CentroidcheckBox.toolTip = "Compute the XY coordinates of the segment on a given slice"
     self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis"
     self.ui.RcheckBox.toolTip = "Compute the max distances from the principal or user-defined axes"
     self.ui.DoubecheckBox.toolTip = "Size-correct values by taking the respective roots needed to reduce them to a single linear dimension and then divinding the values by segment length following Doube et al. (2012)"
     self.ui.SummerscheckBox.toolTip = "Compute the ratio of second moment of area for a give slice over the second moment of area for a circluar beam with the same cross-sectional area following Summers et al. (2004)"
-    
+    self.ui.CenterSegButton.toolTip = "Move segment to the center of the volume"  
+    self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
+
 
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
@@ -267,6 +271,54 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
     self._parameterNode.SetParameter("TotalArea", str(self.ui.TotalAreacheckBox.checked))
     self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
+  
+  
+  def onCenterSeg(self):
+    """
+    Run processing when user clicks "Snap to Center" button.
+    """   
+    import numpy as np
+    
+    segmentationNode = self.ui.segmentationSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    masterVolumeNode = self.ui.volumeSelector.currentNode()
+
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+
+    reconstructedVolumeNode = masterVolumeNode
+    volumeExtent = reconstructedVolumeNode.GetImageData().GetExtent()
+    ijkToRas = vtk.vtkMatrix4x4()
+    reconstructedVolumeNode.GetIJKToRASMatrix(ijkToRas)
+    ras = ijkToRas.MultiplyPoint([volumeExtent[0],volumeExtent[2],volumeExtent[4],1])
+    volumeBounds = [ras[0], ras[0], ras[1], ras[1], ras[2], ras[2]]
+    for iCoord in [volumeExtent[0], volumeExtent[1]]:
+      for jCoord in [volumeExtent[2], volumeExtent[3]]:
+        for kCoord in [volumeExtent[4], volumeExtent[5]]:
+          ras = ijkToRas.MultiplyPoint([iCoord, jCoord, kCoord, 1])
+          for i in range(0,3):
+            volumeBounds[i*2] = min(volumeBounds[i*2], ras[i])
+            volumeBounds[i*2+1] = max(volumeBounds[i*2+1], ras[i])      
+          
+          
+    roiCenter = [0.0, 0.0, 0.0]
+    for i in range(0,3):
+      roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2 
+    slicer.modules.markups.logic().JumpSlicesToLocation(roiCenter[0], roiCenter[1], roiCenter[2], True)    
+
+  
+    Centroid_diff = [0.0, 0.0, 0.0]  
+    for i in range(0,3):
+      Centroid_diff[i] = (segcentroid_ras[i] -  roiCenter[i])
+  
+    trans = segmentationNode.GetTransformNodeID()
+    if trans != None:
+      trans = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
+      matrix = vtk.vtkMatrix4x4()
+      trans.GetMatrixTransformToParent(matrix)
+      matrix.SetElement(0,3, trans.GetMatrixTransformToParent().GetElement(0,3) - Centroid_diff[0]) 
+      matrix.SetElement(1,3, trans.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
+      matrix.SetElement(2,3, trans.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
+      trans.SetMatrixTransformToParent(matrix) 
 
   
   def onBoundingBox(self):
@@ -275,7 +327,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
     """  
     import numpy as np
     
-    roiNode = slicer.mrmlScene.GetFirstNodeByName("Slice Geometry Bounding Box")
+    roiNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Bounding Box")
     if self.ui.BoundingBoxButton.checked == True:
       if roiNode == None:
         reconstructedVolumeNode = self.ui.volumeSelector.currentNode()
@@ -298,7 +350,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
         for i in range(0,3):
           roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2
           roiRadius[i] = (volumeBounds[i*2+1] - volumeBounds[i*2])/2
-        roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Slice Geometry Bounding Box")
+        roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Segment Geometry Bounding Box")
         roiNode.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
         roiNode.SetRadiusXYZ(roiRadius[0], roiRadius[1], roiRadius[2])
         roiNode.SetLocked(1) 
@@ -324,12 +376,14 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
               for i in range(0,3):
                 volumeBounds[i*2] = min(volumeBounds[i*2], ras[i])
                 volumeBounds[i*2+1] = max(volumeBounds[i*2+1], ras[i])
+                
+                
         roiCenter = [0.0, 0.0, 0.0]
         roiRadius = [0.0, 0.0, 0.0]
         for i in range(0,3):
           roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2
           roiRadius[i] = (volumeBounds[i*2+1] - volumeBounds[i*2])/2
-        #roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Slice Geometry Bounding Box")
+        #roiNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "Segment Geometry Bounding Box")
         roiNode.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
         roiNode.SetRadiusXYZ(roiRadius[0], roiRadius[1], roiRadius[2])
         roiNode.SetLocked(1) 
@@ -355,7 +409,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       segName = segment.GetName()
       
       tableNode = self.ui.tableSelector.currentNode()
-      expTable = segName + " Slice Geometry table"
+      expTable = segName + " Segment Geometry table"
       if not tableNode:
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", expTable)
         self.ui.tableSelector.setCurrentNode(tableNode)
@@ -368,15 +422,15 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
       
       
       plotChartNode = self.ui.chartSelector.currentNode()
-      expChart = segName + " Slice Geometry plot"
+      expChart = segName + " Segment Geometry plot"
       if not plotChartNode:
-        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Slice Geometry plot")
+        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Segment Geometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)
       if plotChartNode.GetName() != expChart and slicer.mrmlScene.GetFirstNodeByName(expChart) != None:
         plotChartNode = slicer.mrmlScene.GetFirstNodeByName(expChart)
         self.ui.chartSelector.setCurrentNode(plotChartNode)
       if plotChartNode.GetName() != expChart and slicer.mrmlScene.GetFirstNodeByName(expChart) == None:
-        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Slice Geometry plot")
+        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Segment Geometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)  
           
 
@@ -386,7 +440,7 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
                      self.ui.MODcheckBox_2.checked, self.ui.PolarcheckBox_2.checked, self.ui.orientationspinBox.value, 
-                     self.ui.CentroidcheckBox.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
+                     self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.TotalAreacheckBox.checked, self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked)
 
@@ -397,10 +451,10 @@ class SegmentSliceGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMix
 
 
 #
-# SegmentSliceGeometryLogic
+# SegmentGeometryLogic
 #
 
-class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
+class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
   """This class should implement all the actual
   computation done by your module.  The interface
   should be such that other python code can import
@@ -410,24 +464,12 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
-  def setDefaultParameters(self, parameterNode):
-    """
-    Initialize parameter node with default settings.
-    """
-    if not parameterNode.GetParameter("Axis"):
-      parameterNode.SetParameter("Axis", "slice")
-
 
   def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
-  MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, CentroidcheckBox, ThetacheckBox, RcheckBox,
+  MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, angle, ThetacheckBox, RcheckBox,
   TotalAreacheckBox, CompactnesscheckBox, areaSegementationNode, areaSegmentID, DoubecheckBox, SummerscheckBox):
     """
     Run the processing algorithm.
-    Can be used without GUI widget.
-    :param segmentationNode: cross section area will be computed on this
-    :param axis: axis index to compute cross section areas along
-    :param tableNode: result table node
-    :param plotChartNode: result chart node
     """
 
     import numpy as np
@@ -463,7 +505,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
     # do calculations
     try:
       # Create temporary volume node
-      tempSegmentLabelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "SegmentSliceGeometryTemp")
+      tempSegmentLabelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "SegmentGeometryTemp")
 
       
       #### CREATE ARRAYS FOR ALL COLUMNS ####
@@ -483,7 +525,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       areaArray.SetName("CSA (mm^2)")
       
       meanIntensityArray = vtk.vtkFloatArray()
-      meanIntensityArray.SetName("Mean Intensity")
+      meanIntensityArray.SetName("Mean Brightness")
       
       CxArray = vtk.vtkFloatArray()
       CxArray.SetName("X Centroid (mm)")
@@ -491,23 +533,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       CyArray = vtk.vtkFloatArray()
       CyArray.SetName("Y Centroid (mm)")
               
-      ThetaArray = vtk.vtkFloatArray()
-      ThetaArray.SetName("Theta (rad)")
-              
-      RmaxArray = vtk.vtkFloatArray()
-      RmaxArray.SetName("Rmax (mm)")
-        
-      RminArray = vtk.vtkFloatArray()
-      RminArray.SetName("Rmin (mm)")
-      
-      JxyArray = vtk.vtkFloatArray()
-      JxyArray.SetName("Jna (mm^4)")
-        
       ImaxArray = vtk.vtkFloatArray()
       ImaxArray.SetName("Imax (mm^4)")
         
       IminArray = vtk.vtkFloatArray()
       IminArray.SetName("Imin (mm^4)")
+                    
+      ThetaArray = vtk.vtkFloatArray()
+      ThetaArray.SetName("Theta (rad)")
       
       JzArray = vtk.vtkFloatArray()
       JzArray.SetName("J (mm^4)")
@@ -517,24 +550,33 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         
       ZminArray = vtk.vtkFloatArray()
       ZminArray.SetName("Zmin (mm^3)")
+              
+      RmaxArray = vtk.vtkFloatArray()
+      RmaxArray.SetName("Rmax (mm)")
+        
+      RminArray = vtk.vtkFloatArray()
+      RminArray.SetName("Rmin (mm)")
+              
+      InaArray = vtk.vtkFloatArray()
+      InaArray.SetName("Ina (mm^4)")
+        
+      IlaArray = vtk.vtkFloatArray()
+      IlaArray.SetName("Ila (mm^4)")
+      
+      JxyArray = vtk.vtkFloatArray()
+      JxyArray.SetName("Jna (mm^4)")
+              
+      ZnaArray = vtk.vtkFloatArray()
+      ZnaArray.SetName("Zna (mm^3)")
+        
+      ZfaArray = vtk.vtkFloatArray()
+      ZfaArray.SetName("Zfa (mm^3)")
       
       RnaArray = vtk.vtkFloatArray()
       RnaArray.SetName("Rna (mm)")
       
       RfaArray = vtk.vtkFloatArray()
       RfaArray.SetName("Rfa (mm)")
-              
-      InaArray = vtk.vtkFloatArray()
-      InaArray.SetName("Ina (mm^4)")
-        
-      IfaArray = vtk.vtkFloatArray()
-      IfaArray.SetName("Ifa (mm^4)")
-        
-      ZnaArray = vtk.vtkFloatArray()
-      ZnaArray.SetName("Zna (mm^3)")
-        
-      ZfaArray = vtk.vtkFloatArray()
-      ZfaArray.SetName("Zfa (mm^3)")
       
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("Total CSA (mm^2)")
@@ -545,50 +587,50 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
       #create arrays for unitless metrics with Doube method
       if DoubecheckBox == True:
         areaArray_Doube = vtk.vtkFloatArray()
-        areaArray_Doube.SetName("CSA (Doube)")
-        
-        InaArray_Doube = vtk.vtkFloatArray()
-        InaArray_Doube.SetName("Ina (Doube)")
-        
-        IfaArray_Doube = vtk.vtkFloatArray()
-        IfaArray_Doube.SetName("Ifa (Doube)")
-      
-        JxyArray_Doube = vtk.vtkFloatArray()
-        JxyArray_Doube.SetName("Jna (Doube)")
-        
+        areaArray_Doube.SetName("CSA (LN)")
+
         ImaxArray_Doube = vtk.vtkFloatArray()
-        ImaxArray_Doube.SetName("Imax (Doube)")
+        ImaxArray_Doube.SetName("Imax (LenNorm)")
         
         IminArray_Doube = vtk.vtkFloatArray()
-        IminArray_Doube.SetName("Imin (Doube)")
+        IminArray_Doube.SetName("Imin (LenNorm)")
       
         JzArray_Doube = vtk.vtkFloatArray()
-        JzArray_Doube.SetName("J (Doube)")
+        JzArray_Doube.SetName("J (LenNorm)")
         
         ZmaxArray_Doube = vtk.vtkFloatArray()
-        ZmaxArray_Doube.SetName("Zmax (Doube)")
+        ZmaxArray_Doube.SetName("Zmax (LenNorm)")
         
         ZminArray_Doube = vtk.vtkFloatArray()
-        ZminArray_Doube.SetName("Zmin (Doube)")
+        ZminArray_Doube.SetName("Zmin (LenNorm)")
+                
+        InaArray_Doube = vtk.vtkFloatArray()
+        InaArray_Doube.SetName("Ina (LenNorm)")
+        
+        IlaArray_Doube = vtk.vtkFloatArray()
+        IlaArray_Doube.SetName("Ila (LenNorm)")
+      
+        JxyArray_Doube = vtk.vtkFloatArray()
+        JxyArray_Doube.SetName("Jna (LenNorm)")   
         
         ZnaArray_Doube = vtk.vtkFloatArray()
-        ZnaArray_Doube.SetName("Zna (Doube)")
+        ZnaArray_Doube.SetName("Zna (LenNorm)")
         
         ZfaArray_Doube = vtk.vtkFloatArray()
-        ZfaArray_Doube.SetName("Zfa (Doube)")
+        ZfaArray_Doube.SetName("Zfa (LenNorm)")
       
       if SummerscheckBox == True:
         ImaxArray_Summers = vtk.vtkFloatArray()
-        ImaxArray_Summers.SetName("Imax/Icircle")
+        ImaxArray_Summers.SetName("Imax (MatNorm)")
         
         IminArray_Summers = vtk.vtkFloatArray()
-        IminArray_Summers.SetName("Imin/Icircle")
+        IminArray_Summers.SetName("Imin (MatNorm)")
         
         InaArray_Summers = vtk.vtkFloatArray()
-        InaArray_Summers.SetName("Ina/Icircle")
+        InaArray_Summers.SetName("Ina (MatNorm)")
         
-        IfaArray_Summers = vtk.vtkFloatArray()
-        IfaArray_Summers.SetName("Ifa/Icircle")        
+        IlaArray_Summers = vtk.vtkFloatArray()
+        IlaArray_Summers.SetName("Ila (MatNorm)")        
 
       
       # leave in the capabilities to go back to multiple segments
@@ -627,7 +669,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
               raise ValueError("CLI execution failed: " + errorText)
   
             slicer.mrmlScene.RemoveNode(cliNode)
-            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Slice Geometry Resampled Volume",True)
+            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Segment Geometry Resampled Volume",True)
           volumeNodeformasking = outputVolume
           volumeNode.SetAndObserveTransformNodeID(volumetransformNode)
           
@@ -681,8 +723,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           
         if volumeNode != None:  
           # create array to calculate intensity
-          voxelArray = slicer.util.arrayFromVolume(outputVolume)  
-          
+          while True:
+            try:
+              voxelArray = slicer.util.arrayFromVolume(outputVolume)
+              break
+            except ValueError:
+              raise ValueError("The segment is outside of the volume's bounds!")   
+
+
         # remove output volume node 
         slicer.mrmlScene.RemoveNode(outputVolume)
         
@@ -760,11 +808,11 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         for i in sampleSlices:
           if axisIndex == 0:
             PixelDepthMm = spacing[0] # get mm for length
-            PixelHeightMm = spacing[1]
-            PixelWidthMm = spacing[2]
+            PixelHeightMm = spacing[2]
+            PixelWidthMm = spacing[1]
             areaOfPixelMm2 = spacing[1] * spacing[2]
             volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
-            unitOfPixelMm4 = spacing[1]**2 * spacing[2]**2
+            unitOfPixelMm4 = spacing[1]**3 * spacing[2]**1
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
             if volumeNode != None and IntensitycheckBox == True:
@@ -775,7 +823,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             PixelWidthMm = spacing[0]
             areaOfPixelMm2 = spacing[0] * spacing[2]
             volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
-            unitOfPixelMm4 = spacing[0]**2 * spacing[2]**2
+            unitOfPixelMm4 = spacing[0]**3 * spacing[2]**1
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
             if volumeNode != None and IntensitycheckBox == True:
@@ -786,12 +834,27 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             PixelWidthMm = spacing[0]
             areaOfPixelMm2 = spacing[0] * spacing[1]
             volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
-            unitOfPixelMm4 = spacing[0]**2 * spacing[1]**2
+            unitOfPixelMm4 = spacing[0]**3 * spacing[1]**1
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[i,:,:][np.where(voxelArray[i, :, :]>0)]) 
+
+          if segmentID == segmentNode:
+          # add values to calculations 
+            LengthArray.InsertNextValue((numSlices * PixelDepthMm))          
+            areaArray.InsertNextValue((CSA * areaOfPixelMm2))
+            if volumeNode != None and IntensitycheckBox == True:
+              meanIntensityArray.InsertNextValue((meanIntensity)) 
+            # do size correction
+            if DoubecheckBox == True:
+              areaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
+    
+          if segmentID == areaSegmentID:
+            TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))  
             
+           
+          #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
             
@@ -806,7 +869,13 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           if Sn > 0:
             # calculate centroid coordinates
             Cx = Sx / Sn
-            Cy = Sy / Sn
+            Cy = Sy / Sn 
+          if Sn == 0:
+           raise ValueError("Attempted to compute on a slice with no segment. Check for empty slices")   
+          if segmentID == segmentNode:
+          # add values to calculations                       
+            CxArray.InsertNextValue((Cx * PixelWidthMm))
+            CyArray.InsertNextValue((Cy * PixelHeightMm))
             
           # calculate second moment of area along horizontal and vertical axes
           Myy = Sxx - (Sx * Sx / Sn) + Sn / 12
@@ -818,29 +887,62 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
           if Mxy == 0:
             Theta = 0
           else:
-            #Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy)**2 + 4 * (Mxy)**2)) / (2 * Mxy)) * 180 / np.pi
             Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy) * (Mxx - Myy) + 4 * Mxy * Mxy)) / (2 * Mxy)) * 180 / np.pi
           rot2 = Theta * np.pi /180
           
-          # determine second moment of area around the principal axes
+          if segmentID == segmentNode:
+          # add values to calculations                       
+            ThetaArray.InsertNextValue((rot2))
+          
+          # determine second moment of area around the principal axes and polar moment
           Imin = (Mxx + Myy) / 2 + np.sqrt(((Mxx - Myy) / 2)**2 + Mxy * Mxy)
           Imax = (Mxx + Myy) / 2 - np.sqrt(((Mxx - Myy) / 2)**2 + Mxy * Mxy)
           # determine polar moment of area around the principal axes
           Jz = Imin + Imax
           
-          
-          # determine the max distance from each principal axis
-          Rmax = 0
-          Rmin = 0
-          for j in range(Sn):
-            Rmax = max(Rmax, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot2) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot2)))
-            Rmin = max(Rmin, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot2) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot2)))
-          
-          # section moduli around principal axes
-          Zmax = Imax * unitOfPixelMm4 / Rmax
-          Zmin = Imin * unitOfPixelMm4 / Rmin
-
+          if segmentID == segmentNode:
+          # add values to calculations          
+            ImaxArray.InsertNextValue((Imax * unitOfPixelMm4))
+            IminArray.InsertNextValue((Imin * unitOfPixelMm4))
+            JzArray.InsertNextValue((Jz * unitOfPixelMm4))
             
+            # do material normalization          
+            if SummerscheckBox == True:
+              ImaxArray_Summers.InsertNextValue((Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
+              IminArray_Summers.InsertNextValue((Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
+              
+            # do size correction
+            if DoubecheckBox == True:
+              ImaxArray_Doube.InsertNextValue((Imax**(1/4) / numSlices))
+              IminArray_Doube.InsertNextValue((Imin**(1/4) / numSlices))
+              JzArray_Doube.InsertNextValue((Jz**(1/4) / numSlices))  
+          
+          # calculate section modulus
+          if RcheckBox == True and SMAcheckBox_1 == True:
+            # determine the max distance from each principal axis
+            Rmax = 0
+            Rmin = 0
+            for j in range(Sn):
+              Rmax = max(Rmax, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot2) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot2)))
+              Rmin = max(Rmin, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot2) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot2)))
+          
+            # section moduli around principal axes
+            Zmax = Imax * unitOfPixelMm4 / Rmax
+            Zmin = Imin * unitOfPixelMm4 / Rmin
+            
+            if segmentID == segmentNode:
+              # add values to calculations          
+              RmaxArray.InsertNextValue((Rmax))
+              RminArray.InsertNextValue((Rmin))
+              ZmaxArray.InsertNextValue((Zmax))
+              ZminArray.InsertNextValue((Zmin))
+              
+              # do size correction
+              if DoubecheckBox == True:
+                ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
+                ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
+           
+          # use custom neutral axis  
           if OrientationcheckBox == True: 
             xCosTheta = 0
             yCosTheta = 0 
@@ -863,9 +965,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             sxys = sum((yCosTheta - xSinTheta) * (xCosTheta + ySinTheta))
             pixelMoments = Sn * (np.cos(angle) * np.cos(angle) + np.sin(angle) * np.sin(angle)) / 12  
           
-            Ifa = sxxs - (sxss * sxss / Sn) + Sn/12        
+            Ila = sxxs - (sxss * sxss / Sn) + Sn/12        
             Ina = syys - (sys * sys / Sn) + Sn/12
-            Jxy = Ina + Ifa  
+            Jxy = Ina + Ila  
           
             # max distance from the user defined neutral axis and axis perpendicular to that 
             rot3 = angle *  np.pi/180
@@ -874,17 +976,16 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
             for j in range(Sn):
               maxRadna = max(maxRadna, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot3) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot3)))
               maxRadfa = max(maxRadfa, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot3) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot3)))
-            
           
             # section moduli around horizontal and vertical axes
             Zna = Ina * unitOfPixelMm4 / maxRadna
-            Zfa = Ifa * unitOfPixelMm4 / maxRadfa
+            Zfa = Ila * unitOfPixelMm4 / maxRadfa
 
             if segmentID == segmentNode:
               # add values to orientation calculations          
               RnaArray.InsertNextValue((maxRadna))
               RfaArray.InsertNextValue((maxRadfa))
-              IfaArray.InsertNextValue((Ifa * unitOfPixelMm4))
+              IlaArray.InsertNextValue((Ila * unitOfPixelMm4))
               InaArray.InsertNextValue((Ina * unitOfPixelMm4))
               JxyArray.InsertNextValue((Jxy * unitOfPixelMm4))        
               ZnaArray.InsertNextValue((Zna))
@@ -893,56 +994,16 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
               # do Doube size correction
               if DoubecheckBox == True:
                 InaArray_Doube.InsertNextValue((Ina**(1/4) / numSlices))
-                IfaArray_Doube.InsertNextValue((Ifa**(1/4) / numSlices))
+                IlaArray_Doube.InsertNextValue((Ila**(1/4) / numSlices))
                 JxyArray_Doube.InsertNextValue((Jxy**(1/4) / numSlices))
                 ZnaArray_Doube.InsertNextValue((Zna**(1/3) / numSlices))
                 ZfaArray_Doube.InsertNextValue((Zfa**(1/3) / numSlices))
               
               if SummerscheckBox == True:
                 InaArray_Summers.InsertNextValue((Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
-                IfaArray_Summers.InsertNextValue((Ifa*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
-          
-          if segmentID == segmentNode:
-            # add computed values to the arrays
-            LengthArray.InsertNextValue((numSlices * PixelDepthMm))
-          
-            areaArray.InsertNextValue((CSA * areaOfPixelMm2))
-          
-            if volumeNode != None and IntensitycheckBox == True:
-              meanIntensityArray.InsertNextValue((meanIntensity))
-          
-            CxArray.InsertNextValue((Cx * PixelWidthMm))
-            CyArray.InsertNextValue((Cy * PixelHeightMm))
-          
-            ThetaArray.InsertNextValue((rot2))
-          
-            RmaxArray.InsertNextValue((Rmax))
-            RminArray.InsertNextValue((Rmin))
-          
-            ImaxArray.InsertNextValue((Imax * unitOfPixelMm4))
-            IminArray.InsertNextValue((Imin * unitOfPixelMm4))
-            JzArray.InsertNextValue((Jz * unitOfPixelMm4))
-          
-            if SummerscheckBox == True:
-              ImaxArray_Summers.InsertNextValue((Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
-              IminArray_Summers.InsertNextValue((Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
-          
-            ZmaxArray.InsertNextValue((Zmax))
-            ZminArray.InsertNextValue((Zmin))
+                IlaArray_Summers.InsertNextValue((Ila*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
             
-            # do Doube size correction
-            if DoubecheckBox == True:
-              areaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
-              ImaxArray_Doube.InsertNextValue((Imax**(1/4) / numSlices))
-              IminArray_Doube.InsertNextValue((Imin**(1/4) / numSlices))
-              JzArray_Doube.InsertNextValue((Jz**(1/4) / numSlices))
-              ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
-              ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
-  
-          if segmentID == areaSegmentID:
-            TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))
-            
-            
+                     
     
       if CompactnesscheckBox == True:
        for s in range(TotalAreaArray.GetNumberOfTuples()):
@@ -963,15 +1024,6 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(LengthArray)
         tableNode.SetColumnUnitLabel(LengthArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(LengthArray.GetName(), "Segment Length")  
-      
-      if CentroidcheckBox == True:
-        tableNode.AddColumn(CxArray)
-        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "X-coordinate of the centroid")  
-      
-        tableNode.AddColumn(CyArray)
-        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(areaArray.GetName(), "Y-coordinate of the centroid")        
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
@@ -1032,9 +1084,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(InaArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray.GetName(), "Second moment of area around the neutral axis")
         
-        tableNode.AddColumn(IfaArray)
-        tableNode.SetColumnUnitLabel(IfaArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IfaArray.GetName(), "Second moment of area around the force axis")
+        tableNode.AddColumn(IlaArray)
+        tableNode.SetColumnUnitLabel(IlaArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(IlaArray.GetName(), "Second moment of area around the loading axis")
               
       if OrientationcheckBox == True and PolarcheckBox_2 == True:  
         tableNode.AddColumn(JxyArray)
@@ -1092,14 +1144,14 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(InaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray_Doube.GetName(), "Ina^(1/4)/Length")
         
-        tableNode.AddColumn(IfaArray_Doube)
-        tableNode.SetColumnUnitLabel(IfaArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IfaArray_Doube.GetName(), "Ifa^(1/4)/Length")
+        tableNode.AddColumn(IlaArray_Doube)
+        tableNode.SetColumnUnitLabel(IlaArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(IlaArray_Doube.GetName(), "Ila^(1/4)/Length")
         
       if DoubecheckBox == True and PolarcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(JxyArray_Doube)
         tableNode.SetColumnUnitLabel(JxyArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray_Doube.GetName(), "Jna+fa^(1/4)/Length")
+        tableNode.SetColumnDescription(JxyArray_Doube.GetName(), "Jna+la^(1/4)/Length")
         
       if DoubecheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(ZnaArray_Doube)
@@ -1125,9 +1177,9 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(InaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray_Summers.GetName(), "Ina divided by the second moment of area of a circle with the same cross-sectional area")
         
-        tableNode.AddColumn(IfaArray_Summers)
-        tableNode.SetColumnUnitLabel(IfaArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IfaArray_Summers.GetName(), "Ifa divided by the second moment of area of a circle with the same cross-sectional area") 
+        tableNode.AddColumn(IlaArray_Summers)
+        tableNode.SetColumnUnitLabel(IlaArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(IlaArray_Summers.GetName(), "Ila divided by the second moment of area of a circle with the same cross-sectional area") 
       
       # Make a plot series node for this column.
       segment = segmentationNode.GetSegmentation().GetSegment(segmentNode)
@@ -1165,8 +1217,8 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
     finally:
       # Remove temporary volume node
       slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
-      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentSliceGeometryTemp_ColorTable"))
-      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentSliceGeometryTemp_ColorTable"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
       # Change layout to include plot and table
@@ -1193,7 +1245,7 @@ class SegmentSliceGeometryLogic(ScriptedLoadableModuleLogic):
 # SegmentCrossSectionAreaTest
 #
 
-class SegmentCrossSectionAreaTest(ScriptedLoadableModuleTest):
+class SegmentGeometryTest(ScriptedLoadableModuleTest):
   """
   This is the test case for your scripted module.
   Uses ScriptedLoadableModuleTest base class, available at:
@@ -1209,9 +1261,9 @@ class SegmentCrossSectionAreaTest(ScriptedLoadableModuleTest):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_SegmentCrossSectionArea1()
+    self.test_SegmentGeometry1()
 
-  def test_SegmentCrossSectionArea1(self):
+  def test_SegmentGeometry1(self):
     """ Ideally you should have several levels of tests.  At the lowest level
     tests should exercise the functionality of the logic with different inputs
     (both valid and invalid).  At higher levels your tests should emulate the
@@ -1246,30 +1298,50 @@ class SegmentCrossSectionAreaTest(ScriptedLoadableModuleTest):
     tumorSeed.Update()
     segmentId = segmentationNode.AddSegmentFromClosedSurfaceRepresentation(tumorSeed.GetOutput(), "Tumor",
                                                                            [1.0, 0.0, 0.0])
+    segmentNode = segmentationNode.GetSegmentation().GetSegment(segmentId)                                                                       
 
-    tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Slice Geometry table")
-    plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Slice Geometry plot")
+    tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Segment Geometry test table")
+    plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
 
-    logic = SegmentCrossSectionAreaLogic()
-    logic.run(segmentationNode, masterVolumeNode, "slice", tableNode, plotChartNode)
-    logic.showChart(plotChartNode)
+    logic = SegmentGeometryLogic()
+    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True,
+    True, True, False, False, False, False, False, True, True, False, False, False, False, True, True)
+    self.assertEqual(tableNode.GetNumberOfColumns(), 22)
 
-    self.assertEqual(tableNode.GetNumberOfColumns(), 3)
-    self.assertEqual(tableNode.GetNumberOfColumns(), 3)
-
-    # Compute error
-    crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "Tumor")
-    largestCrossSectionArea = crossSectionAreas.max()
     import math
+    # Compute CSA error
+    crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "CSA (mm^2)")
+    largestCrossSectionArea = crossSectionAreas.max()
     expectedlargestCrossSectionArea = radius*radius*math.pi
     logging.info("Largest cross-section area: {0:.2f}".format(largestCrossSectionArea))
     logging.info("Expected largest cross-section area: {0:.2f}".format(expectedlargestCrossSectionArea))
-    errorPercent = 100.0 * abs(largestCrossSectionArea - expectedlargestCrossSectionArea) < expectedlargestCrossSectionArea
+    errorPercent = 100.0 * abs(1-(largestCrossSectionArea /expectedlargestCrossSectionArea))
     logging.info("Largest cross-section area error: {0:.2f}%".format(errorPercent))
+    
+    # Compute Imin error
+    crossSectionSecondMom = slicer.util.arrayFromTableColumn(tableNode, "Imin (mm^4)")
+    largestSecondMom  = crossSectionSecondMom.max()
+    expectedlargestSecondMom = radius*radius*radius*radius*math.pi/4
+    logging.info("Largest second moment of area: {0:.2f}".format(largestSecondMom))
+    logging.info("Expected largest second moment of area: {0:.2f}".format(expectedlargestSecondMom))
+    errorPercent2 = 100.0 * abs(1- (largestSecondMom/expectedlargestSecondMom))
+    logging.info("Largest second moment of area error: {0:.2f}%".format(errorPercent2))
+    
+    # Compute Section modulus error
+    crossSectionModulus = slicer.util.arrayFromTableColumn(tableNode, "Zmin (mm^3)")
+    largestModulus  = crossSectionModulus.max()
+    expectedlargestModulus = radius*radius*radius*math.pi/4
+    logging.info("Largest section modulus: {0:.2f}".format(largestModulus))
+    logging.info("Expected largest section modulus: {0:.2f}".format(expectedlargestModulus))
+    errorPercent3 = 100.0 * abs(1- (largestModulus/expectedlargestModulus))
+    logging.info("Largest section modulus area error: {0:.2f}%".format(errorPercent3))
 
     # Error between expected and actual cross section is due to finite resolution of the segmentation.
     # It should not be more than a few percent. The actual error in this case is around 1%, but use 2% to account for
     # numerical differences between different platforms.
-    self.assertTrue(errorPercent < 2.0)
+    # Note: that error tends to be higher for anistropic data
+    self.assertTrue(errorPercent < 3.0)
+    self.assertTrue(errorPercent2 < 3.0)
+    self.assertTrue(errorPercent3 < 3.0)
 
     self.delayDisplay('Test passed')
