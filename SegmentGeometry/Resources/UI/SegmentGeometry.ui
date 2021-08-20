@@ -203,7 +203,7 @@
       <item row="5" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Segment axis:</string>
+         <string>Select axis:</string>
         </property>
        </widget>
       </item>
@@ -564,6 +564,9 @@
             </item>
             <item row="0" column="2">
              <widget class="QRadioButton" name="DegradioButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Degrees</string>
               </property>
@@ -574,6 +577,9 @@
             </item>
             <item row="0" column="3">
              <widget class="QRadioButton" name="RadradioButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property> 
               <property name="text">
                <string>Radians</string>
               </property>

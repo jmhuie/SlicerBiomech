@@ -169,30 +169,38 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
-    if self._parameterNode.GetNodeReference("Volume") and not self.ui.regionSegmentSelector.currentSegmentID == None:
-      self.ui.regionSegmentSelector.toolTip = "Select segmentation node"
+    if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None:
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
     else:
-      self.ui.regionSegmentSelector.toolTip = "Select segmentation node"
       self.ui.applyButton.toolTip = "Select input segmentation node"
       self.ui.applyButton.enabled = False
+    
+    if self._parameterNode.GetNodeReference("Segmentation"):
+      self.ui.regionSegmentSelector.toolTip = "Select segment"
+    else:
+      self.ui.regionSegmentSelector.toolTip = "Select input segmentation node"  
+  
       
     if self._parameterNode.GetNodeReference("Volume"):
       self.ui.volumeSelector.toolTip = "Select output table"
-      self.ui.IntensitycheckBox.toolTip = "Compute mean voxel intensity"
+      self.ui.IntensitycheckBox.toolTip = "Compute mean pixel brightness. Need to resample volume if using a transformed segment or volume"
       self.ui.IntensitycheckBox.enabled = True
-      self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
+      self.ui.ResampleVolumecheckBox.toolTip = "Resample volume. Only needed if measuring mean pixel brightness from a transformed segment and volume"
       self.ui.ResampleVolumecheckBox.enabled = True
       self.ui.BoundingBoxButton.enabled = True
+      self.ui.CenterSegButton.toolTip = "Move segment to the center of the volume"  
+      self.ui.BoundingBoxButton.toolTip = "Show box that represents the bounds of the volume"
     else:
       self.ui.volumeSelector.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.enabled = False
-      self.ui.ResampleVolumecheckBox.toolTip = "Need to resample volume for mean voxel intensity calculations if segment is transformed"
+      self.ui.ResampleVolumecheckBox.toolTip = "Select input volume node"
       self.ui.ResampleVolumecheckBox.enabled = False
       self.ui.BoundingBoxButton.enabled = False
- 
+      self.ui.CenterSegButton.toolTip = "Select input volume node"  
+      self.ui.BoundingBoxButton.toolTip = "Select input volume node"
+       
     if self._parameterNode.GetNodeReference("Volume") and self._parameterNode.GetNodeReference("Segmentation") and self.ui.regionSegmentSelector.currentSegmentID != None:
       self.ui.CenterSegButton.enabled = True
     else:
@@ -201,25 +209,32 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if self._parameterNode.GetNodeReference("ResultsTable"):
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
-      self.ui.tableSelector.toolTip = "Select output node"
+      self.ui.tableSelector.toolTip = "Select output table"
       
     if self._parameterNode.GetNodeReference("ResultsChart"):
-      self.ui.tableSelector.toolTip = "Edit output chart"
+      self.ui.chartSelector.toolTip = "Edit output chart"
     else:
-      self.ui.tableSelector.toolTip = "Select output chart"
+      self.ui.chartSelector.toolTip = "Select output chart"
             
     if self.ui.OrientationcheckBox.checked == True:
+      self.ui.OrientationcheckBox.toolTip = "Check to use custom neutral axis"
       self.ui.orientationspinBox.toolTip = "Enter the angle (degrees) of the neutral axis. By default, the neutral axis is set parallel to the horizontal"
       self.ui.orientationspinBox.enabled = True
-      self.ui.SMAcheckBox_2.toolTip = "Compute second moment of area around the neutral and force axes"
+      self.ui.SMAcheckBox_2.toolTip = "Compute second moment of area around the neutral and loading axes"
       self.ui.SMAcheckBox_2.enabled = True
-      self.ui.MODcheckBox_2.toolTip = "Compute section modulus around the neutral and force axes"
+      self.ui.MODcheckBox_2.toolTip = "Compute section modulus around the neutral and loading axes"
       self.ui.MODcheckBox_2.enabled = True
-      self.ui.PolarcheckBox_2.toolTip = "Compute polar moment of inertia around the neutral and force axes"
+      self.ui.PolarcheckBox_2.toolTip = "Compute polar moment of inertia around the neutral and loading axes"
       self.ui.PolarcheckBox_2.enabled = True
-      self.ui.RcheckBox_2.toolTip = "Compute the max distances from the principal axes"
+      self.ui.RcheckBox_2.toolTip = "Compute the max distances from the neutral and loading axes"
       self.ui.RcheckBox_2.enabled = True
+      self.ui.DegradioButton.enabled = True
+      self.ui.DegradioButton.toolTip = "Define netural axis angle in degrees"
+      self.ui.RadradioButton.enabled = True
+      self.ui.RadradioButton.toolTip = "Define netural axis angle in radians"
+
     else:
+      self.ui.OrientationcheckBox.toolTip = "Uncheck to use custom neutral axis"
       self.ui.orientationspinBox.toolTip = "Select option use the neutral axis"
       self.ui.orientationspinBox.enabled = False
       self.ui.SMAcheckBox_2.toolTip = "Select option to use neutral axis"
@@ -230,6 +245,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.PolarcheckBox_2.enabled = False
       self.ui.RcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.RcheckBox_2.enabled = False
+      self.ui.DegradioButton.enabled = False      
+      self.ui.DegradioButton.toolTip = "Select option to use neutral axis"
+      self.ui.RadradioButton.enabled = False
+      self.ui.RadradioButton.toolTip = "Select option to use neutral axis"
       
     if self.ui.TotalAreacheckBox.checked == True or self.ui.CompactnesscheckBox.checked == True:
       self.ui.areaSegmentSelector.toolTip = "Select solid segment for total-cross sectional area or global compactness computation"
@@ -239,8 +258,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.areaSegmentSelector.enabled = False
       
     # other tooltips
-    self.ui.axisSelectorBox.toolTip = "Select orthogonal axis to compute on"
-    self.ui.resamplespinBox.toolTip = "Perform computations in percent intervals along the the segment. Enter zero to compute values on every slice"
+    self.ui.segmentationSelector.toolTip = "Select input segmentation node"
+    self.ui.axisSelectorBox.toolTip = "Select slice view to compute on. Should be perpendicular to the long axis"
+    self.ui.resamplespinBox.toolTip = "Perform computations in percent increments along the length of the segment. Enter zero to compute values on every slice"
     self.ui.CSAcheckBox.toolTip = "Compute cross-sectional area"
     self.ui.SMAcheckBox_1.toolTip = "Compute second moment of area around the principal axes"
     self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
@@ -248,10 +268,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
     self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis"
     self.ui.RcheckBox.toolTip = "Compute the max distances from the principal axes"
-    self.ui.DoubecheckBox.toolTip = "Size-correct values by taking the respective roots needed to reduce them to a single linear dimension and then divinding the values by segment length following Doube et al. (2012)"
-    self.ui.SummerscheckBox.toolTip = "Compute the ratio of second moment of area for a give slice over the second moment of area for a circluar beam with the same cross-sectional area following Summers et al. (2004)"
-    self.ui.CenterSegButton.toolTip = "Move segment to the center of the volume"  
-    self.ui.BoundingBoxButton.toolTip = "Show box to make sure the segment is inside the bounds of the volume"
+    self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2012)"
+    self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
+    self.ui.TotalAreacheckBox.toolTip = "Compute total cross-sectional area. Needs a separate solid segment" 
+    self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment"
 
 
 
@@ -801,13 +821,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         if segmentID == segmentNode:
           if interval > 0:
             for i in range(len(sampleSlices)):
-              sliceNumberArray.InsertNextValue(sampleSlices[i]+1) # adds slice number to the array
+              sliceNumberArray.InsertNextValue(sampleSlices[i]+extentoffset) # adds slice number to the array
               SegmentNameArray.InsertNextValue(segName)
               percentLengthArray.InsertNextValue(percentLength[i])
               
           else:
             for i in range(numSlices):
-              sliceNumberArray.InsertNextValue(sampleSlices[i]+1) # adds slice number to the array
+              sliceNumberArray.InsertNextValue(sampleSlices[i]+extentoffset) # adds slice number to the array
               SegmentNameArray.InsertNextValue(segName)
               percentLengthArray.InsertNextValue(percentLength[i])
 
@@ -1030,11 +1050,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       tableNode.SetColumnDescription(SegmentNameArray.GetName(), "Segment name")  
       
       table.AddColumn(sliceNumberArray)
-      tableNode.SetColumnDescription(sliceNumberArray.GetName(), "Index of " + axis)
+      tableNode.SetColumnDescription(sliceNumberArray.GetName(), "Corresponding slice index on the untransformed volume")
       
       tableNode.AddColumn(percentLengthArray)
       tableNode.SetColumnUnitLabel(percentLengthArray.GetName(), "%")  # TODO: use length unit
-      tableNode.SetColumnDescription(percentLengthArray.GetName(), "Percent of the segment length along the the user-defined axis")  
+      tableNode.SetColumnDescription(percentLengthArray.GetName(), "Percent of the segment length")  
       
       if LengthcheckBox == True:
         tableNode.AddColumn(LengthArray)
@@ -1043,6 +1063,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
+        tableNode.SetColumnDescription(LengthArray.GetName(), "Mean pixel brightness of a given slice") 
 
       if CSAcheckBox == True:    
         tableNode.AddColumn(areaArray)
@@ -1056,7 +1077,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
       if CompactnesscheckBox == True:    
         tableNode.AddColumn(CompactnessArray)
-        tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness")    
+        tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness calculated as CSA/TCSA")    
         
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaArray)
@@ -1107,7 +1128,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if OrientationcheckBox == True and PolarcheckBox_2 == True:  
         tableNode.AddColumn(JxyArray)
         tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and force axes")
+        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and loading axes")
         
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
@@ -1116,7 +1137,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         tableNode.AddColumn(ZlaArray)
         tableNode.SetColumnUnitLabel(ZlaArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZlaArray.GetName(), "Section modulus around the force axis")
+        tableNode.SetColumnDescription(ZlaArray.GetName(), "Section modulus around the loading axis")
         
       if RcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(RnaArray)
@@ -1125,7 +1146,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
         tableNode.AddColumn(RlaArray)
         tableNode.SetColumnUnitLabel(RlaArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RlaArray.GetName(), "Max distance from the force axis") 
+        tableNode.SetColumnDescription(RlaArray.GetName(), "Max distance from the loading axis") 
         
       if DoubecheckBox == True and CSAcheckBox == True:
         tableNode.AddColumn(areaArray_Doube)
@@ -1187,20 +1208,20 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if SummerscheckBox == True and SMAcheckBox_1 == True:
         tableNode.AddColumn(IminArray_Summers)
         tableNode.SetColumnUnitLabel(IminArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray_Summers.GetName(), "Imin divided by the second moment of area of a circle with the same cross-sectional area") 
+        tableNode.SetColumnDescription(IminArray_Summers.GetName(), "Imin divided by the second moment of area of a solid circle with the same cross-sectional area") 
         
         tableNode.AddColumn(ImaxArray_Summers)
         tableNode.SetColumnUnitLabel(ImaxArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ImaxArray_Summers.GetName(), "Imax divided by the second moment of area of a circle with the same cross-sectional area")        
+        tableNode.SetColumnDescription(ImaxArray_Summers.GetName(), "Imax divided by the second moment of area of a solid circle with the same cross-sectional area")        
         
       if SummerscheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Summers)
         tableNode.SetColumnUnitLabel(InaArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(InaArray_Summers.GetName(), "Ina divided by the second moment of area of a circle with the same cross-sectional area")
+        tableNode.SetColumnDescription(InaArray_Summers.GetName(), "Ina divided by the second moment of area of a solid circle with the same cross-sectional area")
         
         tableNode.AddColumn(IlaArray_Summers)
         tableNode.SetColumnUnitLabel(IlaArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IlaArray_Summers.GetName(), "Ila divided by the second moment of area of a circle with the same cross-sectional area") 
+        tableNode.SetColumnDescription(IlaArray_Summers.GetName(), "Ila divided by the second moment of area of a solid circle with the same cross-sectional area") 
       
       # Make a plot series node for this column.
       segment = segmentationNode.GetSegmentation().GetSegment(segmentNode)
