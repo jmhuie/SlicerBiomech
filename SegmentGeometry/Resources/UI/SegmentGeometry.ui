@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>584</width>
-    <height>977</height>
+    <height>994</height>
    </rect>
   </property>
   <property name="layoutDirection">
@@ -570,7 +570,7 @@
               <property name="text">
                <string>Degrees</string>
               </property>
-              <property name ="checked">
+              <property name="checked">
                <bool>true</bool>
               </property>
              </widget>
@@ -579,7 +579,7 @@
              <widget class="QRadioButton" name="RadradioButton">
               <property name="enabled">
                <bool>false</bool>
-              </property> 
+              </property>
               <property name="text">
                <string>Radians</string>
               </property>

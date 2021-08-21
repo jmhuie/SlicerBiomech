@@ -716,14 +716,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         if axisIndex == 0:
           extent = [maskExtent[0],maskExtent[1],realextent[2],realextent[3],realextent[4],realextent[5]]
           extentoffset = abs(realextent[0] - maskExtent[0])
-          print(extentoffset)
         elif axisIndex == 1:
           extent = [realextent[0],realextent[1],maskExtent[2],maskExtent[3],realextent[4],realextent[5]]
           extentoffset = abs(realextent[2] - maskExtent[2])
         elif axisIndex == 2:
           extent = [realextent[0],realextent[1],realextent[2],realextent[3],maskExtent[4],maskExtent[5]]
           extentoffset = abs(realextent[4] - maskExtent[4])
-          print(extentoffset)
 
           
         # Calculate the new origin
@@ -842,7 +840,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             PixelHeightMm = spacing[2]
             PixelWidthMm = spacing[1]
             areaOfPixelMm2 = spacing[1] * spacing[2]
-            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
             unitOfPixelMm4 = spacing[1]**3 * spacing[2]**1
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
@@ -853,7 +850,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             PixelHeightMm = spacing[2]
             PixelWidthMm = spacing[0]
             areaOfPixelMm2 = spacing[0] * spacing[2]
-            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
             unitOfPixelMm4 = spacing[0]**3 * spacing[2]**1
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
@@ -864,7 +860,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             PixelHeightMm = spacing[1]
             PixelWidthMm = spacing[0]
             areaOfPixelMm2 = spacing[0] * spacing[1]
-            volOfPixelMm3 = spacing[0] * spacing[1] * spacing[2]
             unitOfPixelMm4 = spacing[0]**3 * spacing[1]**1
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
@@ -890,14 +885,22 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
+          
+          # for calculating a convex hull area and perimeter
+          #if segmentID == segmentNode:
+          #  if TotalAreacheckBox == True:
+          #    from scipy.spatial.qhull import ConvexHull
+          #    from scipy.spatial.distance import euclidean
+          #    points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
+          #    hull = ConvexHull(points)
+          #    print(hull.area)
+          #    print(hull.volume) 
+              
             
           # set up variables for calculations
           Sn = np.count_nonzero(slicetemp)
           Sx = sum(coords_Ijk[0])
-          Sxx = sum(coords_Ijk[0] * coords_Ijk[0])
           Sy = sum(coords_Ijk[1])
-          Syy = sum(coords_Ijk[1] * coords_Ijk[1])
-          Sxy = sum(coords_Ijk[0] * coords_Ijk[1])
             
           if Sn > 0:
             # calculate centroid coordinates
@@ -911,33 +914,54 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             CyArray.InsertNextValue((Cy * PixelHeightMm))
             
           # calculate second moment of area along horizontal and vertical axes
-          Myy = Sxx - (Sx * Sx / Sn) + Sn / 12
-          Mxx = Syy - (Sy * Sy / Sn) + Sn / 12
-          Mxy = Sxy - (Sx * Sy / Sn)
-          Jxy = Mxx + Mxy
-          
-          # determine how far the minor axis is from the horizontal 
-          if Mxy == 0:
+          Ix = 0
+          for  i in range(Sn):
+            Ix = Ix + 1/12 + (Cy - coords_Ijk[1][i])**2
+            
+          Iy = 0
+          for  i in range(Sn):
+            Iy = Iy + 1/12 + (Cx - coords_Ijk[0][i])**2
+
+          # determine how far the major principal axis is from the horizontal 
+          Ixy = 0
+          for i in range(Sn):
+            Ixy = Ixy + (Cx - coords_Ijk[0][i]) * (Cy - coords_Ijk[1][i])
+
+          if Ixy == 0:
             Theta = 0
           else:
-            Theta = np.arctan((Mxx - Myy + np.sqrt((Mxx - Myy) * (Mxx - Myy) + 4 * Mxy * Mxy)) / (2 * Mxy)) * 180 / np.pi
-          rot2 = Theta * np.pi /180
-          
+            Theta = np.arctan((Ix - Iy + np.sqrt((Ix - Iy) * (Ix - Iy) + 4 * Ixy * Ixy)) / (2 * Ixy))
+                     
+          #major axis
+          Imax = 0
+          Rmax = 0
+          for i in range(Sn): 
+            rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
+            Imax = [Imax]+ (rad + 1/12)
+            Rmax = max(Rmax,np.sqrt(rad))
+          Zmax = Imax/Rmax
+            
+          # minor axis
+          Imin = 0
+          Rmin = 0
+          for i in range(Sn):
+            rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
+            Imin = [Imin]+ (rad + 1/12)
+            Rmin = max(Rmin,np.sqrt(rad))
+          Zmin = Imin/Rmin
+            
+          Jz = Imin+Imax
+            
           if segmentID == segmentNode:
           # add values to calculations                       
-            ThetaArray.InsertNextValue((rot2))
-          
-          # determine second moment of area around the principal axes and polar moment
-          Imin = (Mxx + Myy) / 2 + np.sqrt(((Mxx - Myy) / 2)**2 + Mxy * Mxy)
-          Imax = (Mxx + Myy) / 2 - np.sqrt(((Mxx - Myy) / 2)**2 + Mxy * Mxy)
-          # determine polar moment of area around the principal axes
-          Jz = Imin + Imax
-          
-          if segmentID == segmentNode:
-          # add values to calculations          
-            ImaxArray.InsertNextValue((Imax * unitOfPixelMm4))
-            IminArray.InsertNextValue((Imin * unitOfPixelMm4))
-            JzArray.InsertNextValue((Jz * unitOfPixelMm4))
+            ThetaArray.InsertNextValue(Theta)       
+            ImaxArray.InsertNextValue(Imax * unitOfPixelMm4)
+            IminArray.InsertNextValue(Imin * unitOfPixelMm4)
+            JzArray.InsertNextValue(Jz * unitOfPixelMm4)
+            RmaxArray.InsertNextValue(Rmax * PixelWidthMm)
+            RminArray.InsertNextValue(Rmin * PixelWidthMm)
+            ZmaxArray.InsertNextValue(Zmax * unitOfPixelMm4 / PixelWidthMm)
+            ZminArray.InsertNextValue(Zmin * unitOfPixelMm4 / PixelWidthMm)
             
             # do material normalization          
             if SummerscheckBox == True:
@@ -949,97 +973,57 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               ImaxArray_Doube.InsertNextValue((Imax**(1/4) / numSlices))
               IminArray_Doube.InsertNextValue((Imin**(1/4) / numSlices))
               JzArray_Doube.InsertNextValue((Jz**(1/4) / numSlices))  
-          
-          # calculate section modulus
-          if RcheckBox == True or SMAcheckBox_1 == True:
-            # determine the max distance from each principal axis
-            Rmax = 0
-            Rmin = 0
-            for j in range(Sn):
-              Rmax = max(Rmax, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot2) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot2)))
-              Rmin = max(Rmin, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot2) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot2)))
-          
-            # section moduli around principal axes
-            Zmax = Imax * unitOfPixelMm4 / Rmax
-            Zmin = Imin * unitOfPixelMm4 / Rmin
-            
-            if segmentID == segmentNode:
-              # add values to calculations          
-              RmaxArray.InsertNextValue((Rmax))
-              RminArray.InsertNextValue((Rmin))
-              ZmaxArray.InsertNextValue((Zmax))
-              ZminArray.InsertNextValue((Zmin))
-              
-              # do size correction
-              if DoubecheckBox == True:
-                ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
-                ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
+              ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
+              ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
            
           # use custom neutral axis  
           if OrientationcheckBox == True: 
-            xCosTheta = 0
-            yCosTheta = 0 
-            xSinTheta = 0
-            ySinTheta = 0
-            sxss = 0
-            sys = 0
-            sxxs = 0
-            syys = 0
-            sxys = 0
-            
-            xCosTheta = coords_Ijk[0] * np.cos(angle)
-            yCosTheta = coords_Ijk[1] * np.cos(angle)
-            xSinTheta = coords_Ijk[0] * np.sin(angle)
-            ySinTheta = coords_Ijk[1] * np.sin(angle)
-            sxss = sum(xCosTheta + ySinTheta)
-            sys = sum(yCosTheta - xSinTheta)
-            sxxs = sum((xCosTheta + ySinTheta) * (xCosTheta + ySinTheta))
-            syys = sum((yCosTheta - xSinTheta) * (yCosTheta - xSinTheta))
-            sxys = sum((yCosTheta - xSinTheta) * (xCosTheta + ySinTheta))
-            pixelMoments = Sn * (np.cos(angle) * np.cos(angle) + np.sin(angle) * np.sin(angle)) / 12  
-          
-            Ila = sxxs - (sxss * sxss / Sn) + Sn/12        
-            Ina = syys - (sys * sys / Sn) + Sn/12
-            Jxy = Ina + Ila  
-          
-            # max distance from the user defined neutral axis and axis perpendicular to that 
             if RadButton == True:
-              rot3 = angle 
+              Theta = angle 
             if DegButton == True:
-              rot3 = angle * np.pi/180  
-            maxRadna = 0
-            maxRadla = 0
-            for j in range(Sn):
-              maxRadna = max(maxRadna, abs((coords_Ijk[1][j]-Cy)*PixelHeightMm*np.cos(rot3) - (coords_Ijk[0][j]-Cx)*PixelWidthMm*np.sin(rot3)))
-              maxRadla = max(maxRadla, abs((coords_Ijk[0][j]-Cx)*PixelWidthMm*np.cos(rot3) + (coords_Ijk[1][j]-Cy)*PixelHeightMm*np.sin(rot3)))
-          
-            # section moduli around horizontal and vertical axes
-            Zna = Ina * unitOfPixelMm4 / maxRadna
-            Zla = Ila * unitOfPixelMm4 / maxRadla
+              Theta = angle * np.pi/180  
+
+            #neutral axis
+            Ina = 0
+            Rna = 0
+            for i in range(Sn): 
+              rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
+              Ina = [Ina] +(rad + 1/12)
+              Rna = max(Rna,np.sqrt(rad))
+            Zna = Ina/Rna
+            
+            #loading axis
+            Ila = 0
+            Rla = 0
+            for i in range(Sn):
+              rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
+              Ila = [Ila]+ (rad + 1/12)
+              Rla = max(Rla,np.sqrt(rad))
+            Zla = Ila/Rla
+            
+            Jna = Ina+Ila
 
             if segmentID == segmentNode:
-              # add values to orientation calculations          
-              RnaArray.InsertNextValue((maxRadna))
-              RlaArray.InsertNextValue((maxRadla))
-              IlaArray.InsertNextValue((Ila * unitOfPixelMm4))
-              InaArray.InsertNextValue((Ina * unitOfPixelMm4))
-              JxyArray.InsertNextValue((Jxy * unitOfPixelMm4))        
-              ZnaArray.InsertNextValue((Zna))
-              ZlaArray.InsertNextValue((Zla))
-            
+              # add values to orientation calculations 
+              IlaArray.InsertNextValue(Ila * unitOfPixelMm4)
+              InaArray.InsertNextValue(Ina * unitOfPixelMm4)
+              JxyArray.InsertNextValue(Jna * unitOfPixelMm4)        
+              ZnaArray.InsertNextValue(Zna * unitOfPixelMm4/PixelWidthMm)
+              ZlaArray.InsertNextValue(Zla * unitOfPixelMm4/PixelWidthMm)
+              RnaArray.InsertNextValue(Rna * PixelWidthMm)
+              RlaArray.InsertNextValue(Rla * PixelWidthMm)
+
               # do Doube size correction
               if DoubecheckBox == True:
-                InaArray_Doube.InsertNextValue((Ina**(1/4) / numSlices))
-                IlaArray_Doube.InsertNextValue((Ila**(1/4) / numSlices))
-                JxyArray_Doube.InsertNextValue((Jxy**(1/4) / numSlices))
-                ZnaArray_Doube.InsertNextValue((Zna**(1/3) / numSlices))
-                ZlaArray_Doube.InsertNextValue((Zla**(1/3) / numSlices))
+                InaArray_Doube.InsertNextValue(Ina**(1/4) / numSlices)
+                IlaArray_Doube.InsertNextValue(Ila**(1/4) / numSlices)
+                JxyArray_Doube.InsertNextValue(Jna**(1/4) / numSlices)
+                ZnaArray_Doube.InsertNextValue(Zna**(1/3) / numSlices)
+                ZlaArray_Doube.InsertNextValue(Zla**(1/3) / numSlices)
               
               if SummerscheckBox == True:
                 InaArray_Summers.InsertNextValue((Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
                 IlaArray_Summers.InsertNextValue((Ila*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
-            
-                     
     
       if CompactnesscheckBox == True:
        for s in range(TotalAreaArray.GetNumberOfTuples()):
@@ -1258,7 +1242,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
     finally:
       # Remove temporary volume node
-      slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
+      #slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
@@ -1346,7 +1330,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
 
     logic = SegmentGeometryLogic()
-    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True,
+    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "A (Green)", 1, tableNode, plotChartNode, True, True, True, True,
     True, True, True, True, True, True,True, 0, True, True, True, True, True, True,segmentationNode, segmentId, True, True)
     self.assertEqual(tableNode.GetNumberOfColumns(), 39)
 

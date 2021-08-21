@@ -73,7 +73,7 @@ Calculating total cross-sectional area and global compactness (CSAd divided byTC
 10. Make sure there are no empty areas inside of the solid segment. If there are, manually fill them in with the Paint tool.
 11. Click Apply.
 
-**Note** Steps 5-10 are optional, but I have found that filling the hollow segment with Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, which would increase the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
+**Note:** Steps 5-10 are optional, but I have found that filling the hollow segment with Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, which would increase the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
 
 ### Compute Unitless Variables
 Two methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
