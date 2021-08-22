@@ -100,7 +100,7 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Imin: Second moment of area around the minor principal axis.
 
-- Theta: Angle (radians) between the minor principal axis and the horizontal axis in the clockwise direction.
+- Theta: Angle (radians) between the minor principal axis and the horizontal axis.
 
 - J: Polar moment of area using the principal axes. Calculated as Imin + Imax.
 

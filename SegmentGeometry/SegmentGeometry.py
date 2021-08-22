@@ -272,7 +272,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
     self.ui.TotalAreacheckBox.toolTip = "Compute total cross-sectional area. Needs a separate solid segment" 
     self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment"
-
+    self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
 
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
@@ -459,7 +459,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
       self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.ResampleVolumecheckBox.checked, self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
-                     self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked,
+                     self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
                      self.ui.MODcheckBox_2.checked, self.ui.PolarcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
@@ -488,7 +488,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
   """
 
 
-  def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox,
   TotalAreacheckBox, CompactnesscheckBox, areaSegementationNode, areaSegmentID, DoubecheckBox, SummerscheckBox):
     """
@@ -606,6 +606,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
       CompactnessArray = vtk.vtkFloatArray()
       CompactnessArray.SetName("Compactness")
+      
+      FeretArray = vtk.vtkFloatArray()
+      FeretArray.SetName("Feret Diameter (mm)")
       
       #create arrays for unitless metrics with Doube method
       if DoubecheckBox == True:
@@ -880,22 +883,28 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))  
             if DoubecheckBox == True:
               TotalAreaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
+           
             
            
           #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
           
-          # for calculating a convex hull area and perimeter
-          #if segmentID == segmentNode:
-          #  if TotalAreacheckBox == True:
-          #    from scipy.spatial.qhull import ConvexHull
-          #    from scipy.spatial.distance import euclidean
-          #    points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
-          #    hull = ConvexHull(points)
-          #    print(hull.area)
-          #    print(hull.volume) 
-              
+          #for calculating a convex hull area and perimeter
+          if segmentID == segmentNode:
+            from scipy.spatial.qhull import ConvexHull
+            from scipy.spatial.distance import euclidean
+            points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
+            hull = ConvexHull(points)
+            Fdiam = 0
+            for i in hull.vertices:
+              pt1 = points[i]
+              for j in hull.vertices:
+                pt2 = points[j]
+                Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2))
+            FeretArray.InsertNextValue(Fdiam * PixelWidthMm)
+            if (numSlices*PixelDepthMm)/(Fdiam * PixelWidthMm) < 8:
+              eulerflag = 1
             
           # set up variables for calculations
           Sn = np.count_nonzero(slicetemp)
@@ -1028,6 +1037,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if CompactnesscheckBox == True:
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
+      
+      if eulerflag == 1:
+        #slicer.util.confirmOkCancelDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
+       print("Warning! Euler's beam theory may not apply")
         
       # adds table column for various arrays
       table.AddColumn(SegmentNameArray)
@@ -1044,6 +1057,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(LengthArray)
         tableNode.SetColumnUnitLabel(LengthArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(LengthArray.GetName(), "Segment Length")  
+      
+      if FeretcheckBox == True:
+        tableNode.AddColumn(FeretArray)
+        tableNode.SetColumnUnitLabel(FeretArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(FeretArray.GetName(), "Maximum feret diameter")    
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
@@ -1239,7 +1257,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           # Add this series to the plot chart node created above.
           plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode2.GetID())
        
-      
     finally:
       # Remove temporary volume node
       #slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
@@ -1330,9 +1347,9 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
 
     logic = SegmentGeometryLogic()
-    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "A (Green)", 1, tableNode, plotChartNode, True, True, True, True,
+    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
     True, True, True, True, True, True,True, 0, True, True, True, True, True, True,segmentationNode, segmentId, True, True)
-    self.assertEqual(tableNode.GetNumberOfColumns(), 39)
+    self.assertEqual(tableNode.GetNumberOfColumns(), 40)
 
     import math
     # Compute CSA error
