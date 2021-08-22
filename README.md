@@ -85,8 +85,12 @@ To use either normalization method, enable normalization check boxes. If either 
 # Output Details
 
 - Segment: Segment name.
+
 - Percent: Percent of segment length.
+
 - Length: Length of segment along the defined segmentation length.
+
+- Feret Diameter: Maximum feret diameter.
 
 - Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
 
