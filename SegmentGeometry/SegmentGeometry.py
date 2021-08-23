@@ -250,7 +250,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
     self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis"
     self.ui.RcheckBox.toolTip = "Compute the max distances from the principal axes"
-    self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2012)"
+    self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2009)"
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
     self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
 
