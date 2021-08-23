@@ -674,68 +674,6 @@
         </layout>
        </widget>
       </item>
-      <item row="12" column="0">
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_2" native="true">
-        <property name="title" stdset="0">
-         <string>Total cross-sectional area and global compactness:</string>
-        </property>
-        <property name="collapsed" stdset="0">
-         <bool>false</bool>
-        </property>
-        <layout class="QFormLayout" name="formLayout_7">
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="TotalAreacheckBox">
-           <property name="text">
-            <string>Total cross-sectional area</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="CompactnesscheckBox">
-           <property name="text">
-            <string>Global compactness</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Select solid segment:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="segmentationNodeSelectorVisible" stdset="0">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item row="14" column="0">
        <widget class="Line" name="line_3">
         <property name="orientation">
@@ -769,6 +707,35 @@
            </property>
            <property name="checked">
             <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="CompactnesscheckBox">
+           <property name="text">
+            <string>CSA compactness</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="horizontalLayout">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="segmentationNodeSelectorVisible" stdset="0">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
