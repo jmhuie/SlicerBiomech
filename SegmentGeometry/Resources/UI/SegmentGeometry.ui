@@ -477,16 +477,6 @@
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QCheckBox" name="PolarcheckBox_1">
-              <property name="text">
-               <string>Polar moment of inertia</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
              <widget class="QCheckBox" name="MODcheckBox_1">
               <property name="text">
                <string>Section modulus</string>
@@ -496,7 +486,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
+            <item row="2" column="1">
              <widget class="QCheckBox" name="RcheckBox">
               <property name="text">
                <string>Chord Length</string>
@@ -630,19 +620,6 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QCheckBox" name="PolarcheckBox_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Polar moment of inertia</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
              <widget class="QCheckBox" name="MODcheckBox_2">
               <property name="enabled">
                <bool>true</bool>
@@ -655,7 +632,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="0" column="2">
              <widget class="QCheckBox" name="RcheckBox_2">
               <property name="enabled">
                <bool>true</bool>
@@ -707,35 +684,6 @@
            </property>
            <property name="checked">
             <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="CompactnesscheckBox">
-           <property name="text">
-            <string>CSA compactness</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="horizontalLayout">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="segmentationNodeSelectorVisible" stdset="0">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -855,22 +803,6 @@
    <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>regionSegmentSelector</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>144</x>
-     <y>351</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>260</x>
-     <y>71</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>SegmentGeometry</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>areaSegmentSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">

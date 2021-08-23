@@ -83,9 +83,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.CenterSegButton.connect("clicked(bool)", self.onCenterSeg)
     self.ui.BoundingBoxButton.connect("clicked(bool)", self.onBoundingBox)
-    #self.ui.TotalAreacheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
-    self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
-    self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     
 
 
@@ -164,9 +161,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
     self.ui.axisSelectorBox.blockSignals(wasBlocked)
 
-    wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
-    self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None:
@@ -224,8 +218,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.SMAcheckBox_2.enabled = True
       self.ui.MODcheckBox_2.toolTip = "Compute section modulus around the neutral and loading axes"
       self.ui.MODcheckBox_2.enabled = True
-      self.ui.PolarcheckBox_2.toolTip = "Compute polar moment of inertia around the neutral and loading axes"
-      self.ui.PolarcheckBox_2.enabled = True
       self.ui.RcheckBox_2.toolTip = "Compute the max distances from the neutral and loading axes"
       self.ui.RcheckBox_2.enabled = True
       self.ui.DegradioButton.enabled = True
@@ -241,23 +233,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.SMAcheckBox_2.enabled = False
       self.ui.MODcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.MODcheckBox_2.enabled = False
-      self.ui.PolarcheckBox_2.toolTip = "Select option to use neutral axis"
-      self.ui.PolarcheckBox_2.enabled = False
       self.ui.RcheckBox_2.toolTip = "Select option to use neutral axis"
       self.ui.RcheckBox_2.enabled = False
       self.ui.DegradioButton.enabled = False      
       self.ui.DegradioButton.toolTip = "Select option to use neutral axis"
       self.ui.RadradioButton.enabled = False
       self.ui.RadradioButton.toolTip = "Select option to use neutral axis"
-      
-    #if self.ui.TotalAreacheckBox.checked == True or self.ui.CompactnesscheckBox.checked == True:
-    if self.ui.CompactnesscheckBox.checked == True:
-      self.ui.areaSegmentSelector.toolTip = "Select solid segment for total-cross sectional area or global compactness computation"
-      self.ui.areaSegmentSelector.enabled = True
-    else: 
-      self.ui.areaSegmentSelector.toolTip = "Select option to compute total cross-sectional area or global compactness" 
-      self.ui.areaSegmentSelector.enabled = False
-      
+     
     # other tooltips
     self.ui.segmentationSelector.toolTip = "Select input segmentation node"
     self.ui.axisSelectorBox.toolTip = "Select slice view to compute on. Should be perpendicular to the long axis"
@@ -265,14 +247,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.CSAcheckBox.toolTip = "Compute cross-sectional area"
     self.ui.SMAcheckBox_1.toolTip = "Compute second moment of area around the principal axes"
     self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
-    self.ui.PolarcheckBox_1.toolTip = "Compute polar moment of inertia around the principal axes"
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
     self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis"
     self.ui.RcheckBox.toolTip = "Compute the max distances from the principal axes"
     self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2012)"
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
-    #self.ui.TotalAreacheckBox.toolTip = "Compute total cross-sectional area. Needs a separate solid segment" 
-    self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment"
     self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
 
 
@@ -293,8 +272,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetNodeReferenceID("ResultsChart", self.ui.chartSelector.currentNodeID)
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
-    #self._parameterNode.SetParameter("TotalArea", str(self.ui.TotalAreacheckBox.checked))
-    self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
   
   
   def onCenterSeg(self):
@@ -462,10 +439,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.ResampleVolumecheckBox.checked, self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
-                     self.ui.PolarcheckBox_1.checked, self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
-                     self.ui.MODcheckBox_2.checked, self.ui.PolarcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
+                     self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
+                     self.ui.MODcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
                      self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
-                     self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked)
 
     except Exception as e:
@@ -490,8 +466,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
 
   def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
-  MODcheckBox_1, PolarcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, PolarcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox,
-  CompactnesscheckBox, areaSegementationNode, areaSegmentID, DoubecheckBox, SummerscheckBox):
+  MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox):
     """
     Run the processing algorithm.
     """
@@ -566,9 +541,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       ThetaArray = vtk.vtkFloatArray()
       ThetaArray.SetName("Theta (rad)")
       
-      JzArray = vtk.vtkFloatArray()
-      JzArray.SetName("J (mm^4)")
-        
       ZmaxArray = vtk.vtkFloatArray()
       ZmaxArray.SetName("Zmax (mm^3)")
         
@@ -587,9 +559,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       IlaArray = vtk.vtkFloatArray()
       IlaArray.SetName("Ila (mm^4)")
       
-      JxyArray = vtk.vtkFloatArray()
-      JxyArray.SetName("Jna (mm^4)")
-              
       ZnaArray = vtk.vtkFloatArray()
       ZnaArray.SetName("Zna (mm^3)")
         
@@ -601,13 +570,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
       RlaArray = vtk.vtkFloatArray()
       RlaArray.SetName("Rla (mm)")
-      
-      TotalAreaArray = vtk.vtkFloatArray()
-      TotalAreaArray.SetName("TCSA (mm^2)")
-      
-      CompactnessArray = vtk.vtkFloatArray()
-      CompactnessArray.SetName("Compactness")
-      
+
       FeretArray = vtk.vtkFloatArray()
       FeretArray.SetName("Feret Diameter (mm)")
       
@@ -621,10 +584,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         IminArray_Doube = vtk.vtkFloatArray()
         IminArray_Doube.SetName("Imin (LenNorm)")
-      
-        JzArray_Doube = vtk.vtkFloatArray()
-        JzArray_Doube.SetName("J (LenNorm)")
-        
+
         ZmaxArray_Doube = vtk.vtkFloatArray()
         ZmaxArray_Doube.SetName("Zmax (LenNorm)")
         
@@ -636,19 +596,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         IlaArray_Doube = vtk.vtkFloatArray()
         IlaArray_Doube.SetName("Ila (LenNorm)")
-      
-        JxyArray_Doube = vtk.vtkFloatArray()
-        JxyArray_Doube.SetName("Jna (LenNorm)")   
         
         ZnaArray_Doube = vtk.vtkFloatArray()
         ZnaArray_Doube.SetName("Zna (LenNorm)")
         
         ZlaArray_Doube = vtk.vtkFloatArray()
         ZlaArray_Doube.SetName("Zla (LenNorm)")
-        
-        #TotalAreaArray_Doube = vtk.vtkFloatArray()
-        #TotalAreaArray_Doube.SetName("TCSA (LenNorm^2)")
-      
+
       if SummerscheckBox == True:
         ImaxArray_Summers = vtk.vtkFloatArray()
         ImaxArray_Summers.SetName("Imax (MatNorm)")
@@ -656,19 +610,27 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         IminArray_Summers = vtk.vtkFloatArray()
         IminArray_Summers.SetName("Imin (MatNorm)")
         
+        ZminArray_Summers = vtk.vtkFloatArray()       
+        ZminArray_Summers.SetName("Zmin (MatNorm)")
+        
+        ZmaxArray_Summers = vtk.vtkFloatArray()       
+        ZmaxArray_Summers.SetName("Zmax (MatNorm)")
+        
         InaArray_Summers = vtk.vtkFloatArray()
         InaArray_Summers.SetName("Ina (MatNorm)")
         
         IlaArray_Summers = vtk.vtkFloatArray()
-        IlaArray_Summers.SetName("Ila (MatNorm)")        
+        IlaArray_Summers.SetName("Ila (MatNorm)") 
+        
+        ZnaArray_Summers = vtk.vtkFloatArray()       
+        ZnaArray_Summers.SetName("Zna (MatNorm)")
+        
+        ZlaArray_Summers = vtk.vtkFloatArray()       
+        ZlaArray_Summers.SetName("Zla (MatNorm)")
 
       
       # leave in the capabilities to go back to multiple segments
-      #if TotalAreacheckBox == True or CompactnesscheckBox == True:
-      if CompactnesscheckBox == True:
-        segmentindex = [segmentNode, areaSegmentID]
-      else:
-        segmentindex = [segmentNode]
+      segmentindex = [segmentNode]
       for segmentID in segmentindex:
         
         segment = segmentationNode.GetSegmentation().GetSegment(segmentID)
@@ -880,12 +842,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             # do size correction
             if DoubecheckBox == True:
               areaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
-    
-          if segmentID == areaSegmentID:
-            TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))  
-            #if DoubecheckBox == True:
-            #  TotalAreaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
-           
             
            
           #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
@@ -961,14 +917,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Rmin = max(Rmin,np.sqrt(rad))
           Zmin = Imin/Rmin
             
-          Jz = Imin+Imax
             
           if segmentID == segmentNode:
           # add values to calculations                       
             ThetaArray.InsertNextValue(Theta)       
             ImaxArray.InsertNextValue(Imax * unitOfPixelMm4)
             IminArray.InsertNextValue(Imin * unitOfPixelMm4)
-            JzArray.InsertNextValue(Jz * unitOfPixelMm4)
             RmaxArray.InsertNextValue(Rmax * PixelWidthMm)
             RminArray.InsertNextValue(Rmin * PixelWidthMm)
             ZmaxArray.InsertNextValue(Zmax * unitOfPixelMm4 / PixelWidthMm)
@@ -976,16 +930,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             
             # do material normalization          
             if SummerscheckBox == True:
-              ImaxArray_Summers.InsertNextValue((Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
-              IminArray_Summers.InsertNextValue((Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4)))
+              ImaxArray_Summers.InsertNextValue(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+              IminArray_Summers.InsertNextValue(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+              ZmaxArray_Summers.InsertNextValue(Zmax/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+              ZminArray_Summers.InsertNextValue(Zmin/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
               
             # do size correction
             if DoubecheckBox == True:
-              ImaxArray_Doube.InsertNextValue((Imax**(1/4) / numSlices))
-              IminArray_Doube.InsertNextValue((Imin**(1/4) / numSlices))
-              JzArray_Doube.InsertNextValue((Jz**(1/4) / numSlices))  
-              ZmaxArray_Doube.InsertNextValue((Zmax**(1/3) / numSlices))
-              ZminArray_Doube.InsertNextValue((Zmin**(1/3) / numSlices))
+              ImaxArray_Doube.InsertNextValue(Imax**(1/4) / numSlices)
+              IminArray_Doube.InsertNextValue(Imin**(1/4) / numSlices)
+              ZmaxArray_Doube.InsertNextValue(Zmax**(1/3) / numSlices)
+              ZminArray_Doube.InsertNextValue(Zmin**(1/3) / numSlices)
            
           # use custom neutral axis  
           if OrientationcheckBox == True: 
@@ -1012,13 +967,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               Rla = max(Rla,np.sqrt(rad))
             Zla = Ila/Rla
             
-            Jna = Ina+Ila
 
             if segmentID == segmentNode:
               # add values to orientation calculations 
               IlaArray.InsertNextValue(Ila * unitOfPixelMm4)
               InaArray.InsertNextValue(Ina * unitOfPixelMm4)
-              JxyArray.InsertNextValue(Jna * unitOfPixelMm4)        
               ZnaArray.InsertNextValue(Zna * unitOfPixelMm4/PixelWidthMm)
               ZlaArray.InsertNextValue(Zla * unitOfPixelMm4/PixelWidthMm)
               RnaArray.InsertNextValue(Rna * PixelWidthMm)
@@ -1028,17 +981,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               if DoubecheckBox == True:
                 InaArray_Doube.InsertNextValue(Ina**(1/4) / numSlices)
                 IlaArray_Doube.InsertNextValue(Ila**(1/4) / numSlices)
-                JxyArray_Doube.InsertNextValue(Jna**(1/4) / numSlices)
                 ZnaArray_Doube.InsertNextValue(Zna**(1/3) / numSlices)
                 ZlaArray_Doube.InsertNextValue(Zla**(1/3) / numSlices)
               
               if SummerscheckBox == True:
-                InaArray_Summers.InsertNextValue((Ina*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
-                IlaArray_Summers.InsertNextValue((Ila*unitOfPixelMm4/((np.pi * (np.sqrt(CSA*areaOfPixelMm2/np.pi))**4) / 4)))
-    
-      if CompactnesscheckBox == True:
-       for s in range(TotalAreaArray.GetNumberOfTuples()):
-         CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
+                InaArray_Summers.InsertNextValue(Ina/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+                IlaArray_Summers.InsertNextValue(Ila/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+                ZnaArray_Summers.InsertNextValue(Zna/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+                ZlaArray_Summers.InsertNextValue(Zla/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+
       
       if eulerflag == 1:
         #slicer.util.confirmOkCancelDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
@@ -1074,15 +1025,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm2")  # TODO: use length unit
         tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
         
-      #if TotalAreacheckBox == True:    
-      #  tableNode.AddColumn(TotalAreaArray)
-      #  tableNode.SetColumnUnitLabel(TotalAreaArray.GetName(), "mm2")  # TODO: use length unit
-      #  tableNode.SetColumnDescription(TotalAreaArray.GetName(), "Total cross-sectional area")  
-        
-      if CompactnesscheckBox == True:    
-        tableNode.AddColumn(CompactnessArray)
-        tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness calculated as CSA/TCSA")    
-        
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaArray)
         tableNode.SetColumnUnitLabel(ThetaArray.GetName(), "rad")  # TODO: use length unit
@@ -1096,11 +1038,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ImaxArray)
         tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
-                 
-      if PolarcheckBox_1 == True:     
-        tableNode.AddColumn(JzArray)
-        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia around the principal axes")
 
       if MODcheckBox_1 == True:
         tableNode.AddColumn(ZminArray)
@@ -1129,11 +1066,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IlaArray.GetName(), "mm4")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray.GetName(), "Second moment of area around the loading axis")
               
-      if OrientationcheckBox == True and PolarcheckBox_2 == True:  
-        tableNode.AddColumn(JxyArray)
-        tableNode.SetColumnUnitLabel(JxyArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray.GetName(), "Polar moment of inertia around the neutral and loading axes")
-        
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
         tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm3")  # TODO: use length unit
@@ -1157,11 +1089,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(areaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(areaArray_Doube.GetName(), "CSA^(1/2)/Length")
         
-      #if DoubecheckBox == True and TotalAreacheckBox == True:
-      #  tableNode.AddColumn(TotalAreaArray_Doube)
-      #  tableNode.SetColumnUnitLabel(TotalAreaArray_Doube.GetName(), "none")  # TODO: use length unit
-      #  tableNode.SetColumnDescription(TotalAreaArray_Doube.GetName(), "TCSA^(1/2)/Length")  
-       
       if DoubecheckBox == True and SMAcheckBox_1 == True:
         tableNode.AddColumn(IminArray_Doube)
         tableNode.SetColumnUnitLabel(IminArray_Doube.GetName(), "none")  # TODO: use length unit
@@ -1171,11 +1098,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ImaxArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ImaxArray_Doube.GetName(), "Imax^(1/4)/Length")
 
-      if DoubecheckBox == True and PolarcheckBox_1 == True:
-        tableNode.AddColumn(JzArray_Doube)
-        tableNode.SetColumnUnitLabel(JzArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(JzArray_Doube.GetName(), "J^(1/4)/Length")
-        
       if DoubecheckBox == True and MODcheckBox_1 == True:
         tableNode.AddColumn(ZminArray_Doube)
         tableNode.SetColumnUnitLabel(ZminArray_Doube.GetName(), "none")  # TODO: use length unit
@@ -1193,18 +1115,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(IlaArray_Doube)
         tableNode.SetColumnUnitLabel(IlaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray_Doube.GetName(), "Ila^(1/4)/Length")
-        
-      if DoubecheckBox == True and PolarcheckBox_2 == True and OrientationcheckBox == True:
-        tableNode.AddColumn(JxyArray_Doube)
-        tableNode.SetColumnUnitLabel(JxyArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(JxyArray_Doube.GetName(), "Jna^(1/4)/Length")
-        
+
       if DoubecheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(ZlaArray_Doube)
         tableNode.SetColumnUnitLabel(ZlaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZlaArray_Doube.GetName(), "Zla^(1/3)/Length")  
         
-
         tableNode.AddColumn(ZnaArray_Doube)
         tableNode.SetColumnUnitLabel(ZnaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray_Doube.GetName(), "Zna^(1/3)/Length")
@@ -1217,6 +1133,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ImaxArray_Summers)
         tableNode.SetColumnUnitLabel(ImaxArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ImaxArray_Summers.GetName(), "Imax divided by the second moment of area of a solid circle with the same cross-sectional area")        
+
+      if SummerscheckBox == True and MODcheckBox_1 == True:
+        tableNode.AddColumn(ZminArray_Summers)
+        tableNode.SetColumnUnitLabel(ZminArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZminArray_Summers.GetName(), "Zmin divided by the section modulus of a solid circle with the same cross-sectional area")
+        
+        tableNode.AddColumn(ZmaxArray_Summers)
+        tableNode.SetColumnUnitLabel(ZmaxArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZmaxArray_Summers.GetName(), "Zmax divided by the section modulus of a solid circle with the same cross-sectional area")    
         
       if SummerscheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Summers)
@@ -1226,6 +1151,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(IlaArray_Summers)
         tableNode.SetColumnUnitLabel(IlaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray_Summers.GetName(), "Ila divided by the second moment of area of a solid circle with the same cross-sectional area") 
+        
+      if SummerscheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
+        tableNode.AddColumn(ZnaArray_Summers)
+        tableNode.SetColumnUnitLabel(ZnaArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZnaArray_Summers.GetName(), "Zna divided by the section modulus of a solid circle with the same cross-sectional area")
+        
+        tableNode.AddColumn(ZlaArray_Summers)
+        tableNode.SetColumnUnitLabel(ZlaArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZlaArray_Summers.GetName(), "Zla divided by the section modulus of a solid circle with the same cross-sectional area")         
       
       # Make a plot series node for this column.
       segment = segmentationNode.GetSegmentation().GetSegment(segmentNode)
@@ -1261,7 +1195,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        
     finally:
       # Remove temporary volume node
-      #slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
+      slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
@@ -1350,8 +1284,9 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
 
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
-    True, True, True, True, True, True,True, 0, True, True, True, True, True,segmentationNode, segmentId, True, True)
-    self.assertEqual(tableNode.GetNumberOfColumns(), 38)
+    True, True, True, True, True, True, 0, True, True, True, True, True)
+    #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
+
 
     import math
     # Compute CSA error
