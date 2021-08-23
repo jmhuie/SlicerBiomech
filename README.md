@@ -59,22 +59,6 @@ If you selected "Mean Pixel Brightness" and transformed your segment, you must c
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive angle that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
 
-### Compute Total CSA or Global Compactness
-Calculating total cross-sectional area and global compactness (CSAd divided byTCSA) is not automated in Segment Geometry. To calculate total cross-sectional area or global compactness, a separate segment that contains the full or "solid" structure needs to be provided. The recommend workflow is to use the Surface Wrap Solidify tool in the Segment Editor module. 
-1. In the Segment Editor module, select your main segment used for Segment Geometry that needs to be filled in. We'll call this the "hollow" segment.
-2. Click the Wrap Solidify tool.
-3. Under "Region" select "Outer Surface", under "Create Shell" select nothing, and under "Output" select "New Segment"
-4. Click Apply
-5. Select the newly created segment and use the Logical Operator tool to substract the hollow segment from the solid one.
-6. Use the Islands tool to remove small islands less then 5-10 voxels.
-7. Use the Logical Operator tool to add the hollow segment back to the solid one.
-8. Turn on the segment 3D view and inspect the two segments. You should see your holllow segment over the solid one. **Note:** you may need to toggle the hollow segment on and back off if it's not on top of the solid segment.
-9. Remove any small bits of the solid segment that are still visible. It's easiest to inspect the 3D, find the bit in the slice view, and remove it with the "Remove Selected Island" effect from the Islands tool.
-10. Make sure there are no empty areas inside of the solid segment. If there are, manually fill them in with the Paint tool.
-11. Click Apply.
-
-**Note:** Steps 5-10 are optional, but I have found that filling the hollow segment with Wrap Solidify also adds pads the exterior surface margin of solid segment with extra voxels. Assuming that the hollow segment already captured the "correct" exterior surface margin, then the solid segment would have an inflated TCSA and may not line up perfectly with the hollow segment if voxels were added to the ends, which would increase the length of the solid segment. Thus, steps 5-10 help remove those extra voxels.
-
 ### Compute Unitless Variables
 Two methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
 * First is a length normalization from Doube et al. (2012). With this method, cross-sectional area, second moment of area, polar moment of inertia, and section modulus are corrected based on the length of the segment. First the respective root of the variables are taken to make them linear, then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
@@ -96,17 +80,11 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - CSA: Cross-sectional area.
 
-- TCSA: Total cross-sectional area.
-
-- Compactness: Global compactness calculated as CSA/Total CSA.
-
 - Imax: Second moment of area around the major principal axis.
 
 - Imin: Second moment of area around the minor principal axis.
 
 - Theta: Angle (radians) between the minor principal axis and the horizontal axis.
-
-- J: Polar moment of area using the principal axes. Calculated as Imin + Imax.
 
 - Zmax: Section modulus around the major principal axis. 
 
@@ -119,8 +97,6 @@ To use either normalization method, enable normalization check boxes. If either 
 - Ina: Second moment of area around the neutral axis.
 
 - Ila: Second moment of area around the loading axis.
-
-- Jna: Polar moment of area around the neutral and loading axes. Calculated as Ina + Ifa.
 
 - Zna: Section modulus around the neutral axis.
 
