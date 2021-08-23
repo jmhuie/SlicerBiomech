@@ -21,7 +21,7 @@ To cite 3D Slicer as a general image analysis platform, please use:
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
 
 To cite the length normalization method, please use: 
-* Doube M, Yen SC, Kłosowski MM, Farke AA, Hutchinson JR, Shefelbine SJ. (2012) Whole‐bone scaling of the avian pelvic limb. Journal of Anatomy. 221(1):21-9. https://doi.org/10.1111/j.1469-7580.2012.01514.x
+* Doube M, Conroy AW, Christiansen P, Hutchinson JR, Shefelbine S. (2009) Three-dimensional geometric analysis of felid limb bone allometry. PloS one. 4(3):e4742. https://doi.org/10.1371/journal.pone.0004742
 
 To cite the material normalization method, please use: 
 * Summers AP, Ketcham RA, Rowe T. (2004) Structure and function of the horn shark (Heterodontus francisci) cranium through ontogeny: development of a hard prey specialist. Journal of Morphology. 260(1):1-2. https://doi.org/10.1002/jmor.10141
