@@ -57,7 +57,7 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if you need to re-run the analysis.
 
 ### Use Custom Neutral Axis
-If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive angle that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
+If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
 
 ### Compute Unitless Variables
 Two methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
@@ -80,19 +80,19 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - CSA: Cross-sectional area.
 
-- Imax: Second moment of area around the major principal axis.
-
 - Imin: Second moment of area around the minor principal axis.
 
-- Theta: Angle (radians) between the minor principal axis and the horizontal axis.
+- Imax: Second moment of area around the major principal axis.
 
-- Zmax: Section modulus around the major principal axis. 
+- Theta: Angle (radians) of how much the minor principal axis deviates from the horizontal axis in a clockwise direction.
 
 - Zmin: Section modulus around the minor principal axis.
 
-- Rmax: Distance to the furthest pixel from the major principal axis.
+- Zmax: Section modulus around the major principal axis. 
 
 - Rmin: Distance to the furthest pixel from the minor principal axis.
+
+- Rmax: Distance to the furthest pixel from the major principal axis.
 
 - Ina: Second moment of area around the neutral axis.
 

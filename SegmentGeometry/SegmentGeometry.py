@@ -248,7 +248,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SMAcheckBox_1.toolTip = "Compute second moment of area around the principal axes"
     self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
-    self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis"
+    self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis in a clockwise direction"
     self.ui.RcheckBox.toolTip = "Compute the max distances from the principal axes"
     self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2009)"
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
@@ -498,7 +498,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     segName = segment.GetName()
     plotChartNode.SetTitle(segName)
     plotChartNode.SetXAxisTitle("Percent of Length")
-    plotChartNode.SetYAxisTitle('Second Moment of Area (mm^4)')
+    plotChartNode.SetYAxisTitle('Segment Geometry of Area (mm^4)')
     
     
     # do calculations
@@ -920,7 +920,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             
           if segmentID == segmentNode:
           # add values to calculations                       
-            ThetaArray.InsertNextValue(Theta)       
+            ThetaArray.InsertNextValue(Theta + np.pi/2)       
             ImaxArray.InsertNextValue(Imax * unitOfPixelMm4)
             IminArray.InsertNextValue(Imin * unitOfPixelMm4)
             RmaxArray.InsertNextValue(Rmax * PixelWidthMm)
