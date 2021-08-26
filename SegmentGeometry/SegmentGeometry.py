@@ -83,6 +83,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.CenterSegButton.connect("clicked(bool)", self.onCenterSeg)
     self.ui.BoundingBoxButton.connect("clicked(bool)", self.onBoundingBox)
+    self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
+    self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     
 
 
@@ -161,6 +163,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
     self.ui.axisSelectorBox.blockSignals(wasBlocked)
 
+    wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
+    self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None:
@@ -239,7 +244,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.DegradioButton.toolTip = "Select option to use neutral axis"
       self.ui.RadradioButton.enabled = False
       self.ui.RadradioButton.toolTip = "Select option to use neutral axis"
-     
+    
+    if self.ui.CompactnesscheckBox.checked == True:
+      self.ui.areaSegmentSelector.toolTip = "Select solid segment to measure total area and compactness"
+      self.ui.areaSegmentSelector.enabled = True
+    else: 
+      self.ui.areaSegmentSelector.toolTip = "Select option to compute compactness" 
+      self.ui.areaSegmentSelector.enabled = False     
     # other tooltips
     self.ui.segmentationSelector.toolTip = "Select input segmentation node"
     self.ui.axisSelectorBox.toolTip = "Select slice view to compute on. Should be perpendicular to the long axis"
@@ -253,6 +264,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.DoubecheckBox.toolTip = "Normalize values by taking the respective roots needed to reduce them to a linear dimension and then divinding themy by segment length following Doube et al. (2009)"
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
     self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
+    self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment to measure TCSA"
 
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
@@ -272,6 +284,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetNodeReferenceID("ResultsChart", self.ui.chartSelector.currentNodeID)
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
+    self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
   
   
   def onCenterSeg(self):
@@ -442,7 +455,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
                      self.ui.MODcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
                      self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
-                     self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked)
+                     self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
+                     self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),)
 
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -466,7 +480,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
 
   def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
-  MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox):
+  MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
+  CompactnesscheckBox, areaSegementationNode, areaSegmentID):
     """
     Run the processing algorithm.
     """
@@ -577,6 +592,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       FeretArray = vtk.vtkFloatArray()
       FeretArray.SetName("Feret Diameter (mm)")
       
+      TotalAreaArray = vtk.vtkFloatArray()
+      TotalAreaArray.SetName("TCSA (mm^2)")
+            
+      CompactnessArray = vtk.vtkFloatArray()
+      CompactnessArray.SetName("Compactness")
+      
       #create arrays for unitless metrics with Doube method
       if DoubecheckBox == True:
         areaArray_Doube = vtk.vtkFloatArray()
@@ -633,9 +654,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       
       # leave in the capabilities to go back to multiple segments
-      segmentindex = [segmentNode]
+      if CompactnesscheckBox == True:
+        segmentindex = [segmentNode, areaSegmentID]
+      else:
+        segmentindex = [segmentNode]
       for segmentID in segmentindex:
-        
+              
         segment = segmentationNode.GetSegmentation().GetSegment(segmentID)
         segName = segment.GetName()
 
@@ -845,7 +869,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             # do size correction
             if DoubecheckBox == True:
               areaArray_Doube.InsertNextValue((np.sqrt(CSA) / numSlices))
-            
+              
+          if segmentID == areaSegmentID:
+            TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))    
            
           #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
           coords_Kji = np.where(slicetemp > 0)
@@ -1010,11 +1036,14 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IlaArray_Summers.InsertNextValue(Ila/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
                 ZnaArray_Summers.InsertNextValue(Zna/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
                 ZlaArray_Summers.InsertNextValue(Zla/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+      
+      if CompactnesscheckBox == True:
+       for s in range(TotalAreaArray.GetNumberOfTuples()):
+         CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
 
       
       if eulerflag == 1:
-        slicer.util.confirmOkCancelDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
-        #print("Warning! Euler's beam theory may not apply")
+        slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
         
       # adds table column for various arrays
       tableNode.AddColumn(SegmentNameArray)
@@ -1045,7 +1074,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(areaArray)
         tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm2")  # TODO: use length unit
         tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
-        
+
+      if CompactnesscheckBox == True:    
+        tableNode.AddColumn(CompactnessArray)
+        tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness calculated as CSA/TCSA")    
+                
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaMinArray)
         tableNode.SetColumnUnitLabel(ThetaMinArray.GetName(), "degrees")  # TODO: use length unit
@@ -1309,7 +1342,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
 
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
-    True, True, True, True, True, True, 0, True, True, True, True, True)
+    True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
 
 
