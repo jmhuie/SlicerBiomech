@@ -538,8 +538,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       IminArray = vtk.vtkFloatArray()
       IminArray.SetName("Imin (mm^4)")
                     
-      ThetaArray = vtk.vtkFloatArray()
-      ThetaArray.SetName("Theta (rad)")
+      ThetaMinArray = vtk.vtkFloatArray()
+      ThetaMinArray.SetName("Theta min (deg)")
+      
+      ThetaMaxArray = vtk.vtkFloatArray()
+      ThetaMaxArray.SetName("Theta max (deg)")
       
       ZmaxArray = vtk.vtkFloatArray()
       ZmaxArray.SetName("Zmax (mm^3)")
@@ -853,13 +856,18 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             from scipy.spatial.qhull import ConvexHull
             from scipy.spatial.distance import euclidean
             points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
-            hull = ConvexHull(points)
-            Fdiam = 0
-            for i in hull.vertices:
-              pt1 = points[i]
-              for j in hull.vertices:
-                pt2 = points[j]
-                Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2))
+            if len(points) == 1:
+              Fdiam = 1
+            if len(points) == 2:
+              Fdiam = 2
+            if len(points) >= 3:  
+              hull = ConvexHull(points)
+              Fdiam = 0
+              for i in hull.vertices:
+                pt1 = points[i]
+                for j in hull.vertices:
+                  pt2 = points[j]
+                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2))
             FeretArray.InsertNextValue(Fdiam * PixelWidthMm)
             if (numSlices*PixelDepthMm)/(Fdiam * PixelWidthMm) < 8:
               eulerflag = 1
@@ -906,7 +914,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
             Imax = [Imax]+ (rad + 1/12)
             Rmax = max(Rmax,np.sqrt(rad))
-          Zmax = Imax/Rmax
+          if Rmax == 0:
+            Zmax = Imax
+          else:    
+            Zmax = Imax/Rmax
             
           # minor axis
           Imin = 0
@@ -915,12 +926,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
             Imin = [Imin]+ (rad + 1/12)
             Rmin = max(Rmin,np.sqrt(rad))
-          Zmin = Imin/Rmin
-            
-            
+          if Rmin == 0:
+            Zmin = Imin
+          else:    
+            Zmin = Imin/Rmin 
+                       
           if segmentID == segmentNode:
           # add values to calculations                       
-            ThetaArray.InsertNextValue(Theta + np.pi/2)       
+            ThetaMinArray.InsertNextValue((Theta + np.pi/2)*180/np.pi )       
+            ThetaMaxArray.InsertNextValue((Theta*180/np.pi) + 180)       
             ImaxArray.InsertNextValue(Imax * unitOfPixelMm4)
             IminArray.InsertNextValue(Imin * unitOfPixelMm4)
             RmaxArray.InsertNextValue(Rmax * PixelWidthMm)
@@ -956,7 +970,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
               Ina = [Ina] +(rad + 1/12)
               Rna = max(Rna,np.sqrt(rad))
-            Zna = Ina/Rna
+            if Rna == 0:
+              Zna = Ina
+            else:  
+              Zna = Ina/Rna
+            
             
             #loading axis
             Ila = 0
@@ -965,7 +983,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
               Ila = [Ila]+ (rad + 1/12)
               Rla = max(Rla,np.sqrt(rad))
-            Zla = Ila/Rla
+            if Rla == 0:
+              Zla = Ila  
+            else:  
+              Zla = Ila/Rla
             
 
             if segmentID == segmentNode:
@@ -992,14 +1013,14 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       
       if eulerflag == 1:
-        #slicer.util.confirmOkCancelDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
-       print("Warning! Euler's beam theory may not apply")
+        slicer.util.confirmOkCancelDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
+        #print("Warning! Euler's beam theory may not apply")
         
       # adds table column for various arrays
-      table.AddColumn(SegmentNameArray)
+      tableNode.AddColumn(SegmentNameArray)
       tableNode.SetColumnDescription(SegmentNameArray.GetName(), "Segment name")  
       
-      table.AddColumn(sliceNumberArray)
+      tableNode.AddColumn(sliceNumberArray)
       tableNode.SetColumnDescription(sliceNumberArray.GetName(), "Corresponding slice index on the untransformed volume")
       
       tableNode.AddColumn(percentLengthArray)
@@ -1026,9 +1047,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
         
       if ThetacheckBox == True:    
-        tableNode.AddColumn(ThetaArray)
-        tableNode.SetColumnUnitLabel(ThetaArray.GetName(), "rad")  # TODO: use length unit
-        tableNode.SetColumnDescription(ThetaArray.GetName(), "Angle of the principal axis (radians)")  
+        tableNode.AddColumn(ThetaMinArray)
+        tableNode.SetColumnUnitLabel(ThetaMinArray.GetName(), "degrees")  # TODO: use length unit
+        tableNode.SetColumnDescription(ThetaMinArray.GetName(), "Angle of the minor principal axis")  
+        
+        tableNode.AddColumn(ThetaMaxArray)
+        tableNode.SetColumnUnitLabel(ThetaMaxArray.GetName(), "degrees")  # TODO: use length unit
+        tableNode.SetColumnDescription(ThetaMaxArray.GetName(), "Angle of the major principal axis")  
       
       if SMAcheckBox_1 == True:  
         tableNode.AddColumn(IminArray)

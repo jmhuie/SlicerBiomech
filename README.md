@@ -84,7 +84,9 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Imax: Second moment of area around the major principal axis.
 
-- Theta: Angle (radians) of how much the minor principal axis deviates from the horizontal axis in a clockwise direction.
+- Theta min: Angle (degrees) of how much the minor principal axis deviates from the horizontal axis in a clockwise direction.
+
+- Theta max: Angle (degrees) of how much the major principal axis deviates from the horizontal axis in a clockwise direction.
 
 - Zmin: Section modulus around the minor principal axis.
 
