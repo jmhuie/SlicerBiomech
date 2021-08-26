@@ -2,8 +2,8 @@
 
 This is the repository for Segment Geometry, an extension for 3D Slicer.
 
-The official method for installing Segment Geometry is through 3D Slicer's built-in Extension Manager. To install Segment Geometry, first install the most recent stable release of [3D Slicer] (https://download.slicer.org/) (r29738 or later). 
-Then open 3D Slicer open the Extensions Manager module and search for "Segment Geometry" and install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, the Segment Geometry module should be fully functional and under the Quantification 
+The official method for installing Segment Geometry is through 3D Slicer's built-in Extension Manager. To install Segment Geometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
+In 3D Slicer, open the Extensions Manager module and search for "Segment Geometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, Segment Geometry should be fully functional and located in the Quantification 
 module category.
 
 
