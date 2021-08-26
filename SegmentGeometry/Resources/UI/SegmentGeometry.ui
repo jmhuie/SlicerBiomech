@@ -137,20 +137,10 @@
          <property name="verticalSpacing">
           <number>0</number>
          </property>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="ResampleVolumecheckBox">
-           <property name="text">
-            <string>Resample Volume</string>
-           </property>
-           <property name="unchecked" stdset="0">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="1">
           <widget class="QPushButton" name="CenterSegButton">
            <property name="text">
-            <string>Snap to Center</string>
+            <string>Snap Segment to Center</string>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -175,7 +165,7 @@
          <item row="2" column="2">
           <widget class="QPushButton" name="BoundingBoxButton">
            <property name="text">
-            <string>Toggle Bounding Box</string>
+            <string>Show/Hide Bounding Box</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -203,7 +193,7 @@
       <item row="5" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Select axis:</string>
+         <string>Long Axis:</string>
         </property>
        </widget>
       </item>
@@ -232,7 +222,7 @@
       <item row="6" column="0">
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>Sample slices:</string>
+         <string>Sample Interval:</string>
         </property>
        </widget>
       </item>
@@ -711,6 +701,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name ="selectNodeUponCreation">
+            <bool>false</bool>
+           </property> 
            <property name="segmentationNodeSelectorVisible" stdset="0">
             <bool>true</bool>
            </property>

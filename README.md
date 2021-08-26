@@ -38,23 +38,21 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 3. Segment bone or structure of interest in the Segement Editor module.
 6. Create a new Linear Transform in the Transforms module.
 7. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
-8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your segment with the three slice views based on how you would like to interatively slice through the segment. You should be able to scroll through one of the slice views and see the cross-sections you want to compute on.
+8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your segment with the three slice views based on how you would like slice through the segment. You should be able to scroll through one of the slice views and see the cross-sections you want to compute on.
 * **Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you'll get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
 
 10. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
 11. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
-12. Click the "Snap to Center" to automatically move your segment to the center of the untransformed Volume node.
-13. Click the "Toggle Bounding Box" to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
+12. Click the "Move Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
+13. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
 * **Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounding box.
 
-15. Select the "Segment Axis". This is the slice view that contains the cross-sections you want to compute on.
-16. Choose how much of the segment to sample. By default, it will sample every 1% of the segment's length. Enter "0" to compute on every slice in the segment.
-17. Select an output table and chart for the results. A new table and chart will be created automatically by default.
+15. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
+16. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of segment. Enter "0" to compute on the whole segment.
+17. Edit the selected output table and chart options.
 18. Under "Advanced" choose which computations should be performed.
+* **Note:** Calculating mean pixel brightness is the only parameter that requires resampling the volume Node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. This process can greatly increase computation time depending on the size of the volume.
 19. Click Apply.
-
-### Compute Mean Pixel Brightness
-If you selected "Mean Pixel Brightness" and transformed your segment, you must check the "Resample Volume" box. This will resample your volume using the Resample Scalar/Vector/DWI Volume module with linear interpolation. Because this process substaintially increases computation time, the resampled volume will be saved and may be used as the input Volume node if you need to re-run the analysis.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
@@ -65,6 +63,7 @@ Two methods for normalizing variables to remove the effects of size are implemen
 The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
 To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 * Second is a material normalization from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. The purpose is investigate how well the structure's material is distributed to maximize bending resistance relative to an idealized beam, and make comparisons between individuals or species without the effects of size.
+Measuring compactness is another method for normalizing cross-sectional area. Compactness is the area occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
 
 # Output Details
 
@@ -79,6 +78,8 @@ To use either normalization method, enable normalization check boxes. If either 
 - Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
 
 - CSA: Cross-sectional area.
+
+- Compactness: Ratio between cross-sectional area and total cross-sectional area.
 
 - Imin: Second moment of area around the minor principal axis.
 

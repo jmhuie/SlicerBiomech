@@ -183,10 +183,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       
     if self._parameterNode.GetNodeReference("Volume"):
       self.ui.volumeSelector.toolTip = "Select output table"
-      self.ui.IntensitycheckBox.toolTip = "Compute mean pixel brightness. Need to resample volume if using a transformed segment or volume"
+      self.ui.IntensitycheckBox.toolTip = "Compute mean pixel brightness. Will automatically resample volume if segment is transformed."
       self.ui.IntensitycheckBox.enabled = True
-      self.ui.ResampleVolumecheckBox.toolTip = "Resample volume. Only needed if measuring mean pixel brightness from a transformed segment and volume"
-      self.ui.ResampleVolumecheckBox.enabled = True
       self.ui.BoundingBoxButton.enabled = True
       self.ui.CenterSegButton.toolTip = "Move segment to the center of the volume"  
       self.ui.BoundingBoxButton.toolTip = "Show box that represents the bounds of the volume"
@@ -194,8 +192,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.volumeSelector.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.toolTip = "Select input volume node"
       self.ui.IntensitycheckBox.enabled = False
-      self.ui.ResampleVolumecheckBox.toolTip = "Select input volume node"
-      self.ui.ResampleVolumecheckBox.enabled = False
       self.ui.BoundingBoxButton.enabled = False
       self.ui.CenterSegButton.toolTip = "Select input volume node"  
       self.ui.BoundingBoxButton.toolTip = "Select input volume node"
@@ -449,7 +445,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           
 
       self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
-                     self.ui.ResampleVolumecheckBox.checked, self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
+                     self.ui.BoundingBoxButton.checked, self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
                      self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
@@ -479,7 +475,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
   """
 
 
-  def run(self, segmentationNode, segmentNode, volumeNode, ResamplecheckBox, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
+  def run(self, segmentationNode, segmentNode, volumeNode, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
   CompactnesscheckBox, areaSegementationNode, areaSegmentID):
     """
@@ -513,7 +509,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     segName = segment.GetName()
     plotChartNode.SetTitle(segName)
     plotChartNode.SetXAxisTitle("Percent of Length")
-    plotChartNode.SetYAxisTitle('Segment Geometry of Area (mm^4)')
+    plotChartNode.SetYAxisTitle('Second Moment of Area (mm^4)')
     
     
     # do calculations
@@ -674,7 +670,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume")
           
           transformNode = segmentationNode.GetNodeReferenceID('transform')
-          if ResamplecheckBox == True and transformNode and segmentID == segmentNode:
+          if IntensitycheckBox == True and transformNode != None and segmentID == segmentNode:
             parameters = {}
             parameters["inputVolume"] = volumeNode
             parameters["outputVolume"] = outputVolume
@@ -688,8 +684,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               slicer.mrmlScene.RemoveNode(cliNode)
               raise ValueError("CLI execution failed: " + errorText)
   
+            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume, segName + " Resampled Volume",True)
             slicer.mrmlScene.RemoveNode(cliNode)
-            outputvolume = slicer.vtkSlicerVolumesLogic().CloneVolume(slicer.mrmlScene,outputVolume,"Segment Geometry Resampled Volume",True)
+            slicer.mrmlScene.RemoveNode(outputvolume)
           volumeNodeformasking = outputVolume
           volumeNode.SetAndObserveTransformNodeID(volumetransformNode)
           
@@ -1041,9 +1038,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
 
-      
-      if eulerflag == 1:
-        slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
+      if SMAcheckBox_1 == True or MODcheckBox_1 == True:
+        if eulerflag == 1:
+          slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
+      elif SMAcheckBox_1 == True or MODcheckBox_1 == True and OrientationcheckBox == True: 
+        if eulerflag == 1:
+          slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")  
         
       # adds table column for various arrays
       tableNode.AddColumn(SegmentNameArray)
@@ -1250,6 +1250,22 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
           # Add this series to the plot chart node created above.
           plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode2.GetID())
+          
+      if OrientationcheckBox == False and SMAcheckBox_1 == False and CSAcheckBox == True: 
+        plotChartNode.SetYAxisTitle('Cross-Sectional Area (mm^2)') 
+        if slicer.mrmlScene.GetFirstNodeByName(segName + " CSA (mm^2)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
+          plotSeriesNode3 = slicer.mrmlScene.GetFirstNodeByName(segName + " CSA (mm^2)")
+        else:
+          plotSeriesNode3 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", segName + " CSA (mm^4)")
+          plotSeriesNode3.SetPlotType(plotSeriesNode3.PlotTypeScatter)
+          plotSeriesNode3.SetAndObserveTableNodeID(tableNode.GetID())
+          plotSeriesNode3.SetYColumnName("CSA (mm^2)")
+          plotSeriesNode3.SetXColumnName("Percent (%)")
+          plotSeriesNode3.SetUniqueColor()
+        
+          # Add this series to the plot chart node created above.
+          plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode3.GetID())
+         
        
     finally:
       # Remove temporary volume node
@@ -1341,7 +1357,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
 
     logic = SegmentGeometryLogic()
-    logic.run(segmentationNode, segmentId, masterVolumeNode, False, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
+    logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
     True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
 
