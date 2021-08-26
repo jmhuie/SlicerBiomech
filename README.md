@@ -74,7 +74,7 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Length: Length of segment along the defined segmentation length.
 
-- Feret Diameter: Maximum feret diameter.
+- Feret Diameter: Maximum diameter of the section.
 
 - Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
 
