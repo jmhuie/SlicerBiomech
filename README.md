@@ -63,7 +63,7 @@ Three methods for normalizing variables to remove the effects of size are implem
 The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
 To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 * **Material normalization** from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. Normalized values represent how well the structure's material is distributed to maximize bending resistance relative to an idealized beam. The material normalization isolates the effect of shape on second moment of area.
-* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
+* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
 
 # Output Details
 
