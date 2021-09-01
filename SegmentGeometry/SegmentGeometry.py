@@ -516,6 +516,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     try:
       # Create temporary volume node
       tempSegmentLabelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "SegmentGeometryTemp")
+      FdiamMin = None
+      eulerflag = 0  
 
       
       #### CREATE ARRAYS FOR ALL COLUMNS ####
@@ -587,8 +589,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       FeretArray = vtk.vtkFloatArray()
       FeretArray.SetName("Feret Diameter (mm)")
-      
-      FdiamMin = None
       
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("TCSA (mm^2)")
@@ -907,6 +907,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               if FdiamMin != None:
                 FdiamMin = min(FdiamMin,Fdiam)
                 AR = Length/FdiamMin
+                if AR < 10:
+                  eulerflag = 1
+                  print("Segment aspect ratio:", round(AR,2))
 
             
           # set up variables for calculations
@@ -1052,10 +1055,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
       
-      eulerflag = 0  
-      if AR < 10:
-        eulerflag = 1
-      print("Segment aspect ratio:", round(AR,2))
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! The no-shear assumption may not be met.  Click OK to proceed.")
@@ -1351,7 +1350,8 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     # Load master volume
     import SampleData
     sampleDataLogic = SampleData.SampleDataLogic()
-    masterVolumeNode = sampleDataLogic.downloadMRBrainTumor1()
+    sampleDataLogic.downloadDentalSurgery()
+    masterVolumeNode = slicer.util.getFirstNodeByName("PreDentalSurgery")
 
     # Create segmentation
     segmentationNode = slicer.vtkMRMLSegmentationNode()
@@ -1362,7 +1362,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     # Create a sphere shaped segment
     radius = 20
     tumorSeed = vtk.vtkSphereSource()
-    tumorSeed.SetCenter(-6, 30, 28)
+    tumorSeed.SetCenter(-90, -90, 80)
     tumorSeed.SetRadius(radius)
     tumorSeed.SetPhiResolution(120)
     tumorSeed.SetThetaResolution(120)
@@ -1378,7 +1378,6 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
     True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
-
 
     import math
     # Compute CSA error
