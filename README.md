@@ -49,7 +49,7 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 17. Click Apply.
 
 ### Use Custom Neutral Axis
-If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
+If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents how much the neutral axis deviates from the horizontal in the clockwise direction, starting from the right side. By default, the netural axis is set parallel to the horizontal.
 
 ### Compute Unitless Variables
 Three methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
