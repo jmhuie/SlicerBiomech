@@ -18,11 +18,11 @@ class SegmentGeometry(ScriptedLoadableModule):
     ScriptedLoadableModule.__init__(self, parent)
     self.parent.title = "Segment Geometry"
     self.parent.categories = ["Quantification"]
-    self.parent.dependencies = ["SegmentEditorExtraEffects"]
+    self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
     For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
-    self.parent.acknowledgementText = """This file was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
+    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
 
 
 #
@@ -1058,7 +1058,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       print("Segment aspect ratio:", round(AR,2))
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
-          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")
+          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met.  Click OK to proceed.")
       elif SMAcheckBox_1 == True or MODcheckBox_1 == True and OrientationcheckBox == True: 
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")  

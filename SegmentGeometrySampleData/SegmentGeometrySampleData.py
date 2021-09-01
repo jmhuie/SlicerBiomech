@@ -31,10 +31,11 @@ class SegmentGeometrySampleData(ScriptedLoadableModule):
     import SampleData
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
       sampleName='Aneides lugubris forelimbs',
-      category='Quantification',
-      uris='https://github.com/jmhuie/Slice-SegmentGeometry/blob/master/SampleData/Aneides_Forelimbs.zip?raw=true',
+      category='Segment Geometry',
+      uris='https://github.com/jmhuie/Slicer-SegmentGeometry/blob/main/SampleData/Aneides_Forelimbs.zip?raw=true',
       loadFiles=True,
-      fileNames='Aneides_Forelimbs.zip',
+      fileNames='Aneides_lugubris_mvz_249828_forelimbs.nrrd',
       thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometrySampleData.png'),
-      loadFileType='ZipFile',
+      checksums='SampleData:Aneides_Forelimbs.zip?raw=true',
+      nodeNames="Aneides"
 )
