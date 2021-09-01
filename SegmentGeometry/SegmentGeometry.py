@@ -588,6 +588,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       FeretArray = vtk.vtkFloatArray()
       FeretArray.SetName("Feret Diameter (mm)")
       
+      FdiamMin = None
+      
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("TCSA (mm^2)")
             
@@ -762,7 +764,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         # determine how many slices to calculate statistics for
         if interval > 0:
-          resample = np.rint(100/interval)
+          #resample = np.rint(100/interval)
           resample = np.arange(interval, stop = 101, step = interval)
           #resample = np.linspace(interval,100,num = resample.astype(int),endpoint = True) 
           sampleSlices = numSlices * (resample / 100)
@@ -825,6 +827,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
         
+        if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
+          raise ValueError("Voxel anisotropy!")
+
+          
         for i in sampleSlices:
           if axisIndex == 0:
             PixelDepthMm = spacing[0] # get mm for length
@@ -859,7 +865,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
           if segmentID == segmentNode:
           # add values to calculations 
-            LengthArray.InsertNextValue((numSlices * PixelDepthMm))          
+            LengthArray.InsertNextValue((numSlices * PixelDepthMm))         
+            Length = (numSlices * PixelDepthMm)
             areaArray.InsertNextValue((CSA * areaOfPixelMm2))
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensityArray.InsertNextValue((meanIntensity)) 
@@ -883,17 +890,24 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               Fdiam = 1
             if len(points) == 2:
               Fdiam = 2
-            if len(points) >= 3:  
+            if len(points) >= 3: 
               hull = ConvexHull(points)
               Fdiam = 0
               for i in hull.vertices:
                 pt1 = points[i]
                 for j in hull.vertices:
                   pt2 = points[j]
-                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2))
-            FeretArray.InsertNextValue(Fdiam * PixelWidthMm)
-            if (numSlices*PixelDepthMm)/(Fdiam * PixelWidthMm) < 8:
-              eulerflag = 1
+                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2) * PixelWidthMm)
+            FeretArray.InsertNextValue(Fdiam)
+            sampleMin = int(max(sampleSlices)*.05)
+            sampleMax = int(max(sampleSlices)*.95)
+            if i >= sampleMin and i <= sampleMax:
+              if FdiamMin == None:
+                FdiamMin = Fdiam
+              if FdiamMin != None:
+                FdiamMin = min(FdiamMin,Fdiam)
+                AR = Length/FdiamMin
+
             
           # set up variables for calculations
           Sn = np.count_nonzero(slicetemp)
@@ -1037,7 +1051,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if CompactnesscheckBox == True:
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
-
+      
+      eulerflag = 0  
+      if AR < 10:
+        eulerflag = 1
+      print("Segment aspect ratio:", round(AR,2))
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")

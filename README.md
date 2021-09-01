@@ -39,20 +39,18 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 6. Create a new Linear Transform in the Transforms module.
 7. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
 8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your segment with the three slice views based on how you would like slice through the segment. You should be able to scroll through one of the slice views and see the cross-sections you want to compute on.
-* **Note:** If your data is isotropic, it does not matter which slice view is perpendicular to the long axis (z-axis). If your data is anistropic, you'll get the best results if rotate your specimen so that the long axis is perpendicular to the red slice view. You can also resample your volume to make it isotropic in the Resample Scalar Volume module for better results.
-
-10. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
-11. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
-12. Click the "Move Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
-13. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
+9. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
+10. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
+11. Click the "Move Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
+12. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
 * **Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounding box.
 
-15. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
-16. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of segment. Enter "0" to compute on the whole segment.
-17. Edit the selected output table and chart options.
-18. Under "Advanced" choose which computations should be performed.
+13. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
+14. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of segment. Enter "0" to compute on the whole segment.
+15. Edit the selected output table and chart options.
+16. Under "Advanced" choose which computations should be performed.
 * **Note:** Calculating mean pixel brightness is the only parameter that requires resampling the Volume node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. This process can greatly increase computation time depending on the size of the volume.
-19. Click Apply.
+17. Click Apply.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area, polar moment of inertia, section modulus, and chord length. To define the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents how much the neutral axis deviates from the horizontal in the clockwise direction. By default, the netural axis is set parallel to the horizontal.
@@ -69,9 +67,11 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Segment: Segment name.
 
-- Percent: Percent of segment length.
+- Slice Index: The corresponding slice number from the untransformed Volume node.
 
-- Length: Length of segment along the defined segmentation length.
+- Percent: Percent of total segment length.
+
+- Length: Length of the segment defined as the number of slices that make up the segment, multiplied by the image spacing.
 
 - Feret Diameter: Maximum diameter of the section.
 
@@ -79,15 +79,15 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - CSA: Cross-sectional area.
 
-- Compactness: Ratio between cross-sectional area and total cross-sectional area.
+- Compactness: Ratio between cross-sectional area and the provided total cross-sectional area.
 
 - Imin: Second moment of area around the minor principal axis.
 
 - Imax: Second moment of area around the major principal axis.
 
-- Theta min: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction.
+- Theta min: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
-- Theta max: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction.
+- Theta max: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
 - Zmin: Section modulus around the minor principal axis.
 
@@ -112,6 +112,17 @@ To use either normalization method, enable normalization check boxes. If either 
 - Material Normalization: Material normalized values are indicated with "MatNorm"
 
 - Length Normalization: Length normalized values are indicated with "LenNorm"
+
+# Frequently Asked Questions
+
+**Q:** My volume has anisotropic voxels, can I use it in Segment Geometry?
+
+**A:** Currently, Segment Geometry cannot handle transformed volumes and segment with anisotropic voxels
+
+**Q:** I got an error that says ""Attempted to compute on a slice with no segment. Check for empty slices". What does that mean?
+
+**A:** It means there is a break in your segment, where some slices don't contain any pixels. Often this is caused by floating pixels that are not part of the structure. Make sure that your segment is one connected structure.
+
 
 # Funding Acknowledgement
 
