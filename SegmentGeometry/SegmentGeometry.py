@@ -909,7 +909,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 AR = Length/FdiamMin
                 if AR < 10:
                   eulerflag = 1
-                  print("Segment aspect ratio:", round(AR,2))
+
 
             
           # set up variables for calculations
@@ -1055,6 +1055,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
       
+      print("Segment aspect ratio:", round(AR,2))
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! The no-shear assumption may not be met.  Click OK to proceed.")
