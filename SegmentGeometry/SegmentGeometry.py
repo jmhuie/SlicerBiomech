@@ -261,6 +261,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SummerscheckBox.toolTip = "Normalize second moment of area by dividing the calculated value by the second moment of area for a solid circle with the same cross-sectional area following Summers et al. (2004)"
     self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
     self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment to measure TCSA"
+    self.ui.CentroidcheckBox.toolTip = "Compute the XY coordinates for the centroid of the section"
 
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
@@ -452,7 +453,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.MODcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
                      self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
-                     self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),)
+                     self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
+                     self.ui.CentroidcheckBox.checked,)
 
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -477,7 +479,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
   def run(self, segmentationNode, segmentNode, volumeNode, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
-  CompactnesscheckBox, areaSegementationNode, areaSegmentID):
+  CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox):
     """
     Run the processing algorithm.
     """
@@ -517,7 +519,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       # Create temporary volume node
       tempSegmentLabelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "SegmentGeometryTemp")
       FdiamMin = None
-      eulerflag = 0  
+      eulerflag = 1  
 
       
       #### CREATE ARRAYS FOR ALL COLUMNS ####
@@ -540,10 +542,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       meanIntensityArray.SetName("Mean Brightness")
       
       CxArray = vtk.vtkFloatArray()
-      CxArray.SetName("X Centroid (mm)")
+      CxArray.SetName("Cx (mm)")
       
       CyArray = vtk.vtkFloatArray()
-      CyArray.SetName("Y Centroid (mm)")
+      CyArray.SetName("Cy (mm)")
               
       ImaxArray = vtk.vtkFloatArray()
       ImaxArray.SetName("Imax (mm^4)")
@@ -588,7 +590,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       RlaArray.SetName("Rla (mm)")
 
       FeretArray = vtk.vtkFloatArray()
-      FeretArray.SetName("Feret Diameter (mm)")
+      FeretArray.SetName("Max Diameter (mm)")
       
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("TCSA (mm^2)")
@@ -828,8 +830,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
         
         if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
-          raise ValueError("Voxels are anisotropic! Resample volume")
-
+          raise ValueError("Voxels are anisotropic! Resample the volume")
           
         for i in sampleSlices:
           if axisIndex == 0:
@@ -877,7 +878,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           if segmentID == areaSegmentID:
             TotalAreaArray.InsertNextValue((CSA * areaOfPixelMm2))    
            
-          #print(PixelDepthMm, PixelHeightMm, PixelWidthMm)  
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
           
@@ -893,22 +893,22 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             if len(points) >= 3: 
               hull = ConvexHull(points)
               Fdiam = 0
-              for i in hull.vertices:
-                pt1 = points[i]
+              for h in hull.vertices:
+                pt1 = points[h]
                 for j in hull.vertices:
                   pt2 = points[j]
                   Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2) * PixelWidthMm)
             FeretArray.InsertNextValue(Fdiam)
-            sampleMin = int(max(sampleSlices)*.05)
-            sampleMax = int(max(sampleSlices)*.95)
+            sampleMin = int(max(sampleSlices)*.1)
+            sampleMax = int(max(sampleSlices)*.9)
             if i >= sampleMin and i <= sampleMax:
               if FdiamMin == None:
-                FdiamMin = Fdiam
+                FdiamMin = (numSlices * PixelDepthMm)
               if FdiamMin != None:
                 FdiamMin = min(FdiamMin,Fdiam)
-                AR = Length/FdiamMin
-                if AR < 10:
-                  eulerflag = 1
+                AR = (numSlices * PixelDepthMm)/FdiamMin
+                if AR > 10:
+                  eulerflag = 0
 
 
             
@@ -939,8 +939,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
           # determine how far the major principal axis is from the horizontal 
           Ixy = 0
-          for i in range(Sn):
-            Ixy = Ixy + (Cx - coords_Ijk[0][i]) * (Cy - coords_Ijk[1][i])
+          for s in range(Sn):
+            Ixy = Ixy + (Cx - coords_Ijk[0][s]) * (Cy - coords_Ijk[1][i])
 
           if Ixy == 0:
             Theta = 0
@@ -950,8 +950,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           #major axis
           Imax = 0
           Rmax = 0
-          for i in range(Sn): 
-            rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
+          for s in range(Sn): 
+            rad = ((coords_Ijk[1][s]-Cy)*np.cos(Theta) - (coords_Ijk[0][s]-Cx)*np.sin(Theta))**2
             Imax = [Imax]+ (rad + 1/12)
             Rmax = max(Rmax,np.sqrt(rad))
           if Rmax == 0:
@@ -962,8 +962,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           # minor axis
           Imin = 0
           Rmin = 0
-          for i in range(Sn):
-            rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
+          for s in range(Sn):
+            rad = ((coords_Ijk[0][s]-Cx)*np.cos(Theta) + (coords_Ijk[1][s]-Cy)*np.sin(Theta))**2
             Imin = [Imin]+ (rad + 1/12)
             Rmin = max(Rmin,np.sqrt(rad))
           if Rmin == 0:
@@ -1006,8 +1006,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             #neutral axis
             Ina = 0
             Rna = 0
-            for i in range(Sn): 
-              rad = ((coords_Ijk[1][i]-Cy)*np.cos(Theta) - (coords_Ijk[0][i]-Cx)*np.sin(Theta))**2
+            for s in range(Sn): 
+              rad = ((coords_Ijk[1][s]-Cy)*np.cos(Theta) - (coords_Ijk[0][s]-Cx)*np.sin(Theta))**2
               Ina = [Ina] +(rad + 1/12)
               Rna = max(Rna,np.sqrt(rad))
             if Rna == 0:
@@ -1019,8 +1019,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             #loading axis
             Ila = 0
             Rla = 0
-            for i in range(Sn):
-              rad = ((coords_Ijk[0][i]-Cx)*np.cos(Theta) + (coords_Ijk[1][i]-Cy)*np.sin(Theta))**2
+            for s in range(Sn):
+              rad = ((coords_Ijk[0][s]-Cx)*np.cos(Theta) + (coords_Ijk[1][s]-Cy)*np.sin(Theta))**2
               Ila = [Ila]+ (rad + 1/12)
               Rla = max(Rla,np.sqrt(rad))
             if Rla == 0:
@@ -1086,7 +1086,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
-        tableNode.SetColumnDescription(LengthArray.GetName(), "Mean pixel brightness of a given slice") 
+        tableNode.SetColumnDescription(LengthArray.GetName(), "Mean pixel brightness") 
 
       if CSAcheckBox == True:    
         tableNode.AddColumn(areaArray)
@@ -1096,6 +1096,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if CompactnesscheckBox == True:    
         tableNode.AddColumn(CompactnessArray)
         tableNode.SetColumnDescription(CompactnessArray.GetName(), "Compactness calculated as CSA/TCSA")    
+
+      if CentroidcheckBox == True:    
+        tableNode.AddColumn(CxArray)
+        tableNode.SetColumnUnitLabel(CxArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(CxArray.GetName(), "x-coordinate of the centroid")  
+        
+        tableNode.AddColumn(CyArray)
+        tableNode.SetColumnUnitLabel(CyArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(CyArray.GetName(), "y-coordinate of the centroid")         
                 
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaMinArray)

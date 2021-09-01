@@ -69,7 +69,7 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Length: Length of the segment defined as the number of slices that make up the segment, multiplied by the image spacing.
 
-- Feret Diameter: Maximum diameter of the section.
+- Max Diameter: Maximum feret diameter of the section.
 
 - Mean Brightness: Mean pixel brightness calculated as the average grey scale value. Note that calculating mean pixel brightness is the only parameter that requires resampling the Volume node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. 
 
@@ -77,13 +77,17 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Compactness: Ratio between cross-sectional area and the provided total cross-sectional area.
 
-- Imin: Second moment of area around the minor principal axis.
+- Cx: x-coordinate of the centroid.
 
-- Imax: Second moment of area around the major principal axis.
+- Cy: y-coordinate of the centroid.
 
 - Theta min: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
 - Theta max: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction, starting from the right side.
+
+- Imin: Second moment of area around the minor principal axis.
+
+- Imax: Second moment of area around the major principal axis.
 
 - Zmin: Section modulus around the minor principal axis.
 
