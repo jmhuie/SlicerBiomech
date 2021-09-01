@@ -930,17 +930,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             
           # calculate second moment of area along horizontal and vertical axes
           Ix = 0
-          for  i in range(Sn):
-            Ix = Ix + 1/12 + (Cy - coords_Ijk[1][i])**2
+          for  s in range(Sn):
+            Ix = Ix + 1/12 + (Cy - coords_Ijk[1][s])**2
             
           Iy = 0
-          for  i in range(Sn):
-            Iy = Iy + 1/12 + (Cx - coords_Ijk[0][i])**2
+          for  s in range(Sn):
+            Iy = Iy + 1/12 + (Cx - coords_Ijk[0][s])**2
 
           # determine how far the major principal axis is from the horizontal 
           Ixy = 0
           for s in range(Sn):
-            Ixy = Ixy + (Cx - coords_Ijk[0][s]) * (Cy - coords_Ijk[1][i])
+            Ixy = Ixy + (Cx - coords_Ijk[0][s]) * (Cy - coords_Ijk[1][s])
 
           if Ixy == 0:
             Theta = 0
