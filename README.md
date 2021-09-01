@@ -38,14 +38,13 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 3. Segment bone or structure of interest in the Segement Editor module.
 6. Create a new Linear Transform in the Transforms module.
 7. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
-8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your segment with the three slice views based on how you would like slice through the segment. You should be able to scroll through one of the slice views and see the cross-sections you want to compute on.
-9. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
-10. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
+8. Use the Rotation sliders or the interactive "Visible in 3D view" tool under display to rotate your segment. Align your the long axis of your segment with one of the three slice views based on how you would like slice through the segment.
+10. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required if you applied a linear transformation.
 11. Click the "Move Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
 12. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you will need to manually move your segment into the box using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
 13. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
 14. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of segment. Enter "0" to compute on the whole segment.
-15. Edit the selected output table and chart options.
+15. Select output table and chart nodes.
 16. Under "Advanced" choose which computations should be performed.
 17. Click Apply.
 
