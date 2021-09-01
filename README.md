@@ -1,8 +1,8 @@
 # Segment Geometry
 
-This is the repository for Segment Geometry, an extension and module for 3D Slicer.
+This is the repository for Segment Geometry, an extension for 3D Slicer.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported as a table and plotted for quick visualizations.
+Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
 <img width="1792" alt="Screenshot" src="https://user-images.githubusercontent.com/52302862/131609394-6f44506d-967a-41c1-abff-4d235f184263.png">
 
@@ -14,7 +14,7 @@ module category.
 
 # How to Cite
 
-Citable paper for Segment Geometry is still a work in progress. Below are other relevant citations.
+Citable paper for Segment Geometry coming soon. Below are other relevant citations.
 
 To cite 3D Slicer as a general image analysis platform, please use: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
@@ -35,29 +35,32 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 1. Start 3D Slicer.
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segement Editor module.
-6. Create a new Linear Transform in the Transforms module.
-7. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
-8. Use the rotation sliders or the interactive "Visible in 3D view" tool under display to orient your segment. Align the long axis of your segment with one of the three slice views based on how you would like slice through the segment.
-9. Navigate to Segment Geometry.
-10. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required if you applied a linear transformation.
-11. Click the "Snap Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
-12. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you will need to manually move your segment into the box using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
-13. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
-14. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of the segment. Enter "0" to compute on the whole segment.
-15. Select output table and chart nodes.
-16. Under "Advanced" choose which computations should be performed.
-17. Click Apply.
+4. Create a new Linear Transform in the Transforms module.
+5. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
+6. Use the rotation sliders or the interactive "Visible in 3D view" tool under display to orient your segment. Align the long axis of your segment with one of the three slice views based on how you would like slice through the segment.
+7. Navigate to Segment Geometry.
+8. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required if you applied a linear transformation.
+9. Click the "Snap Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
+10. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you will need to manually move your segment into the box using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
+11. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
+12. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of the segment. Enter "0" to compute on the whole segment.
+13. Select output table and chart nodes.
+14. Under "Advanced" choose which computations should be performed.
+15. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
+16. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To set the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents the angle be between the neutral axis and the horizontal, starting from the right side and moving in clockwise direction. By default, the netural axis is parallel to the horizontal axis.
 
 ### Compute Unitless Variables
 Three methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
-* **Length normalization** from Doube et al. (2012). With this method, cross-sectional area, second moment of area, polar moment of inertia, and section modulus are corrected based on the length of the segment. First the respective root of the variables are taken to make them linear, then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
+
+* **Length normalization** from Doube et al. (2012). With this method, cross-sectional area, second moment of area, and section modulus are corrected based on the length of the segment. The respective root of the variables are taken to make them linear, and then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
 The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
-To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 * **Material normalization** from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. Normalized values represent how well the structure's material is distributed to maximize bending resistance relative to an idealized beam. The material normalization isolates the effect of shape on second moment of area.
 * **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities). To measure compactness, the user must provide a separate segment that contains the the whole structure including the vacuities.
+
+To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
 
@@ -117,7 +120,7 @@ To use either normalization method, enable normalization check boxes. If either 
 
 **Q: My CT data has anisotropic voxels, can I use it in Segment Geometry?**
 
-A: At this time, Segment Geometry cannot handle transformed volumes and segment with anisotropic voxels. You must resample the volume to make it isotropic before using Segment Geometry.
+A: At this time, Segment Geometry cannot handle data with anisotropic voxels. You must resample your data to make it isotropic before using Segment Geometry.
 
 **Q: I got an error that says "Attempted to compute on a slice with no pixels. Check for empty slices". What does that mean?**
 
