@@ -4,8 +4,7 @@ This is the repository for Segment Geometry, an extension and module for 3D Slic
 
 Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported as a table and plotted for quick visualizations.
 
-
-<img width="1792" alt="Scene Schreenshot" src="https://user-images.githubusercontent.com/52302862/130000723-9d29b0e3-b973-4d62-bca4-633c4c207ae7.png">
+<img width="1792" alt="Screenshot" src="https://user-images.githubusercontent.com/52302862/131609394-6f44506d-967a-41c1-abff-4d235f184263.png">
 
 # Installation
 
