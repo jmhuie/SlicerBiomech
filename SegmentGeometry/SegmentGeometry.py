@@ -919,7 +919,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Cx = Sx / Sn
             Cy = Sy / Sn 
           if Sn == 0:
-           raise ValueError("Attempted to compute on a slice with no segment. Check for empty slices")   
+           raise ValueError("Attempted to compute on a slice with no pixels. Check for empty slices")   
           if segmentID == segmentNode:
           # add values to calculations                       
             CxArray.InsertNextValue((Cx * PixelWidthMm))

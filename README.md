@@ -42,14 +42,11 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 9. Go to the Segment Geometry module. Either by searching (Ctrl+F) or finding it under the Quantification category.
 10. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. All are required if you applied a linear transformation.
 11. Click the "Move Segment to Center" button to automatically move your segment to the center of the untransformed Volume node.
-12. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you may need to manually translate your segment using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
-* **Note:** If you applied a linear transformation to your segment, it's absolutely crucial that your whole segment lies within the 3D bounding box.
-
+12. Click the "Show/Hide Bounding Box" button to draw a box around the untransformed Volume node. If your segment is completely inside the box, you are OK to proceed. If part of the segment is outside of the box, you will need to manually move your segment into the box using the Transforms module. If the box is too small for your segment, you will need to extend the bounds of the Volume node using the Crop Volume module. Click the button again to hide the bounding box.
 13. Select the "Long Axis". This is the slice view perpendicular to the long axis. It should contain the cross-sections you want to compute on.
 14. Choose whether to compute on the whole segment or sample the segment in increments. By default, Segment Geometry will sample sections in 1% increments along the length of segment. Enter "0" to compute on the whole segment.
 15. Edit the selected output table and chart options.
 16. Under "Advanced" choose which computations should be performed.
-* **Note:** Calculating mean pixel brightness is the only parameter that requires resampling the Volume node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. This process can greatly increase computation time depending on the size of the volume.
 17. Click Apply.
 
 ### Use Custom Neutral Axis
@@ -61,7 +58,7 @@ Three methods for normalizing variables to remove the effects of size are implem
 The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
 To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 * **Material normalization** from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. Normalized values represent how well the structure's material is distributed to maximize bending resistance relative to an idealized beam. The material normalization isolates the effect of shape on second moment of area.
-* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
+* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
 
 # Output Details
 
@@ -75,7 +72,7 @@ To use either normalization method, enable normalization check boxes. If either 
 
 - Feret Diameter: Maximum diameter of the section.
 
-- Mean Brightness: Mean pixel brightness calculated as the average grey scale value. 
+- Mean Brightness: Mean pixel brightness calculated as the average grey scale value. Note that calculating mean pixel brightness is the only parameter that requires resampling the Volume node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. 
 
 - CSA: Cross-sectional area.
 
@@ -115,13 +112,21 @@ To use either normalization method, enable normalization check boxes. If either 
 
 # Frequently Asked Questions
 
-**Q:** My volume has anisotropic voxels, can I use it in Segment Geometry?
+**Q: My CT data has anisotropic voxels, can I use it in Segment Geometry?**
 
-**A:** Currently, Segment Geometry cannot handle transformed volumes and segment with anisotropic voxels
+A: At this time, Segment Geometry cannot handle transformed volumes and segment with anisotropic voxels. You must resample the volume to make it isotropic before using Segment Geometry.
 
-**Q:** I got an error that says ""Attempted to compute on a slice with no segment. Check for empty slices". What does that mean?
+**Q: I got an error that says "Attempted to compute on a slice with no pixels. Check for empty slices". What does that mean?**
 
-**A:** It means there is a break in your segment, where some slices don't contain any pixels. Often this is caused by floating pixels that are not part of the structure. Make sure that your segment is one connected structure.
+A: It means there is a break in your segment, where some slices don't contain any pixels. Often this is caused by floating pixels that are not part of the structure. Make sure that your segment is one connected structure.
+
+**Q: I got an error that says "The segment is outside of the volume's bounds!". What does that mean?**
+
+A: It means that your transformed segment was moved outside the bounds of the original untransformed volume. Use the "Snap Segment to Center" and "Show/Hide Bounding Box" buttons to make sure your segment is inside the bounding box.
+
+**Q: I got a warning that says "Warning! Euler's beam theory may not apply. Click OK to proceed.". What does that mean?**
+
+A: It means that the length to thickness ratio of the structure is less than 10 and the no-shear assumption of the Euler-Bernoulli beam theory may not be met. Note that thickness is measured as the narrowest diameter near the middle of the beam.
 
 
 # Funding Acknowledgement
