@@ -18,7 +18,7 @@ class SegmentGeometry(ScriptedLoadableModule):
     ScriptedLoadableModule.__init__(self, parent)
     self.parent.title = "Segment Geometry"
     self.parent.categories = ["Quantification"]
-    self.parent.dependencies = []
+    self.parent.dependencies = ["SegmentEditorExtraEffects"]
     self.parent.contributors = ["Jonathan Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
     For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
