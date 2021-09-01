@@ -58,7 +58,7 @@ Three methods for normalizing variables to remove the effects of size are implem
 The purpose is to be able to examine proportional differences in trait values between individuals or species without the effects of size.
 To use either normalization method, enable normalization check boxes. If either method can be used to normalize any of the selected computations, then normalized values will be appended to the end of the results table. If you use either method in your research please cite the relevant papers. See the "How to Cite" section.
 * **Material normalization** from Summers et al. (2004). With this method, each second moment of area value is divided by the second moment of area of a solid rod with the same cross-sectional area as that slice. Normalized values represent how well the structure's material is distributed to maximize bending resistance relative to an idealized beam. The material normalization isolates the effect of shape on second moment of area.
-* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities), and is generally used to measure bone compactness. To measure compactness, the user must provide a separate segment that contains the whole area of the section.
+* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities). To measure compactness, the user must provide a separate segment that contains the the whole structure including the vacuities.
 
 # Output Details
 
@@ -124,10 +124,9 @@ A: It means there is a break in your segment, where some slices don't contain an
 
 A: It means that your transformed segment was moved outside the bounds of the original untransformed volume. Use the "Snap Segment to Center" and "Show/Hide Bounding Box" buttons to make sure your segment is inside the bounding box.
 
-**Q: I got a warning that says "Warning! Euler's beam theory may not apply. Click OK to proceed.". What does that mean?**
+**Q: I got a warning that says "Warning! The no-shear assumption may not be met. Click OK to proceed.". What does that mean?**
 
-A: It means that the length to thickness ratio of the structure is less than 10 and the no-shear assumption of the Euler-Bernoulli beam theory may not be met. Note that thickness is measured as the narrowest diameter near the middle of the beam.
-
+A: It means that the length of the structure is less than 10x the narrowest diameter of the structure so the no-shear assumption of the Euler-Bernoulli beam theory may not be met. 
 
 # Funding Acknowledgement
 

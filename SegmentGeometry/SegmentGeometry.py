@@ -828,7 +828,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
         
         if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
-          raise ValueError("Voxel anisotropy!")
+          raise ValueError("Voxels are anisotropic! Resample volume")
 
           
         for i in sampleSlices:
@@ -1058,10 +1058,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       print("Segment aspect ratio:", round(AR,2))
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
-          slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")
+          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")
       elif SMAcheckBox_1 == True or MODcheckBox_1 == True and OrientationcheckBox == True: 
         if eulerflag == 1:
-          slicer.util.errorDisplay("Warning! Euler's beam theory may not apply. Click OK to proceed.")  
+          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")  
         
       # adds table column for various arrays
       tableNode.AddColumn(SegmentNameArray)
