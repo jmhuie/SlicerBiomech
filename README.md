@@ -124,7 +124,7 @@ A: At this time, Segment Geometry cannot handle transformed segments/volumes wit
 
 **Q: I got an error that says "Voxels are anisotropic! Use the red axis". What does that mean?**
 
-A: Segment Geometry **can** handle untransformed data with anisotropic voxels if the spacing is the same along the xy directions and different in the z direction (typical of some CT data). This is a very specific use case, but Segment Geometry will work if the long axis is perpendicular to the red slice view.
+A: Segment Geometry **can** handle untransformed data with anisotropic voxels if the spacing is the same along the xy directions and different in the z direction (typical of some CT data). This is a very specific use case, but Segment Geometry will work if the red slice view is selected.
 
 **Q: I got an error that says "Attempted to compute on a slice with no pixels. Check for empty slices". What does that mean?**
 
