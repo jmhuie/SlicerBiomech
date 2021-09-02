@@ -120,7 +120,11 @@ To normalize a variable, enable the check boxes of both the variables you want a
 
 **Q: I got an error that says "Voxels are anisotropic! Resample the volume". What does that mean?**
 
-A: At this time, Segment Geometry cannot handle transformed data with anisotropic voxels. You must resample your data to make it isotropic before applying the transformation node and using Segment Geometry. Non-transformed anisotropic data will work fine.
+A: At this time, Segment Geometry cannot handle transformed segments/volumes with anisotropic voxels. You will need to resample your data to make it isotropic before applying the transformation node and using Segment Geometry. 
+
+**Q: I got an error that says "Voxels are anisotropic! Use the red axis". What does that mean?**
+
+A: Segment Geometry **can** handle untransformed data with anisotropic voxels if the spacing is the same along the xy directions and different in the z direction (typical of some CT data). This is a very specific use case, but Segment Geometry will work if the long axis is perpendicular to the red slice view.
 
 **Q: I got an error that says "Attempted to compute on a slice with no pixels. Check for empty slices". What does that mean?**
 

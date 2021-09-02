@@ -827,39 +827,49 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         ###### DO CALCULATIONS ######
         spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
-        
         transformNode = segmentationNode.GetNodeReferenceID('transform')
         if transformNode != None:
           if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
+            raise ValueError("Voxels are anisotropic! Resample the volume")            
+        
+        if axisIndex == 0:
+          PixelDepthMm = spacing[0] # get mm for length
+          PixelHeightMm = spacing[2]
+          PixelWidthMm = spacing[1]
+          areaOfPixelMm2 = PixelHeightMm * PixelWidthMm
+          unitOfPixelMm4 = PixelHeightMm**3 * PixelWidthMm**1
+          if PixelHeightMm != PixelWidthMm:
+            raise ValueError("Voxels are anisotropic! Use the red axis")
+        elif axisIndex == 1:
+          PixelDepthMm = spacing[1] # get mm for length
+          PixelHeightMm = spacing[2]
+          PixelWidthMm = spacing[0]
+          areaOfPixelMm2 = PixelHeightMm * PixelWidthMm
+          unitOfPixelMm4 = PixelHeightMm**2 * PixelWidthMm**2
+          if PixelHeightMm != PixelWidthMm:
+            raise ValueError("Voxels are anisotropic! Use the red axis")
+        elif axisIndex == 2:
+          PixelDepthMm = spacing[2] # get mm for length
+          PixelHeightMm = spacing[1]
+          PixelWidthMm = spacing[0]
+          areaOfPixelMm2 = PixelHeightMm * PixelWidthMm
+          unitOfPixelMm4 = PixelHeightMm**2 * PixelWidthMm**2
+          if PixelHeightMm != PixelWidthMm:
             raise ValueError("Voxels are anisotropic! Resample the volume")
+
           
         for i in sampleSlices:
           if axisIndex == 0:
-            PixelDepthMm = spacing[0] # get mm for length
-            PixelHeightMm = spacing[2]
-            PixelWidthMm = spacing[1]
-            areaOfPixelMm2 = spacing[1] * spacing[2]
-            unitOfPixelMm4 = spacing[1]**3 * spacing[2]**1
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:, :, i]>0)]) 
           elif axisIndex == 1:
-            PixelDepthMm = spacing[1] # get mm for length
-            PixelHeightMm = spacing[2]
-            PixelWidthMm = spacing[0]
-            areaOfPixelMm2 = spacing[0] * spacing[2]
-            unitOfPixelMm4 = spacing[0]**3 * spacing[2]**1
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:, i, :]>0)]) 
           elif axisIndex == 2:
-            PixelDepthMm = spacing[2] # get mm for length
-            PixelHeightMm = spacing[1]
-            PixelWidthMm = spacing[0]
-            areaOfPixelMm2 = spacing[0] * spacing[1]
-            unitOfPixelMm4 = spacing[0]**3 * spacing[1]**1
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
             if volumeNode != None and IntensitycheckBox == True:
@@ -1360,8 +1370,9 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     # Load master volume
     import SampleData
     sampleDataLogic = SampleData.SampleDataLogic()
-    sampleDataLogic.downloadDentalSurgery()
-    masterVolumeNode = slicer.util.getFirstNodeByName("PreDentalSurgery")
+    masterVolumeNode = sampleDataLogic.downloadMRBrainTumor1()
+    #sampleDataLogic.downloadDentalSurgery()
+    #masterVolumeNode = slicer.util.getFirstNodeByName("PreDentalSurgery")
 
     # Create segmentation
     segmentationNode = slicer.vtkMRMLSegmentationNode()
@@ -1370,9 +1381,10 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     segmentationNode.SetReferenceImageGeometryParameterFromVolumeNode(masterVolumeNode)
 
     # Create a sphere shaped segment
-    radius = 20
+    radius = 40
     tumorSeed = vtk.vtkSphereSource()
-    tumorSeed.SetCenter(-90, -90, 80)
+    tumorSeed.SetCenter(-6, 30, 28)
+    #tumorSeed.SetCenter(-90, -90, 80)
     tumorSeed.SetRadius(radius)
     tumorSeed.SetPhiResolution(120)
     tumorSeed.SetThetaResolution(120)
@@ -1385,7 +1397,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
 
     logic = SegmentGeometryLogic()
-    logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
+    logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 0, tableNode, plotChartNode, True, True, True, True, True,
     True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId, True)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
 
