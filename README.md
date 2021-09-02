@@ -136,7 +136,7 @@ A: It means that your transformed segment was moved outside the bounds of the or
 
 **Q: I got a warning that says "Warning! The no-shear assumption may not be met. Click OK to proceed.". What does that mean?**
 
-A: It means that the length of the structure is less than 10x the maximum feret diameter of the narrowest slice in the structure so the no-shear assumption of the Euler-Bernoulli beam theory may not be met. The diameter of slices from the first and last 5% of the segment length are not considered in the case of rough edges.
+A: It means that the length of the structure is less than 10x the maximum feret diameter of the narrowest slice in the structure so the no-shear assumption of the Euler-Bernoulli beam theory may not be met. The diameter of slices from the first and last 5% of the segment length are not considered in case of rough edges.
 
 # Funding Acknowledgement
 
