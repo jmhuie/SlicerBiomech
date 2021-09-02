@@ -84,21 +84,21 @@ To normalize a variable, enable the check boxes of both the variables you want a
 
 - Cy: y-coordinate of the centroid.
 
-- Theta min: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
+- Theta minor: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
-- Theta max: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction, starting from the right side.
+- Theta major: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
-- Imin: Second moment of area around the minor principal axis.
+- Iminor: Second moment of area around the minor principal axis.
 
-- Imax: Second moment of area around the major principal axis.
+- Imajor: Second moment of area around the major principal axis.
 
-- Zmin: Section modulus around the minor principal axis.
+- Zminor: Section modulus around the minor principal axis.
 
-- Zmax: Section modulus around the major principal axis. 
+- Zmajor: Section modulus around the major principal axis. 
 
-- Rmin: Distance to the furthest pixel from the minor principal axis.
+- Rminor: Distance to the furthest pixel from the minor principal axis.
 
-- Rmax: Distance to the furthest pixel from the major principal axis.
+- Rmajor: Distance to the furthest pixel from the major principal axis.
 
 - Ina: Second moment of area around the neutral axis.
 
