@@ -22,7 +22,7 @@ class SegmentGeometry(ScriptedLoadableModule):
     self.parent.contributors = ["Jonathan Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
     For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
-    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
+    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a Harlan Research Fellowship."""
 
 
 #
@@ -213,7 +213,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             
     if self.ui.OrientationcheckBox.checked == True:
       self.ui.OrientationcheckBox.toolTip = "Check to use custom neutral axis"
-      self.ui.orientationspinBox.toolTip = "Enter the angle (degrees) of the neutral axis. By default, the neutral axis is set parallel to the horizontal"
+      self.ui.orientationspinBox.toolTip = "Enter the angle between the horizontal and neutral axes. By default, the neutral axis is the horizontal axis."
       self.ui.orientationspinBox.enabled = True
       self.ui.SMAcheckBox_2.toolTip = "Compute second moment of area around the neutral and loading axes"
       self.ui.SMAcheckBox_2.enabled = True
@@ -286,7 +286,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
   
   def onCenterSeg(self):
     """
-    Run processing when user clicks "Snap to Center" button.
+    Run processing when user clicks "Snap Segment to Center" button.
     """   
     import numpy as np
     
@@ -334,7 +334,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
   
   def onBoundingBox(self):
     """
-    Run processing when user clicks "Bounding Box" button.
+    Run processing when user clicks "Show/Hide Bounding Box" button.
     """  
     import numpy as np
     
@@ -518,6 +518,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     try:
       # Create temporary volume node
       tempSegmentLabelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLabelMapVolumeNode', "SegmentGeometryTemp")
+      # Create flag for the aspect ratio check
       FdiamMin = None
       eulerflag = 1  
 
@@ -673,6 +674,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           volumeNode.SetAndObserveTransformNodeID(None)
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNode.GetScene(), volumeNode, "TempMaskVolume")
           
+          # resample volume if user is calculating mean pixel brightness and has a transformed segment
           transformNode = segmentationNode.GetNodeReferenceID('transform')
           if IntensitycheckBox == True and transformNode != None and segmentID == segmentNode:
             parameters = {}
@@ -699,7 +701,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           slicer.modules.segmentations.logic().ExportAllSegmentsToLabelmapNode(segmentationNode, volumeNodeformasking, slicer.vtkSegmentation.EXTENT_REFERENCE_GEOMETRY)
           outputVolume = volumesLogic.CloneVolumeGeneric(volumeNodeformasking.GetScene(), volumeNodeformasking, "TempMaskVolume", False)
           
-        # Crop segment
+        # Crop temporary volume to avoid computing on empty slices
         maskExtent = [0] * 6
         fillValue = 0
         import SegmentEditorMaskVolumeLib
@@ -753,7 +755,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               raise ValueError("The segment is outside of the volume's bounds!")   
 
 
-        # remove output volume node 
+        # remove temporary output volume node 
         slicer.mrmlScene.RemoveNode(outputVolume)
         
         if volumeNode == None:
@@ -764,11 +766,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         volumeExtents = tempSegmentLabelmapVolumeNode.GetImageData().GetExtent()
         numSlices = volumeExtents[axisIndex*2+1] - volumeExtents[axisIndex*2] + 1
         
-        # deteRminore how many slices to calculate statistics for
+        # determine how many and which slices to calculate statistics for
         if interval > 0:
-          #resample = np.rint(100/interval)
           resample = np.arange(interval, stop = 101, step = interval)
-          #resample = np.linspace(interval,100,num = resample.astype(int),endpoint = True) 
           sampleSlices = numSlices * (resample / 100)
           sampleSlices = sampleSlices - 1
           sampleSlices = np.rint(sampleSlices)
@@ -782,7 +782,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           sampleSlices = np.asarray(list(range(0,numSlices)))
         percentLength = np.around((sampleSlices+1) / numSlices * 100,1)
           
-        # deteRminores centroid of the first and last slice. Identical if only one slice
+        # determine centroid of the first and last slice. Identical if only one slice
         startPosition_Ijk = [
           (volumeExtents[0]+volumeExtents[1])/2.0 if axisIndex!=0 else volumeExtents[0],
           (volumeExtents[2]+volumeExtents[3])/2.0 if axisIndex!=1 else volumeExtents[2],
@@ -807,7 +807,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           volumePositionIncrement_Ras = (endPosition_Ras - startPosition_Ras) / (numSlices - 1.0)
 
         # If volume node is transformed, apply that transform to get volume's RAS coordinates
-        # doesn't work???
         transformVolumeRasToRas = vtk.vtkGeneralTransform()
         slicer.vtkMRMLTransformNode.GetTransformBetweenNodes(tempSegmentLabelmapVolumeNode.GetParentTransformNode(), None, transformVolumeRasToRas)
 
@@ -883,7 +882,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
           
-          #for calculating a convex hull area and perimeter
+          #for calculating max diameter
           if segmentID == segmentNode:
             from scipy.spatial.qhull import ConvexHull
             from scipy.spatial.distance import euclidean
@@ -1060,7 +1059,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! The no-shear assumption may not be met.  Click OK to proceed.")
-      elif SMAcheckBox_1 == True or MODcheckBox_1 == True and OrientationcheckBox == True: 
+      elif SMAcheckBox_2 == True or MODcheckBox_2 == True and OrientationcheckBox == True: 
         if eulerflag == 1:
           slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")  
         
@@ -1419,7 +1418,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     logging.info("Largest section modulus area error: {0:.2f}%".format(errorPercent3))
 
     # Error between expected and actual cross section is due to finite resolution of the segmentation.
-    # It should not be more than a few percent. The actual error in this case is around 1%, but use 2% to account for
+    # It should not be more than a few percent. The actual error in this case is around 1%, but use 3% to account for
     # numerical differences between different platforms.
     # Note: that error tends to be higher for anistropic data
     self.assertTrue(errorPercent < 3.0)

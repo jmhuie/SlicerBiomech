@@ -136,5 +136,5 @@ A: It means that the length of the structure is less than 10x the narrowest diam
 
 # Funding Acknowledgement
 
-Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914).
+Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a Harlan Research Fellowship.
 
