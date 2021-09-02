@@ -547,29 +547,29 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       CyArray = vtk.vtkFloatArray()
       CyArray.SetName("Cy (mm)")
               
-      ImaxArray = vtk.vtkFloatArray()
-      ImaxArray.SetName("Imax (mm^4)")
+      ImajorArray = vtk.vtkFloatArray()
+      ImajorArray.SetName("Imajor (mm^4)")
         
-      IminArray = vtk.vtkFloatArray()
-      IminArray.SetName("Imin (mm^4)")
+      IminorArray = vtk.vtkFloatArray()
+      IminorArray.SetName("Iminor (mm^4)")
                     
       ThetaMinArray = vtk.vtkFloatArray()
-      ThetaMinArray.SetName("Theta min (deg)")
+      ThetaMinArray.SetName("Theta minor (deg)")
       
       ThetaMaxArray = vtk.vtkFloatArray()
-      ThetaMaxArray.SetName("Theta max (deg)")
+      ThetaMaxArray.SetName("Theta major (deg)")
       
-      ZmaxArray = vtk.vtkFloatArray()
-      ZmaxArray.SetName("Zmax (mm^3)")
+      ZmajorArray = vtk.vtkFloatArray()
+      ZmajorArray.SetName("Zmajor (mm^3)")
         
-      ZminArray = vtk.vtkFloatArray()
-      ZminArray.SetName("Zmin (mm^3)")
+      ZminorArray = vtk.vtkFloatArray()
+      ZminorArray.SetName("Zminor (mm^3)")
               
-      RmaxArray = vtk.vtkFloatArray()
-      RmaxArray.SetName("Rmax (mm)")
+      RmajorArray = vtk.vtkFloatArray()
+      RmajorArray.SetName("Rmajor (mm)")
         
-      RminArray = vtk.vtkFloatArray()
-      RminArray.SetName("Rmin (mm)")
+      RminorArray = vtk.vtkFloatArray()
+      RminorArray.SetName("Rminor (mm)")
               
       InaArray = vtk.vtkFloatArray()
       InaArray.SetName("Ina (mm^4)")
@@ -603,17 +603,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         areaArray_Doube = vtk.vtkFloatArray()
         areaArray_Doube.SetName("CSA (LenNorm)")
 
-        ImaxArray_Doube = vtk.vtkFloatArray()
-        ImaxArray_Doube.SetName("Imax (LenNorm)")
+        ImajorArray_Doube = vtk.vtkFloatArray()
+        ImajorArray_Doube.SetName("Imajor (LenNorm)")
         
-        IminArray_Doube = vtk.vtkFloatArray()
-        IminArray_Doube.SetName("Imin (LenNorm)")
+        IminorArray_Doube = vtk.vtkFloatArray()
+        IminorArray_Doube.SetName("Iminor (LenNorm)")
 
-        ZmaxArray_Doube = vtk.vtkFloatArray()
-        ZmaxArray_Doube.SetName("Zmax (LenNorm)")
+        ZmajorArray_Doube = vtk.vtkFloatArray()
+        ZmajorArray_Doube.SetName("Zmajor (LenNorm)")
         
-        ZminArray_Doube = vtk.vtkFloatArray()
-        ZminArray_Doube.SetName("Zmin (LenNorm)")
+        ZminorArray_Doube = vtk.vtkFloatArray()
+        ZminorArray_Doube.SetName("Zminor (LenNorm)")
                 
         InaArray_Doube = vtk.vtkFloatArray()
         InaArray_Doube.SetName("Ina (LenNorm)")
@@ -628,17 +628,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         ZlaArray_Doube.SetName("Zla (LenNorm)")
 
       if SummerscheckBox == True:
-        ImaxArray_Summers = vtk.vtkFloatArray()
-        ImaxArray_Summers.SetName("Imax (MatNorm)")
+        ImajorArray_Summers = vtk.vtkFloatArray()
+        ImajorArray_Summers.SetName("Imajor (MatNorm)")
         
-        IminArray_Summers = vtk.vtkFloatArray()
-        IminArray_Summers.SetName("Imin (MatNorm)")
+        IminorArray_Summers = vtk.vtkFloatArray()
+        IminorArray_Summers.SetName("Iminor (MatNorm)")
         
-        ZminArray_Summers = vtk.vtkFloatArray()       
-        ZminArray_Summers.SetName("Zmin (MatNorm)")
+        ZminorArray_Summers = vtk.vtkFloatArray()       
+        ZminorArray_Summers.SetName("Zminor (MatNorm)")
         
-        ZmaxArray_Summers = vtk.vtkFloatArray()       
-        ZmaxArray_Summers.SetName("Zmax (MatNorm)")
+        ZmajorArray_Summers = vtk.vtkFloatArray()       
+        ZmajorArray_Summers.SetName("Zmajor (MatNorm)")
         
         InaArray_Summers = vtk.vtkFloatArray()
         InaArray_Summers.SetName("Ina (MatNorm)")
@@ -764,7 +764,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         volumeExtents = tempSegmentLabelmapVolumeNode.GetImageData().GetExtent()
         numSlices = volumeExtents[axisIndex*2+1] - volumeExtents[axisIndex*2] + 1
         
-        # determine how many slices to calculate statistics for
+        # deteRminore how many slices to calculate statistics for
         if interval > 0:
           #resample = np.rint(100/interval)
           resample = np.arange(interval, stop = 101, step = interval)
@@ -782,7 +782,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           sampleSlices = np.asarray(list(range(0,numSlices)))
         percentLength = np.around((sampleSlices+1) / numSlices * 100,1)
           
-        # determines centroid of the first and last slice. Identical if only one slice
+        # deteRminores centroid of the first and last slice. Identical if only one slice
         startPosition_Ijk = [
           (volumeExtents[0]+volumeExtents[1])/2.0 if axisIndex!=0 else volumeExtents[0],
           (volumeExtents[2]+volumeExtents[3])/2.0 if axisIndex!=1 else volumeExtents[2],
@@ -829,8 +829,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
         
-        if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
-          raise ValueError("Voxels are anisotropic! Resample the volume")
+        transformNode = segmentationNode.GetNodeReferenceID('transform')
+        if transformNode != None:
+          if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
+            raise ValueError("Voxels are anisotropic! Resample the volume")
           
         for i in sampleSlices:
           if axisIndex == 0:
@@ -899,8 +901,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                   pt2 = points[j]
                   Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2) * PixelWidthMm)
             FeretArray.InsertNextValue(Fdiam)
-            sampleMin = int(max(sampleSlices)*.1)
-            sampleMax = int(max(sampleSlices)*.9)
+            sampleMin = int(max(sampleSlices)*.05)
+            sampleMax = int(max(sampleSlices)*.95)
             if i >= sampleMin and i <= sampleMax:
               if FdiamMin == None:
                 FdiamMin = (numSlices * PixelDepthMm)
@@ -909,7 +911,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 AR = (numSlices * PixelDepthMm)/FdiamMin
                 if AR > 10:
                   eulerflag = 0
-
 
             
           # set up variables for calculations
@@ -937,7 +938,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           for  s in range(Sn):
             Iy = Iy + 1/12 + (Cx - coords_Ijk[0][s])**2
 
-          # determine how far the major principal axis is from the horizontal 
+          # deteRminore how far the major principal axis is from the horizontal 
           Ixy = 0
           for s in range(Sn):
             Ixy = Ixy + (Cx - coords_Ijk[0][s]) * (Cy - coords_Ijk[1][s])
@@ -948,53 +949,53 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Theta = np.arctan((Ix - Iy + np.sqrt((Ix - Iy) * (Ix - Iy) + 4 * Ixy * Ixy)) / (2 * Ixy))
                      
           #major axis
-          Imax = 0
-          Rmax = 0
+          Imajor = 0
+          Rmajor = 0
           for s in range(Sn): 
             rad = ((coords_Ijk[1][s]-Cy)*np.cos(Theta) - (coords_Ijk[0][s]-Cx)*np.sin(Theta))**2
-            Imax = [Imax]+ (rad + 1/12)
-            Rmax = max(Rmax,np.sqrt(rad))
-          if Rmax == 0:
-            Zmax = Imax
+            Imajor = [Imajor]+ (rad + 1/12)
+            Rmajor = max(Rmajor,np.sqrt(rad))
+          if Rmajor == 0:
+            Zmajor = Imajor
           else:    
-            Zmax = Imax/Rmax
+            Zmajor = Imajor/Rmajor
             
           # minor axis
-          Imin = 0
-          Rmin = 0
+          Iminor = 0
+          Rminor = 0
           for s in range(Sn):
             rad = ((coords_Ijk[0][s]-Cx)*np.cos(Theta) + (coords_Ijk[1][s]-Cy)*np.sin(Theta))**2
-            Imin = [Imin]+ (rad + 1/12)
-            Rmin = max(Rmin,np.sqrt(rad))
-          if Rmin == 0:
-            Zmin = Imin
+            Iminor = [Iminor]+ (rad + 1/12)
+            Rminor = max(Rminor,np.sqrt(rad))
+          if Rminor == 0:
+            Zminor = Iminor
           else:    
-            Zmin = Imin/Rmin 
+            Zminor = Iminor/Rminor 
                        
           if segmentID == segmentNode:
           # add values to calculations                       
             ThetaMinArray.InsertNextValue((Theta + np.pi/2)*180/np.pi )       
             ThetaMaxArray.InsertNextValue((Theta*180/np.pi) + 180)       
-            ImaxArray.InsertNextValue(Imax * unitOfPixelMm4)
-            IminArray.InsertNextValue(Imin * unitOfPixelMm4)
-            RmaxArray.InsertNextValue(Rmax * PixelWidthMm)
-            RminArray.InsertNextValue(Rmin * PixelWidthMm)
-            ZmaxArray.InsertNextValue(Zmax * unitOfPixelMm4 / PixelWidthMm)
-            ZminArray.InsertNextValue(Zmin * unitOfPixelMm4 / PixelWidthMm)
+            ImajorArray.InsertNextValue(Imajor * unitOfPixelMm4)
+            IminorArray.InsertNextValue(Iminor * unitOfPixelMm4)
+            RmajorArray.InsertNextValue(Rmajor * PixelWidthMm)
+            RminorArray.InsertNextValue(Rminor * PixelWidthMm)
+            ZmajorArray.InsertNextValue(Zmajor * unitOfPixelMm4 / PixelWidthMm)
+            ZminorArray.InsertNextValue(Zminor * unitOfPixelMm4 / PixelWidthMm)
             
             # do material normalization          
             if SummerscheckBox == True:
-              ImaxArray_Summers.InsertNextValue(Imax/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
-              IminArray_Summers.InsertNextValue(Imin/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
-              ZmaxArray_Summers.InsertNextValue(Zmax/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
-              ZminArray_Summers.InsertNextValue(Zmin/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+              ImajorArray_Summers.InsertNextValue(Imajor/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+              IminorArray_Summers.InsertNextValue(Iminor/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
+              ZmajorArray_Summers.InsertNextValue(Zmajor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+              ZminorArray_Summers.InsertNextValue(Zminor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
               
             # do size correction
             if DoubecheckBox == True:
-              ImaxArray_Doube.InsertNextValue(Imax**(1/4) / numSlices)
-              IminArray_Doube.InsertNextValue(Imin**(1/4) / numSlices)
-              ZmaxArray_Doube.InsertNextValue(Zmax**(1/3) / numSlices)
-              ZminArray_Doube.InsertNextValue(Zmin**(1/3) / numSlices)
+              ImajorArray_Doube.InsertNextValue(Imajor**(1/4) / numSlices)
+              IminorArray_Doube.InsertNextValue(Iminor**(1/4) / numSlices)
+              ZmajorArray_Doube.InsertNextValue(Zmajor**(1/3) / numSlices)
+              ZminorArray_Doube.InsertNextValue(Zminor**(1/3) / numSlices)
            
           # use custom neutral axis  
           if OrientationcheckBox == True: 
@@ -1116,31 +1117,31 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(ThetaMaxArray.GetName(), "Angle of the major principal axis")  
       
       if SMAcheckBox_1 == True:  
-        tableNode.AddColumn(IminArray)
-        tableNode.SetColumnUnitLabel(IminArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
+        tableNode.AddColumn(IminorArray)
+        tableNode.SetColumnUnitLabel(IminorArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminorArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
        
-        tableNode.AddColumn(ImaxArray)
-        tableNode.SetColumnUnitLabel(ImaxArray.GetName(), "mm4")  # TODO: use length unit
-        tableNode.SetColumnDescription(ImaxArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
+        tableNode.AddColumn(ImajorArray)
+        tableNode.SetColumnUnitLabel(ImajorArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnDescription(ImajorArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
 
       if MODcheckBox_1 == True:
-        tableNode.AddColumn(ZminArray)
-        tableNode.SetColumnUnitLabel(ZminArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZminArray.GetName(), "Section modulus around the minor principal axis (larger Z)")
+        tableNode.AddColumn(ZminorArray)
+        tableNode.SetColumnUnitLabel(ZminorArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZminorArray.GetName(), "Section modulus around the minor principal axis (larger Z)")
       
-        tableNode.AddColumn(ZmaxArray)
-        tableNode.SetColumnUnitLabel(ZmaxArray.GetName(), "mm3")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZmaxArray.GetName(), "Section modulus around the major principal axis (smaller Z)")
+        tableNode.AddColumn(ZmajorArray)
+        tableNode.SetColumnUnitLabel(ZmajorArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZmajorArray.GetName(), "Section modulus around the major principal axis (smaller Z)")
 
       if RcheckBox == True:  
-        tableNode.AddColumn(RminArray)
-        tableNode.SetColumnUnitLabel(RminArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RminArray.GetName(), "Max distance from the minor principal axis") 
+        tableNode.AddColumn(RminorArray)
+        tableNode.SetColumnUnitLabel(RminorArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RminorArray.GetName(), "Max distance from the minor principal axis") 
          
-        tableNode.AddColumn(RmaxArray)
-        tableNode.SetColumnUnitLabel(RmaxArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(RmaxArray.GetName(), "Max distance from the major principal axis") 
+        tableNode.AddColumn(RmajorArray)
+        tableNode.SetColumnUnitLabel(RmajorArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(RmajorArray.GetName(), "Max distance from the major principal axis") 
    
       if OrientationcheckBox == True and SMAcheckBox_2 == True:  
         tableNode.AddColumn(InaArray)
@@ -1175,22 +1176,22 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(areaArray_Doube.GetName(), "CSA^(1/2)/Length")
         
       if DoubecheckBox == True and SMAcheckBox_1 == True:
-        tableNode.AddColumn(IminArray_Doube)
-        tableNode.SetColumnUnitLabel(IminArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray_Doube.GetName(), "Imin^(1/4)/Length")
+        tableNode.AddColumn(IminorArray_Doube)
+        tableNode.SetColumnUnitLabel(IminorArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminorArray_Doube.GetName(), "Iminor^(1/4)/Length")
         
-        tableNode.AddColumn(ImaxArray_Doube)
-        tableNode.SetColumnUnitLabel(ImaxArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ImaxArray_Doube.GetName(), "Imax^(1/4)/Length")
+        tableNode.AddColumn(ImajorArray_Doube)
+        tableNode.SetColumnUnitLabel(ImajorArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ImajorArray_Doube.GetName(), "Imajor^(1/4)/Length")
 
       if DoubecheckBox == True and MODcheckBox_1 == True:
-        tableNode.AddColumn(ZminArray_Doube)
-        tableNode.SetColumnUnitLabel(ZminArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZminArray_Doube.GetName(), "Zmin^(1/3)/Length") 
+        tableNode.AddColumn(ZminorArray_Doube)
+        tableNode.SetColumnUnitLabel(ZminorArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZminorArray_Doube.GetName(), "Zminor^(1/3)/Length") 
   
-        tableNode.AddColumn(ZmaxArray_Doube)
-        tableNode.SetColumnUnitLabel(ZmaxArray_Doube.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZmaxArray_Doube.GetName(), "Zmax^(1/3)/Length")
+        tableNode.AddColumn(ZmajorArray_Doube)
+        tableNode.SetColumnUnitLabel(ZmajorArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZmajorArray_Doube.GetName(), "Zmajor^(1/3)/Length")
       
       if DoubecheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Doube)
@@ -1211,22 +1212,22 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnDescription(ZnaArray_Doube.GetName(), "Zna^(1/3)/Length")
 
       if SummerscheckBox == True and SMAcheckBox_1 == True:
-        tableNode.AddColumn(IminArray_Summers)
-        tableNode.SetColumnUnitLabel(IminArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(IminArray_Summers.GetName(), "Imin divided by the second moment of area of a solid circle with the same cross-sectional area") 
+        tableNode.AddColumn(IminorArray_Summers)
+        tableNode.SetColumnUnitLabel(IminorArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(IminorArray_Summers.GetName(), "Iminor divided by the second moment of area of a solid circle with the same cross-sectional area") 
         
-        tableNode.AddColumn(ImaxArray_Summers)
-        tableNode.SetColumnUnitLabel(ImaxArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ImaxArray_Summers.GetName(), "Imax divided by the second moment of area of a solid circle with the same cross-sectional area")        
+        tableNode.AddColumn(ImajorArray_Summers)
+        tableNode.SetColumnUnitLabel(ImajorArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ImajorArray_Summers.GetName(), "Imajor divided by the second moment of area of a solid circle with the same cross-sectional area")        
 
       if SummerscheckBox == True and MODcheckBox_1 == True:
-        tableNode.AddColumn(ZminArray_Summers)
-        tableNode.SetColumnUnitLabel(ZminArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZminArray_Summers.GetName(), "Zmin divided by the section modulus of a solid circle with the same cross-sectional area")
+        tableNode.AddColumn(ZminorArray_Summers)
+        tableNode.SetColumnUnitLabel(ZminorArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZminorArray_Summers.GetName(), "Zminor divided by the section modulus of a solid circle with the same cross-sectional area")
         
-        tableNode.AddColumn(ZmaxArray_Summers)
-        tableNode.SetColumnUnitLabel(ZmaxArray_Summers.GetName(), "none")  # TODO: use length unit
-        tableNode.SetColumnDescription(ZmaxArray_Summers.GetName(), "Zmax divided by the section modulus of a solid circle with the same cross-sectional area")    
+        tableNode.AddColumn(ZmajorArray_Summers)
+        tableNode.SetColumnUnitLabel(ZmajorArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(ZmajorArray_Summers.GetName(), "Zmajor divided by the section modulus of a solid circle with the same cross-sectional area")    
         
       if SummerscheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Summers)
@@ -1250,13 +1251,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       segment = segmentationNode.GetSegmentation().GetSegment(segmentNode)
       segName = segment.GetName()
       if SMAcheckBox_1 == True: 
-        if slicer.mrmlScene.GetFirstNodeByName(segName + " Imin (mm^4)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
-          plotSeriesNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Imin (mm^4)")
+        if slicer.mrmlScene.GetFirstNodeByName(segName + " Iminor (mm^4)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
+          plotSeriesNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Iminor (mm^4)")
         else:
-          plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", segName + " Imin (mm^4)")
+          plotSeriesNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", segName + " Iminor (mm^4)")
           plotSeriesNode.SetPlotType(plotSeriesNode.PlotTypeScatter)
           plotSeriesNode.SetAndObserveTableNodeID(tableNode.GetID())
-          plotSeriesNode.SetYColumnName("Imin (mm^4)")
+          plotSeriesNode.SetYColumnName("Iminor (mm^4)")
           plotSeriesNode.SetXColumnName("Percent (%)")
           plotSeriesNode.SetUniqueColor()
 
@@ -1386,7 +1387,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
 
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 1, tableNode, plotChartNode, True, True, True, True, True,
-    True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId)
+    True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId, True)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
 
     import math
@@ -1399,8 +1400,8 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     errorPercent = 100.0 * abs(1-(largestCrossSectionArea /expectedlargestCrossSectionArea))
     logging.info("Largest cross-section area error: {0:.2f}%".format(errorPercent))
     
-    # Compute Imin error
-    crossSectionSecondMom = slicer.util.arrayFromTableColumn(tableNode, "Imin (mm^4)")
+    # Compute Iminor error
+    crossSectionSecondMom = slicer.util.arrayFromTableColumn(tableNode, "Iminor (mm^4)")
     largestSecondMom  = crossSectionSecondMom.max()
     expectedlargestSecondMom = radius*radius*radius*radius*math.pi/4
     logging.info("Largest second moment of area: {0:.2f}".format(largestSecondMom))
@@ -1409,7 +1410,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     logging.info("Largest second moment of area error: {0:.2f}%".format(errorPercent2))
     
     # Compute Section modulus error
-    crossSectionModulus = slicer.util.arrayFromTableColumn(tableNode, "Zmin (mm^3)")
+    crossSectionModulus = slicer.util.arrayFromTableColumn(tableNode, "Zminor (mm^3)")
     largestModulus  = crossSectionModulus.max()
     expectedlargestModulus = radius*radius*radius*math.pi/4
     logging.info("Largest section modulus: {0:.2f}".format(largestModulus))
