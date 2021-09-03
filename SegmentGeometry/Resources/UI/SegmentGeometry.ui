@@ -668,55 +668,76 @@
         </property>
         <layout class="QFormLayout" name="formLayout_7">
          <item row="0" column="0">
-          <widget class="QCheckBox" name="DoubecheckBox">
-           <property name="text">
-            <string>Length Normalization</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="SummerscheckBox">
-           <property name="text">
-            <string>Material Normalization</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="CompactnesscheckBox">
-           <property name="text">
-            <string>Compactness</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="horizontalLayout">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name ="selectNodeUponCreation">
-            <bool>false</bool>
-           </property> 
-           <property name="segmentationNodeSelectorVisible" stdset="0">
-            <bool>true</bool>
-           </property>
+          <widget class="QFrame" name="frame_4">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="DoubecheckBox">
+              <property name="text">
+               <string>Length Normalization</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="SummerscheckBox">
+              <property name="text">
+               <string>Material Normalization</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="CompactnesscheckBox">
+              <property name="text">
+               <string>Compactness</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="horizontalLayout">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name ="selectNodeUponCreation">
+               <bool>false</bool>
+              </property> 
+              <property name="segmentationNodeSelectorVisible" stdset="0">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
