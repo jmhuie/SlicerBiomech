@@ -4,7 +4,7 @@ This is the repository for Segment Geometry, an extension for <a href="https://s
 
 Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
-<img width="1792" alt="Screenshot" src="https://user-images.githubusercontent.com/52302862/131609394-6f44506d-967a-41c1-abff-4d235f184263.png">
+<img width="1792" alt="overview" src="https://user-images.githubusercontent.com/52302862/131934682-bde58601-b5f2-4325-b6f3-f64dd55defda.png">
 
 # Installation
 
