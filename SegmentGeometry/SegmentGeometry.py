@@ -24,6 +24,57 @@ class SegmentGeometry(ScriptedLoadableModule):
     For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
     self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a Harlan Research Fellowship."""
 
+    # Additional initialization step after application startup is complete
+    slicer.app.connect("startupCompleted()", registerSampleData)
+
+#
+# Register sample data sets in Sample Data module
+#
+
+def registerSampleData():
+    """
+    Add data sets to Sample Data module.
+    """
+    # It is always recommended to provide sample data for users to make it easy to try the module,
+    # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
+
+    import SampleData
+    iconsPath = os.path.join(os.path.dirname(__file__), 'Resources/Icons')
+
+    # To ensure that the source code repository remains small (can be downloaded and installed quickly)
+    # it is recommended to store data sets that are larger than a few MB in a Github release.
+
+    
+    # load demo Segment Geometry data
+    
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        category="Segment Geometry",
+        sampleName='DemoForelimb',
+        uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs.nrrd',
+        fileNames='DemoForelimb.nrrd',
+        nodeNames='DemoForelimb',
+        thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoForelimb.png'),
+        loadFileType='VolumeFile',
+        )
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        category="Segment Geometry",
+        sampleName='DemoSegment',
+        uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_Segmentation.seg.nrrd',
+        fileNames='DemoSegment.seg.nrrd',
+        nodeNames='DemoSegment',
+        thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoSegment.png'),
+        loadFileType='SegmentationFile',
+        )
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        category="Segment Geometry",
+        sampleName='DemoTransform',
+        uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_LinearTransform_3.h5',
+        fileNames='DemoTransform.h5',
+        nodeNames='DemoTransform',
+        thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoTransform.png'),
+        loadFileType='TransformFile',
+        )
+#
 
 #
 # SegmentGeometryWidget
@@ -593,11 +644,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       FeretArray = vtk.vtkFloatArray()
       FeretArray.SetName("Max Diameter (mm)")
       
+      PerimArray = vtk.vtkFloatArray()
+      PerimArray.SetName("Perimeter (mm)")
+      
       TotalAreaArray = vtk.vtkFloatArray()
       TotalAreaArray.SetName("TCSA (mm^2)")
             
       CompactnessArray = vtk.vtkFloatArray()
       CompactnessArray.SetName("Compactness")
+      
+      CircularityArray = vtk.vtkFloatArray()
+      CircularityArray.SetName("Circularity")
       
       #create arrays for unitless metrics with Doube method
       if DoubecheckBox == True:
@@ -891,24 +948,315 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
            
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
-          
-          #for calculating max diameter
+
+                  
+          # calculate perimeter
           if segmentID == segmentNode:
-            from scipy.spatial.qhull import ConvexHull
-            from scipy.spatial.distance import euclidean
-            points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
-            if len(points) == 1:
+            startx = min(coords_Ijk[0])  
+            starty = max(coords_Ijk[1][coords_Ijk[0] == startx])
+            perimx = startx
+            perimy = starty
+            prevx = startx
+            prevy = starty
+            dire = "N"
+          
+            while True:
+            
+              if dire == "N":
+                quad = "Q1"
+              elif dire == "NE" or dire == "E":
+                quad = "Q2"
+              elif dire == "SE" or dire == "S":
+                quad = "Q3"
+              elif dire == "SW":
+                quad = "Q4"
+              elif dire == "W" or dire == "NW":
+                quad = "Q5"
+              
+              right = coords_Ijk[1][coords_Ijk[0]==prevx+1]        
+              vert = coords_Ijk[1][coords_Ijk[0]==prevx] 
+              left = coords_Ijk[1][coords_Ijk[0]==prevx-1]   
+                        
+              if quad == "Q1":
+                if any(left == prevy):
+                  dire = "W"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx-1
+                  prevy = prevy               
+                elif any(left == prevy+1):
+                  dire = "NW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx-1
+                  prevy = prevy+1   
+                elif any(vert == prevy+1):
+                  dire = "N"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx
+                  prevy = prevy+1 
+                elif any(right == prevy+1):
+                  dire = "NE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx+1
+                  prevy = prevy+1  
+                elif any(right == prevy):
+                  dire = "E"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx+1
+                  prevy = prevy 
+                elif any(right == prevy-1):
+                  dire = "SE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx+1
+                  prevy = prevy-1 
+                elif any(vert == prevy-1):
+                  dire = "S"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx
+                  prevy = prevy-1 
+                elif any(left == prevy -1):
+                  dire = "SW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx-1
+                  prevy = prevy-1 
+
+              if quad == "Q2":
+                if any(left == prevy+1):
+                  dire = "NW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx-1
+                  prevy = prevy+1   
+                elif any(vert == prevy+1):
+                  dire = "N"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx
+                  prevy = prevy+1 
+                elif any(right == prevy+1):
+                  dire = "NE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx+1
+                  prevy = prevy+1  
+                elif any(right == prevy):
+                  dire = "E"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx+1
+                  prevy = prevy 
+                elif any(right == prevy-1):
+                  dire = "SE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx+1
+                  prevy = prevy-1 
+                elif any(vert == prevy-1):
+                  dire = "S"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx
+                  prevy = prevy-1 
+                elif any(left == prevy -1):
+                  dire = "SW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx-1
+                  prevy = prevy-1 
+                elif any(left == prevy):
+                  dire = "W"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx-1
+                  prevy = prevy 
+                
+                
+              if quad == "Q3":
+                if any(right == prevy+1):
+                  dire = "NE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx+1
+                  prevy = prevy+1  
+                elif any(right == prevy):
+                  dire = "E"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx+1
+                  prevy = prevy 
+                elif any(right == prevy-1):
+                  dire = "SE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx+1
+                  prevy = prevy-1 
+                elif any(vert == prevy-1):
+                  dire = "S"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx
+                  prevy = prevy-1 
+                elif any(left == prevy -1):
+                  dire = "SW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx-1
+                  prevy = prevy-1 
+                elif any(left == prevy):
+                  dire = "W"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx-1
+                  prevy = prevy              
+                elif any(left == prevy +1):
+                  dire = "NW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx-1
+                  prevy = prevy+1   
+                elif any(vert == prevy+1):
+                  dire = "N"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx
+                  prevy = prevy+1 
+
+              if quad == "Q4":
+                if any(right == prevy-1):
+                  dire = "SE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx+1
+                  prevy = prevy-1 
+                elif any(vert == prevy-1):
+                  dire = "S"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx
+                  prevy = prevy-1 
+                elif any(left == prevy -1):
+                  dire = "SW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx-1
+                  prevy = prevy-1 
+                elif any(left == prevy):
+                  dire = "W"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx-1
+                  prevy = prevy               
+                elif any(left == prevy +1):
+                  dire = "NW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx-1
+                  prevy = prevy+1   
+                elif any(vert == prevy+1):
+                  dire = "N"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx
+                  prevy = prevy+1 
+                elif any(right == prevy+1):
+                  dire = "NE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx+1
+                  prevy = prevy+1  
+                elif any(right == prevy):
+                  dire = "E"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx+1
+                  prevy = prevy 
+
+              if quad == "Q5":
+                if any(left == prevy -1):
+                  dire = "SW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx-1
+                  prevy = prevy-1 
+                elif any(left == prevy):
+                  dire = "W"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx-1
+                  prevy = prevy               
+                elif any(left == prevy +1):
+                  dire = "NW"
+                  perimx = np.append(perimx,prevx-1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx-1
+                  prevy = prevy+1   
+                elif any(vert == prevy+1):
+                  dire = "N"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx
+                  prevy = prevy+1              
+                elif any(right == prevy+1):
+                  dire = "NE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy+1)
+                  prevx = prevx+1
+                  prevy = prevy+1  
+                elif any(right == prevy):
+                  dire = "E"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy)
+                  prevx = prevx+1
+                  prevy = prevy 
+                elif any(right == prevy-1):
+                  dire = "SE"
+                  perimx = np.append(perimx,prevx+1)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx+1
+                  prevy = prevy-1 
+                elif any(vert == prevy-1):
+                  dire = "S"
+                  perimx = np.append(perimx,prevx)
+                  perimy = np.append(perimy,prevy-1)
+                  prevx = prevx
+                  prevy = prevy-1 
+                
+              if prevx == startx and prevy == starty:
+                break
+               
+            perimeter = 0
+            if isinstance(perimx,np.int64):
+              perimeter = 4
+            else:
+              for p in range(len(perimx)-1):
+                perimeter = perimeter +  np.sqrt((perimx[p+1]-perimx[p])**2+(perimy[p+1]-perimy[p])**2)
+              perimeter = perimeter + np.sqrt((perimx[0]-perimx[len(perimx)-1])**2+(perimy[0]-perimy[len(perimy)-1])**2)
+            PerimArray.InsertNextValue(perimeter * PixelWidthMm)
+            Circularity = 4*np.pi*CSA*areaOfPixelMm2/(perimeter*PixelWidthMm)**2
+            CircularityArray.InsertNextValue(Circularity)
+          
+          # calculate maximum diameter
+          if segmentID == segmentNode:
+            Fdiam = 0
+            if isinstance(perimx,np.int64):
               Fdiam = 1
-            if len(points) == 2:
+            elif len(perimx) == 2:
               Fdiam = 2
-            if len(points) >= 3: 
-              hull = ConvexHull(points)
-              Fdiam = 0
-              for h in hull.vertices:
-                pt1 = points[h]
-                for j in hull.vertices:
-                  pt2 = points[j]
-                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2) * PixelWidthMm)
+            elif len(perimx) >= 3: 
+              for h in range(len(perimx)):
+                x1 = perimx[h]
+                y1 = perimy[h]
+                for j in range(len(perimx)):
+                  x2 = perimx[j]
+                  y2 = perimy[j]
+                  Fdiam = max(Fdiam, np.sqrt((x2-x1)**2 +(y2-y1)**2) * PixelWidthMm)
             FeretArray.InsertNextValue(Fdiam)
             sampleMin = int(max(sampleSlices)*.05)
             sampleMax = int(max(sampleSlices)*.95)
@@ -919,9 +1267,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 FdiamMin = min(FdiamMin,Fdiam)
                 AR = (numSlices * PixelDepthMm)/FdiamMin
                 if AR > 10:
-                  eulerflag = 0
-
-            
+                  eulerflag = 0          
+ 
+                            
           # set up variables for calculations
           Sn = np.count_nonzero(slicetemp)
           Sx = sum(coords_Ijk[0])
