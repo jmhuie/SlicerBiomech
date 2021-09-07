@@ -2,7 +2,7 @@
 
 This is the repository for Segment Geometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
+Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. 
 
 <img width="1792" alt="overview" src="https://user-images.githubusercontent.com/52302862/131934682-bde58601-b5f2-4325-b6f3-f64dd55defda.png">
 
@@ -48,6 +48,8 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 14. Under "Advanced" choose which computations should be performed.
 15. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 16. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
+
+Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander CT scan from MorphoSource (ark:/87602/m4/M49486), a segmentation file that contains an isolated humerus and solid humerus segment for measuring compactness, and a transformation node.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To set the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents the angle be between the neutral axis and the horizontal, starting from the right side and moving in clockwise direction. By default, the netural axis is parallel to the horizontal axis.
