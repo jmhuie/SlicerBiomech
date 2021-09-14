@@ -36,7 +36,7 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segement Editor module.
 4. Create a new Linear Transform in the Transforms module.
-5. Move your Segmentation node and the Volume node from the "Transformable" column to the "Transformed" column.
+5. Move your Segmentation node from the "Transformable" column to the "Transformed" column. You also transform the Volume node, but note that the Slice Index output will be based on the untransformed Volume node.
 6. Use the rotation sliders or the interactive "Visible in 3D view" tool under display to orient your segment. Align the long axis of your segment with one of the three slice views based on how you would like slice through the segment.
 7. Navigate to Segment Geometry.
 8. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required if you applied a linear transformation.
@@ -76,7 +76,9 @@ To normalize a variable, enable the check boxes of both the variables you want a
 
 - Max Diameter: Maximum feret diameter of the section.
 
-- Mean Brightness: Mean pixel brightness calculated as the average grey scale value. Note that calculating mean pixel brightness is the only parameter that requires resampling the Volume node. If the segment is transformed, the Volume node will be resampled automatically with the Resample Scalar/Vector/DWI Volume module and a linear interpolation. 
+- Perimeter: Perimeter of the section. Note that calculation may be incorrect for cross-sections where the inner vacuities connect to the outer edge or there is more than one island in the section (i.e., the cross-section is not a ring).
+
+- Mean Brightness: Mean voxel brightness or average grey scale value of the section. Note that calculating mean brightness is the only parameter requires resampling the Volume node if the Segmentation node is transformed. This is done automatically with the Resample Scalar/Vector/DWI Volume module. 
 
 - CSA: Cross-sectional area.
 
@@ -126,7 +128,7 @@ A: At this time, Segment Geometry cannot handle transformed segments/volumes wit
 
 **Q: I got an error that says "Voxels are anisotropic! Use the red axis". What does that mean?**
 
-A: Segment Geometry **can** handle untransformed data with anisotropic voxels if the spacing is the same along the xy directions and different in the z direction (typical of some CT data). This is a very specific use case, but Segment Geometry will work if the red slice view is selected.
+A: Segment Geometry **can** handle untransformed data with anisotropic voxels if the spacing is the same along the xy directions and different in the z direction (typical of some CT data). This is a very specific use case, but Segment Geometry will work if the red slice view is used as the long axis.
 
 **Q: I got an error that says "Attempted to compute on a slice with no pixels. Check for empty slices". What does that mean?**
 

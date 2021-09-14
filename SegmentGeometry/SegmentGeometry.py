@@ -74,6 +74,7 @@ def registerSampleData():
         thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoTransform.png'),
         loadFileType='TransformFile',
         )
+        
 #
 
 #
@@ -313,6 +314,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.FeretcheckBox.toolTip = "Compute the maximum feret diameter"
     self.ui.CompactnesscheckBox.toolTip = "Compute slice compactness as the CSA/TCSA. Needs a separate solid segment to measure TCSA"
     self.ui.CentroidcheckBox.toolTip = "Compute the XY coordinates for the centroid of the section"
+    self.ui.PerimcheckBox.toolTip = "Compute the perimeter of the section"
 
 
   def updateParameterNodeFromGUI(self, caller=None, event=None):
@@ -505,7 +507,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
                      self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
-                     self.ui.CentroidcheckBox.checked,)
+                     self.ui.CentroidcheckBox.checked,self.ui.PerimcheckBox.checked)
 
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -530,7 +532,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
   def run(self, segmentationNode, segmentNode, volumeNode, BoundingBox, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
-  CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox):
+  CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox, PerimcheckBox):
     """
     Run the processing algorithm.
     """
@@ -920,17 +922,21 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
             if volumeNode != None and IntensitycheckBox == True:
-              meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:, :, i]>0)]) 
+              meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:,:,i]>0)]) 
+              MatInvestment = sum(voxelArray[:,:,i][np.where(voxelArray[:,:,i]>0)]) * areaOfPixelMm2
           elif axisIndex == 1:
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
             if volumeNode != None and IntensitycheckBox == True:
-              meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:, i, :]>0)]) 
+              meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:,i,:]>0)]) 
+              MatInvestment = sum(voxelArray[:,i,:][np.where(voxelArray[:,i,:]>0)]) * areaOfPixelMm2
           elif axisIndex == 2:
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
             if volumeNode != None and IntensitycheckBox == True:
               meanIntensity = np.mean(voxelArray[i,:,:][np.where(voxelArray[i, :, :]>0)]) 
+              MatInvestment = sum(voxelArray[i,:,:][np.where(voxelArray[i, :, :]>0)]) * areaOfPixelMm2
+              print(MatInvestment)
 
           if segmentID == segmentNode:
           # add values to calculations 
@@ -949,7 +955,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
 
-                  
           # calculate perimeter
           if segmentID == segmentNode:
             startx = min(coords_Ijk[0])  
@@ -1441,6 +1446,15 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(FeretArray)
         tableNode.SetColumnUnitLabel(FeretArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(FeretArray.GetName(), "Maximum feret diameter")    
+      
+      if PerimcheckBox == True:
+        tableNode.AddColumn(PerimArray)
+        tableNode.SetColumnUnitLabel(PerimArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(PerimArray.GetName(), "Perimeter of the section")  
+
+      #tableNode.AddColumn(CircularityArray)
+      #tableNode.SetColumnUnitLabel(CircularityArray.GetName(), "mm")  # TODO: use length unit
+      #tableNode.SetColumnDescription(CircularityArray.GetName(), "Circularity of the section") 
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
@@ -1448,7 +1462,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       if CSAcheckBox == True:    
         tableNode.AddColumn(areaArray)
-        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm2")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(areaArray.GetName(), "mm^2")  # TODO: use length unit
         tableNode.SetColumnDescription(areaArray.GetName(), "Cross-sectional area")  
 
       if CompactnesscheckBox == True:    
@@ -1475,20 +1489,20 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
       if SMAcheckBox_1 == True:  
         tableNode.AddColumn(IminorArray)
-        tableNode.SetColumnUnitLabel(IminorArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(IminorArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(IminorArray.GetName(), "Second moment of area around the minor principal axis (larger I)")
        
         tableNode.AddColumn(ImajorArray)
-        tableNode.SetColumnUnitLabel(ImajorArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(ImajorArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(ImajorArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
 
       if MODcheckBox_1 == True:
         tableNode.AddColumn(ZminorArray)
-        tableNode.SetColumnUnitLabel(ZminorArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(ZminorArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZminorArray.GetName(), "Section modulus around the minor principal axis (larger Z)")
       
         tableNode.AddColumn(ZmajorArray)
-        tableNode.SetColumnUnitLabel(ZmajorArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(ZmajorArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZmajorArray.GetName(), "Section modulus around the major principal axis (smaller Z)")
 
       if RcheckBox == True:  
@@ -1502,20 +1516,20 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
    
       if OrientationcheckBox == True and SMAcheckBox_2 == True:  
         tableNode.AddColumn(InaArray)
-        tableNode.SetColumnUnitLabel(InaArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(InaArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray.GetName(), "Second moment of area around the neutral axis")
         
         tableNode.AddColumn(IlaArray)
-        tableNode.SetColumnUnitLabel(IlaArray.GetName(), "mm4")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(IlaArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray.GetName(), "Second moment of area around the loading axis")
               
       if OrientationcheckBox == True and MODcheckBox_2 == True:
         tableNode.AddColumn(ZnaArray)
-        tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray.GetName(), "Section modulus around the neutral axis")
         
         tableNode.AddColumn(ZlaArray)
-        tableNode.SetColumnUnitLabel(ZlaArray.GetName(), "mm3")  # TODO: use length unit
+        tableNode.SetColumnUnitLabel(ZlaArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZlaArray.GetName(), "Section modulus around the loading axis")
         
       if RcheckBox_2 == True and OrientationcheckBox == True:
@@ -1641,7 +1655,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         if slicer.mrmlScene.GetFirstNodeByName(segName + " CSA (mm^2)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
           plotSeriesNode3 = slicer.mrmlScene.GetFirstNodeByName(segName + " CSA (mm^2)")
         else:
-          plotSeriesNode3 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", segName + " CSA (mm^4)")
+          plotSeriesNode3 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotSeriesNode", segName + " CSA (mm^2)")
           plotSeriesNode3.SetPlotType(plotSeriesNode3.PlotTypeScatter)
           plotSeriesNode3.SetAndObserveTableNodeID(tableNode.GetID())
           plotSeriesNode3.SetYColumnName("CSA (mm^2)")
@@ -1739,6 +1753,8 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     tumorSeed.Update()
     segmentId = segmentationNode.AddSegmentFromClosedSurfaceRepresentation(tumorSeed.GetOutput(), "Tumor",
                                                                            [1.0, 0.0, 0.0])
+    segmentId2 = segmentationNode.AddSegmentFromClosedSurfaceRepresentation(tumorSeed.GetOutput(), "Tumor",
+                                                                           [1.0, 0.0, 0.0])
     segmentNode = segmentationNode.GetSegmentation().GetSegment(segmentId)                                                                       
 
     tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Segment Geometry test table")
@@ -1746,7 +1762,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
 
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, False, "S (Red)", 0, tableNode, plotChartNode, True, True, True, True, True,
-    True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId, True)
+    True, True, True, True, True, True, 0, True, True, True, True, True, True,segmentationNode, segmentId2, True, True)
     #self.assertEqual(tableNode.GetNumberOfColumns(), 38)
 
     import math
