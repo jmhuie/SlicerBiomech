@@ -69,7 +69,7 @@ can automatically generate a segment with the vacuities filled in.
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
-Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry will also generate a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. Users should use this volume with the saved slice indices to examine specific slices. 
+Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry will also generate a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. Users should use this volume with the saved slice indices to examine specific slices. Below contains brief information on the possible computations.
 
 - Segment: Segment name.
 
@@ -81,7 +81,7 @@ Segment Geometry presents the results as a table and automatically plots second 
 
 - Max Diameter: Maximum Feret diameter of the section.
 
-- Perimeter: Perimeter of the section. Note that calculation may be incorrect for cross-sections where the inner vacuities connect to the outer edge or there is more than one island in the section. Intended to be used on closed form cross-sections.
+- Perimeter: Perimeter of the section. Note that calculation may be incorrect for cross-sections where inner vacuities connect to the outer edge or there is more than one island in the section. Perimeter calculations are intended to be conducted on closed form cross-sections.
 
 - Mean Brightness: Mean voxel brightness or average grey scale value of the section. 
 
