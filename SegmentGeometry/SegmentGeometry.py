@@ -703,7 +703,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         fillValue = 0
         import SegmentEditorMaskVolumeLib
         maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
-        maskVolumeWithSegment(segmentationNode, segmentID, "FILL_OUTSIDE", [fillValue], volumeNodeformasking, outputVolume, maskExtent) 
+        if IntensitycheckBox == True:
+          maskVolumeWithSegment(segmentationNode, segmentID, "FILL_OUTSIDE", [0], volumeNodeformasking, outputVolume, maskExtent) 
+        else: maskVolumeWithSegment(segmentationNode, segmentID, "FILL_INSIDE_AND_OUTSIDE", [1,0], volumeNodeformasking, outputVolume, maskExtent) 
         extent = maskExtent 
           
         # Calculate the new origin
@@ -1627,7 +1629,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        
     finally:
       # Remove temporary volume node
-      slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
+      #slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
