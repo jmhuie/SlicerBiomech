@@ -31,8 +31,8 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 
 
 # Workflows
-Below are some instructions for how to use Segment Geometry, including a step-by-step guide for general use cases and 
-some details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
+Below are instructions for how to use Segment Geometry, including a step-by-step guide for general use cases and 
+ details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a>, a segmentation file that contains an 
 isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. You may choose to follow along with the instructions using 
 the sample data set or your own.
@@ -69,6 +69,7 @@ can automatically generate a segment with the vacuities filled in.
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
+Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry will also generate a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. Users should use this volume with the saved slice indices to examine specific slices. 
 
 - Segment: Segment name.
 
@@ -88,9 +89,9 @@ To normalize a variable, enable the check boxes of both the variables you want a
 
 - Compactness: Ratio between cross-sectional area and the provided total cross-sectional area.
 
-- Cx: x-coordinate of the centroid.
+- Cx: Centroid x-coordinates that correspond to the resampled and cropped volume exported by Segment Geometry. Presented in IJK format.
 
-- Cy: y-coordinate of the centroid.
+- Cy: Centroid y-coordinates that correspond to the resampled and cropped volume exported by Segment Geometry. Presented in IJK format.
 
 - Theta minor: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
