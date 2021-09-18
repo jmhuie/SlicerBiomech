@@ -1378,17 +1378,21 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
       
-      if eulerflag == 0:
-        ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
-        ResultsText.setStyleSheet("background: transparent; border: transparent")
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
+        if eulerflag == 0:
+          ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
+          ResultsText.setStyleSheet("background: transparent; border: transparent")
         if eulerflag == 1:
           ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
           ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
-      elif SMAcheckBox_2 == True or MODcheckBox_2 == True and OrientationcheckBox == True: 
+      elif OrientationcheckBox == True and SMAcheckBox_2 == True or MODcheckBox_2 == True: 
+        if eulerflag == 0:
+          ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
+          ResultsText.setStyleSheet("background: transparent; border: transparent")
         if eulerflag == 1:
           ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
           ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
+      else: ResultsText.clear()    
  
         
       # adds table column for various arrays

@@ -32,7 +32,7 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 
 # Workflows
 Below are instructions for how to use Segment Geometry, including a step-by-step guide for general use cases and 
- details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
+details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a>, a segmentation file that contains an 
 isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. You may choose to follow along with the instructions using 
 the sample data set or your own.
@@ -43,7 +43,7 @@ the sample data set or your own.
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segment Editor module.
 4. Create a new Linear Transform in the Transforms module.
-5. Move your Segmentation node and Volume Node from the "Transformable" column to the "Transformed" column. 
+5. Move your Segmentation node and Volume node from the "Transformable" column to the "Transformed" column. 
 6. Use the rotation sliders to align the long axis of your segment with one of the three slice views based on how you would like slice through the segment. Additionally, under the "Display" tab there is the option to enable the "Visible in 3D view". This will generate a 3D box that can be used to help rotate and translate your segment and volume.
 7. Switch to the Segment Geometry module.
 8. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
@@ -69,7 +69,9 @@ can automatically generate a segment with the vacuities filled in.
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
-Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry will also generate a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. Users should use this volume with the saved slice indices to examine specific slices. Below contains brief information on the possible computations.
+Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry also generates a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. 
+When calculating second moment of area or section modulus, Segment Geometry will approximate the segment's aspect ratio and alert the user when the no-shear assumption of Euler-Bernoulli's beam theory may not be met. 
+Below contains brief information on the possible computations.
 
 - Segment: Segment name.
 
@@ -124,12 +126,6 @@ Segment Geometry presents the results as a table and automatically plots second 
 - Material Normalization: Material normalized values are indicated with "MatNorm"
 
 - Length Normalization: Length normalized values are indicated with "LenNorm"
-
-# Frequently Asked Questions
-
-**Q: I got a warning that says "Warning! The no-shear assumption may not be met. Click OK to proceed.". What does that mean?**
-
-A: It means that the length of the structure is less than 10x the maximum feret diameter of the narrowest slice in the structure so the no-shear assumption of the Euler-Bernoulli beam theory may not be met. The diameter of slices from the first and last 5% of the segment length are not considered in case of rough edges.
 
 # Funding Acknowledgement
 
