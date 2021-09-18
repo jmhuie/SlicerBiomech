@@ -135,7 +135,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
+    self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
+    self.ui.TransformsButton.connect("clicked(bool)", self.onTransforms)
     
+    # initialize the result label under the apply button
     self.ui.ResultsText.setStyleSheet("background: transparent; border: transparent")
 
 
@@ -222,9 +225,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None and self._parameterNode.GetNodeReference("Volume"):
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
+      self.ui.PrincipalButton.enabled = True
+      self.ui.PrincipalButton.toolTip = "Align segment with the principal axes"
     else:
-      self.ui.applyButton.toolTip = "Select input segmentation node"
+      self.ui.applyButton.toolTip = "Select segmentation and volume nodes"
       self.ui.applyButton.enabled = False
+      self.ui.PrincipalButton.enabled = False
+      self.ui.PrincipalButton.toolTip = "Select segmentation and volume nodes"
     
     if self._parameterNode.GetNodeReference("Segmentation"):
       self.ui.regionSegmentSelector.toolTip = "Select segment"
@@ -324,6 +331,73 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
     self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
+  
+  def onPrincipalAxes(self):
+    """
+    Run processing when user clicks "Align Segment with Principal Axes" button.
+    """
+    
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    volumeNode = self.ui.volumeSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+    
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+    if transformNode == None:
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+    segmentationNode.SetAndObserveTransformNodeID(None)
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+
+    
+
+    import SegmentStatistics
+    segmentationNode.GetDisplayNode().SetSegmentVisibility(segmentId, True)
+    segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+    segStatLogic.getParameterNode().SetParameter("Segmentation", segmentationNode.GetID())
+    segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.obb_origin_ras.enabled",str(True))
+    segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.obb_diameter_mm.enabled",str(True))
+    segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.obb_direction_ras_x.enabled",str(True))
+    segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.obb_direction_ras_y.enabled",str(True))
+    segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.obb_direction_ras_z.enabled",str(True))
+    segStatLogic.computeStatistics()
+    stats = segStatLogic.getStatistics()
+
+    # Draw ROI for each oriented bounding box
+    import numpy as np
+    # Get bounding box
+    obb_origin_ras = np.array(stats[segmentId,"LabelmapSegmentStatisticsPlugin.obb_origin_ras"])
+    obb_diameter_mm = np.array(stats[segmentId,"LabelmapSegmentStatisticsPlugin.obb_diameter_mm"])
+    obb_direction_ras_x = np.array(stats[segmentId,"LabelmapSegmentStatisticsPlugin.obb_direction_ras_x"])
+    obb_direction_ras_y = np.array(stats[segmentId,"LabelmapSegmentStatisticsPlugin.obb_direction_ras_y"])
+    obb_direction_ras_z = np.array(stats[segmentId,"LabelmapSegmentStatisticsPlugin.obb_direction_ras_z"])
+    # Position and orient ROI using a transform
+    obb_center_ras = obb_origin_ras+0.5*(obb_diameter_mm[0] * obb_direction_ras_x + obb_diameter_mm[1] * obb_direction_ras_y + obb_diameter_mm[2] * obb_direction_ras_z)
+    boundingBoxToRasTransform = np.row_stack((np.column_stack((obb_direction_ras_x, obb_direction_ras_y, obb_direction_ras_z, [0,0,0])), (0, 0, 0, 1)))
+    boundingBoxToRasTransformMatrix = slicer.util.vtkMatrixFromArray(boundingBoxToRasTransform)
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+    transformNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)
+    segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+
+    segcentroid_ras_new = segmentationNode.GetSegmentCenterRAS(segmentId)
+    Centroid_diff = [0.0, 0.0, 0.0]  
+    for i in range(0,3):
+      Centroid_diff[i] = (segcentroid_ras_new[i] -  segcentroid_ras[i])
+
+    trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
+    matrix = vtk.vtkMatrix4x4()
+    trans_new.GetMatrixTransformToParent(matrix)
+    matrix.SetElement(0,3, trans_new.GetMatrixTransformToParent().GetElement(0,3) - Centroid_diff[0]) 
+    matrix.SetElement(1,3, trans_new.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
+    matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
+    trans_new.SetMatrixTransformToParent(matrix) 
+  
+  def onTransforms(self):
+    """
+    Run processing when user clicks "Align Segment with Principal Axes" button.
+    """  
+    slicer.util.selectModule("Transforms")
   
   def onApplyButton(self):
     """
@@ -1420,10 +1494,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(PerimArray)
         tableNode.SetColumnUnitLabel(PerimArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(PerimArray.GetName(), "Perimeter of the section")  
-
-      #tableNode.AddColumn(CircularityArray)
-      #tableNode.SetColumnUnitLabel(CircularityArray.GetName(), "mm")  # TODO: use length unit
-      #tableNode.SetColumnDescription(CircularityArray.GetName(), "Circularity of the section") 
 
       if volumeNode != None and IntensitycheckBox == True:
         tableNode.AddColumn(meanIntensityArray)
