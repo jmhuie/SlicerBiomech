@@ -1633,7 +1633,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        
     finally:
       # Remove temporary volume node
-      #slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
+      slicer.mrmlScene.RemoveNode(tempSegmentLabelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
