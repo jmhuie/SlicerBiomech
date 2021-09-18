@@ -136,6 +136,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     
+    self.ui.ResultsText.setStyleSheet("background: transparent; border: transparent")
 
 
     # Initial GUI update
@@ -369,8 +370,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
                      self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
-                     self.ui.CentroidcheckBox.checked,self.ui.PerimcheckBox.checked)
-      
+                     self.ui.CentroidcheckBox.checked,self.ui.PerimcheckBox.checked,self.ui.ResultsText)
+
 
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -395,7 +396,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
   def run(self, segmentationNode, segmentNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
-  CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox, PerimcheckBox):
+  CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox, PerimcheckBox, ResultsText):
     """
     Run the processing algorithm.
     """
@@ -663,7 +664,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         segmentList = vtk.vtkStringArray()
         segmentList.InsertNextValue(segmentID)
         
-        print(volumeNode)
         volumesLogic = slicer.modules.volumes.logic()
         if volumeNode != None:   
           # Create volume for output
@@ -837,7 +837,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           areaOfPixelMm2 = PixelHeightMm * PixelWidthMm
           unitOfPixelMm4 = PixelHeightMm**2 * PixelWidthMm**2
 
-          
         for i in sampleSlices:
           if axisIndex == 0:
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
@@ -875,7 +874,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           if np.count_nonzero(slicetemp) == 0:
             PerimArray.InsertNextValue(0)
             CircularityArray.InsertNextValue(0)
-
+           
           # calculate perimeter
           elif segmentID == segmentNode:
             startx = min(coords_Ijk[0])  
@@ -1379,13 +1378,18 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
       
-      print("Segment aspect ratio:", round(AR,2))
+      if eulerflag == 0:
+        ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
+        ResultsText.setStyleSheet("background: transparent; border: transparent")
       if SMAcheckBox_1 == True or MODcheckBox_1 == True:
         if eulerflag == 1:
-          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met.  Click OK to proceed.")
+          ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+          ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
       elif SMAcheckBox_2 == True or MODcheckBox_2 == True and OrientationcheckBox == True: 
         if eulerflag == 1:
-          slicer.util.errorDisplay("Warning! The no-shear assumption may not be met. Click OK to proceed.")  
+          ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+          ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
+ 
         
       # adds table column for various arrays
       tableNode.AddColumn(SegmentNameArray)

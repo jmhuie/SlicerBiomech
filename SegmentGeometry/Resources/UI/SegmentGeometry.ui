@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>584</width>
-    <height>994</height>
+    <width>615</width>
+    <height>990</height>
    </rect>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="1">
@@ -293,32 +296,6 @@
    </item>
    <item row="13" column="0">
     <widget class="QWidget" name="widget" native="true"/>
-   </item>
-   <item row="15" column="0" colspan="2">
-    <widget class="QPushButton" name="applyButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Run the algorithm.</string>
-     </property>
-     <property name="text">
-      <string>Apply</string>
-     </property>
-    </widget>
-   </item>
-   <item row="16" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item row="8" column="0" colspan="2">
     <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_3" native="true">
@@ -680,18 +657,18 @@
               <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="horizontalLayout">
-               <bool>true</bool>
-              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name ="selectNodeUponCreation">
+              <property name="horizontalLayout" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="selectNodeUponCreation" stdset="0">
                <bool>false</bool>
-              </property> 
+              </property>
               <property name="segmentationNodeSelectorVisible" stdset="0">
                <bool>true</bool>
               </property>
@@ -712,6 +689,36 @@
       <string>Parameter set: </string>
      </property>
     </widget>
+   </item>
+   <item row="16" column="0" colspan="2">
+    <widget class="QPushButton" name="applyButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Run the algorithm.</string>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item row="17" column="0" colspan="2">
+    <widget class="QLabel" name="ResultsText">
+    </widget>
+   </item>
+   <item row="18" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
@@ -844,7 +851,7 @@
     </hint>
    </hints>
   </connection>
-    <connection>
+  <connection>
    <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>areaSegmentSelector</receiver>
