@@ -406,7 +406,7 @@
             <item row="1" column="0">
              <widget class="QCheckBox" name="CSAcheckBox">
               <property name="text">
-               <string>Cross-sectional area</string>
+               <string>Cross-Sectional Area</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -416,7 +416,7 @@
             <item row="2" column="0">
              <widget class="QCheckBox" name="SMAcheckBox_1">
               <property name="text">
-               <string>Second moment of area</string>
+               <string>Second Moment Of Area</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -446,7 +446,7 @@
             <item row="2" column="1">
              <widget class="QCheckBox" name="MODcheckBox_1">
               <property name="text">
-               <string>Section modulus</string>
+               <string>Section Modulus</string>
               </property>
               <property name="checked">
                <bool>false</bool>

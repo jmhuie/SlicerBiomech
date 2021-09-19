@@ -348,8 +348,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode.SetAndObserveTransformNodeID(None)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
 
-    
-
     import SegmentStatistics
     segmentationNode.GetDisplayNode().SetSegmentVisibility(segmentId, True)
     segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
@@ -435,7 +433,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.chartSelector.setCurrentNode(plotChartNode)  
 
      
-      self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
+      hm = self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
@@ -445,8 +443,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
                      self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
                      self.ui.CentroidcheckBox.checked,self.ui.PerimcheckBox.checked,self.ui.ResultsText)
-
-
+      
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
       import traceback
@@ -1452,22 +1449,24 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
        for s in range(TotalAreaArray.GetNumberOfTuples()):
          CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
       
-      if SMAcheckBox_1 == True or MODcheckBox_1 == True:
-        if eulerflag == 0:
-          ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
-          ResultsText.setStyleSheet("background: transparent; border: transparent")
-        if eulerflag == 1:
-          ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
-          ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
-      elif OrientationcheckBox == True and SMAcheckBox_2 == True or MODcheckBox_2 == True: 
-        if eulerflag == 0:
-          ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
-          ResultsText.setStyleSheet("background: transparent; border: transparent")
-        if eulerflag == 1:
-          ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
-          ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
-      else: ResultsText.clear()    
- 
+      try:
+        if SMAcheckBox_1 == True or MODcheckBox_1 == True:
+          if eulerflag == 0:
+            ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
+            ResultsText.setStyleSheet("background: transparent; border: transparent")
+          if eulerflag == 1:
+            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+            ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
+        elif OrientationcheckBox == True and SMAcheckBox_2 == True or MODcheckBox_2 == True: 
+          if eulerflag == 0:
+            ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
+            ResultsText.setStyleSheet("background: transparent; border: transparent")
+          if eulerflag == 1:
+            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+            ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
+        else: ResultsText.clear()
+      except AttributeError:
+        pass
         
       # adds table column for various arrays
       tableNode.AddColumn(SegmentNameArray)
@@ -1734,8 +1733,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       tableWidget.tableView().setMRMLTableNode(tableNode)
 
 
-
-
     logging.info('Processing completed')
 
 
@@ -1805,10 +1802,10 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
 
     tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Segment Geometry test table")
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
-
+    
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, "S (Red)", 0, tableNode, plotChartNode, True, True, True, False, True, 
-    True, True, True, True, True, 0, True, False, True, True, True, True, True, segmentationNode, segmentId, True, True)
+    True, True, True, True, True, 0, True, False, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
     import math
     # Compute CSA error
     crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "CSA (mm^2)")
