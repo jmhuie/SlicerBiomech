@@ -43,16 +43,15 @@ the sample data set or your own.
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segment Editor module.
 4. Create a new Linear Transform in the Transforms module.
-5. Move your Segmentation node and Volume node from the "Transformable" column to the "Transformed" column. 
-6. Use the rotation sliders to align the long axis of your segment with one of the three slice views based on how you would like slice through the segment. Additionally, under the "Display" tab there is the option to enable the "Visible in 3D view". This will generate a 3D box that can be used to help rotate and translate your segment and volume.
-7. Switch to the Segment Geometry module.
-8. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
-9. Select the "Long Axis". This is the slice view perpendicular to the desired long axis. Put differently, it should be the slice view that contains the cross-sections you want to compute on.
-10. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
+5. Switch to the Segment Geometry module.
+6. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
+7. Rotate the segment to align it with the desired axis. You may automatically align your segment with its principal axes and/or manually rotate the segment with an interactive bounding box. Click the "Rotate Segment in 3D View" button to enable and disable interactive mode. Click and drag the sides of the bounding box to rotate the segment and hold shift to drag it.
+8. Back under inputs, select the "Long Axis". This is the slice view perpendicular to the desired long axis. Put differently, it should be the slice view that contains the cross-sections you want to compute on.
+9. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
+10. Choose which computations should be performed.
 11. Select an output table and a chart node. 
-12. Under "Advanced" choose which computations should be performed.
-13. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
-14. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
+12. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
+13. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
 
 ### Use Custom Neutral Axis

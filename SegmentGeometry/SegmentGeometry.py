@@ -136,7 +136,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
-    self.ui.TransformsButton.connect("clicked(bool)", self.onTransforms)
+    self.ui.Interactive3DButton.connect("clicked(bool)", self.onInteractive3DBox)
+
     
     # initialize the result label under the apply button
     self.ui.ResultsText.setStyleSheet("background: transparent; border: transparent")
@@ -219,7 +220,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
     self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    self.ui.areaSegmentSelector.setCurrentSegmentID(self._parameterNode.GetNodeReference("AreaSegment"))
     self.ui.areaSegmentSelector.blockSignals(wasBlocked)
+
 
     # Update buttons states and tooltips
     if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None and self._parameterNode.GetNodeReference("Volume"):
@@ -227,11 +230,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.applyButton.enabled = True
       self.ui.PrincipalButton.enabled = True
       self.ui.PrincipalButton.toolTip = "Align segment with the principal axes"
+      self.ui.Interactive3DButton.enabled = True
+      self.ui.Interactive3DButton.toolTip = "Interactively rotate segment in 3D view"
     else:
       self.ui.applyButton.toolTip = "Select segmentation and volume nodes"
       self.ui.applyButton.enabled = False
       self.ui.PrincipalButton.enabled = False
       self.ui.PrincipalButton.toolTip = "Select segmentation and volume nodes"
+      self.ui.Interactive3DButton.enabled = False
+      self.ui.Interactive3DButton.toolTip = "Select segmentation and volume nodes"
     
     if self._parameterNode.GetNodeReference("Segmentation"):
       self.ui.regionSegmentSelector.toolTip = "Select segment"
@@ -331,7 +338,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetParameter("Orientation", str(self.ui.OrientationcheckBox.checked))
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
     self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
-  
+ 
   def onPrincipalAxes(self):
     """
     Run processing when user clicks "Align Segment with Principal Axes" button.
@@ -391,11 +398,37 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
     trans_new.SetMatrixTransformToParent(matrix) 
   
-  def onTransforms(self):
+  def onInteractive3DBox(self):
     """
-    Run processing when user clicks "Align Segment with Principal Axes" button.
-    """  
-    slicer.util.selectModule("Transforms")
+    Run processing when user clicks "Interactive Rotate 3D View" button.
+    """    
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    volumeNode = self.ui.volumeSelector.currentNode()
+    volumeNode.SetAndObserveTransformNodeID(None)
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+    
+    segtransformNode = segmentationNode.GetTransformNodeID()
+    if segtransformNode != None:
+      segtransformNode = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
+      matrix = vtk.vtkMatrix4x4()
+      segtransformNode.GetMatrixTransformToParent(matrix)
+      transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+      if transformNode == None:
+        transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+      transformNode.SetMatrixTransformToParent(matrix)
+      segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    elif segtransformNode == None:
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+      segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    transformNode.CreateDefaultDisplayNodes()
+    transform = transformNode.GetDisplayNode()
+    transform.UpdateEditorBounds() 
+    if transform.GetEditorVisibility() == False:
+      transform.SetEditorVisibility(1)
+    elif transform.GetEditorVisibility() == True:
+      transform.SetEditorVisibility(0)  
+    volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
   
   def onApplyButton(self):
     """
@@ -1455,14 +1488,14 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
             ResultsText.setStyleSheet("background: transparent; border: transparent")
           if eulerflag == 1:
-            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may be violated.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
             ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
         elif OrientationcheckBox == True and SMAcheckBox_2 == True or MODcheckBox_2 == True: 
           if eulerflag == 0:
             ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
             ResultsText.setStyleSheet("background: transparent; border: transparent")
           if eulerflag == 1:
-            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may not be met.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
+            ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may be violated.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
             ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
         else: ResultsText.clear()
       except AttributeError:
