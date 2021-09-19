@@ -47,7 +47,7 @@ the sample data set or your own.
 6. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
 7. Select the "Long Axis". This is the slice view perpendicular to the desired measurement axis. Put differently, it should be the slice view that contains the cross-sections you want to compute on.
 8. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
-9. Using the Transformation Tools, rotate the segment to align it with the desired long axis/slice view. You may automatically align your segment with its principal axes and/or manually rotate the segment with an interactive bounding box. Click the "Rotate Segment in 3D View" button to enable and disable interactive mode. Click and drag the sides of the bounding box to rotate the segment and hold shift to drag it.
+9. Using the Transformation Tools, rotate the segment to align it with the desired long axis/slice view. You may automatically align your segment with its principal axes and/or manually rotate the segment with an interactive bounding box. Click the "Rotate Segment in 3D View" button to enable and disable the interactive mode. Click and drag the sides of the bounding box to rotate the segment and hold shift while clicking and dragging to move the whole segment.
 10. Choose which computations should be performed.
 11. Select an output table and a chart node. 
 12. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.

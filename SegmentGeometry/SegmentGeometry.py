@@ -347,11 +347,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode = self.ui.regionSegmentSelector.currentNode()
     volumeNode = self.ui.volumeSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
-    segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+    segName = segmentationNode.GetName()
     
-    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
     if transformNode == None:
-      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
     segmentationNode.SetAndObserveTransformNodeID(None)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
 
@@ -379,7 +379,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     obb_center_ras = obb_origin_ras+0.5*(obb_diameter_mm[0] * obb_direction_ras_x + obb_diameter_mm[1] * obb_direction_ras_y + obb_diameter_mm[2] * obb_direction_ras_z)
     boundingBoxToRasTransform = np.row_stack((np.column_stack((obb_direction_ras_x, obb_direction_ras_y, obb_direction_ras_z, [0,0,0])), (0, 0, 0, 1)))
     boundingBoxToRasTransformMatrix = slicer.util.vtkMatrixFromArray(boundingBoxToRasTransform)
-    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
     transformNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)
     segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
@@ -406,20 +406,20 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode = self.ui.volumeSelector.currentNode()
     volumeNode.SetAndObserveTransformNodeID(None)
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
-    segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+    segName = segmentation.GetName()
     
     segtransformNode = segmentationNode.GetTransformNodeID()
     if segtransformNode != None:
       segtransformNode = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
       matrix = vtk.vtkMatrix4x4()
       segtransformNode.GetMatrixTransformToParent(matrix)
-      transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Principal Transformation")
+      transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
       if transformNode == None:
-        transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+        transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
       transformNode.SetMatrixTransformToParent(matrix)
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     elif segtransformNode == None:
-      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Principal Transformation")
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     transformNode.CreateDefaultDisplayNodes()
     transform = transformNode.GetDisplayNode()
@@ -438,7 +438,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     try:
       # Create nodes for results
       segment = self.ui.regionSegmentSelector.currentNode().GetSegmentation().GetSegment(self.ui.regionSegmentSelector.currentSegmentID())
-      segName = segment.GetName()
+      segName = segmentationNode.GetName()
       
       tableNode = self.ui.tableSelector.currentNode()
       expTable = segName + " Segment Geometry table"
