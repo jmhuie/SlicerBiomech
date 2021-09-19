@@ -406,7 +406,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode = self.ui.volumeSelector.currentNode()
     volumeNode.SetAndObserveTransformNodeID(None)
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
-    segName = segmentation.GetName()
+    segName = segmentationNode.GetName()
     
     segtransformNode = segmentationNode.GetTransformNodeID()
     if segtransformNode != None:
@@ -438,7 +438,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     try:
       # Create nodes for results
       segment = self.ui.regionSegmentSelector.currentNode().GetSegmentation().GetSegment(self.ui.regionSegmentSelector.currentSegmentID())
-      segName = segmentationNode.GetName()
+      segName = segment.GetName()
       
       tableNode = self.ui.tableSelector.currentNode()
       expTable = segName + " Segment Geometry table"
