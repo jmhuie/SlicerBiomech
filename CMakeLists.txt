@@ -9,7 +9,7 @@ set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Jonathan Huie (George Washington University)")
 set(EXTENSION_DESCRIPTION "This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.")
 set(EXTENSION_ICONURL "https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry.png")
-set(EXTENSION_SCREENSHOTURLS "https://user-images.githubusercontent.com/52302862/131934682-bde58601-b5f2-4325-b6f3-f64dd55defda.png")
+set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png")
 set(EXTENSION_DEPENDS "SegmentEditorExtraEffects") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
