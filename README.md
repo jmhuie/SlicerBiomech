@@ -4,7 +4,7 @@ This is the repository for Segment Geometry, an extension for <a href="https://s
 
 Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. 
 
-<img width="1792" alt="overview" src="https://user-images.githubusercontent.com/52302862/131934682-bde58601-b5f2-4325-b6f3-f64dd55defda.png">
+<img width="1792" alt="overview" src="https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png">
 
 # Installation
 
@@ -45,7 +45,7 @@ the sample data set or your own.
 4. Create a new Linear Transform in the Transforms module.
 5. Switch to the Segment Geometry module.
 6. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
-7. Use the provided Transformation Tools to rotate the segment and align it with the desired long axis/slice view. 
+7. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. 
 8. Select the "Slice View" perpendicular to the desired measurement axis. It should be the slice view that contains the cross-sections you want to compute on.
 9. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
 10. Choose which computations should be performed.
@@ -53,7 +53,7 @@ the sample data set or your own.
 12. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 13. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
-### Transformation Tools
+### Transform Tools
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
 * **Align With Principal Axes** will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
 * **Rotate Segment In 3D View** will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
