@@ -137,6 +137,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
     self.ui.Interactive3DButton.connect("clicked(bool)", self.onInteractive3DBox)
+    self.ui.RotatorSliders.connect("valueChanged(double)", self.initializeSliders)
+    self.ui.RotationInitButton.connect("clicked(bool)", self.initializeSliders)
 
     
     # initialize the result label under the apply button
@@ -232,6 +234,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.PrincipalButton.toolTip = "Align segment with the principal axes"
       self.ui.Interactive3DButton.enabled = True
       self.ui.Interactive3DButton.toolTip = "Interactively rotate segment in 3D view"
+      self.ui.RotationInitButton.enabled = True
+      self.ui.RotationInitButton.toolTip = "Initialize rotation sliders"
+
     else:
       self.ui.applyButton.toolTip = "Select segmentation and volume nodes"
       self.ui.applyButton.enabled = False
@@ -239,6 +244,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.PrincipalButton.toolTip = "Select segmentation and volume nodes"
       self.ui.Interactive3DButton.enabled = False
       self.ui.Interactive3DButton.toolTip = "Select segmentation and volume nodes"
+      self.ui.RotationInitButton.enabled = False
+      self.ui.RotationInitButton.toolTip = "Select segmentation and volume nodes"
     
     if self._parameterNode.GetNodeReference("Segmentation"):
       self.ui.regionSegmentSelector.toolTip = "Select segment"
@@ -355,6 +362,41 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode.SetAndObserveTransformNodeID(None)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
 
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    if pointNode != None:
+      def updateFinalTransform(unusedArg1=None, unusedArg2=None, unusedArg3=None):
+        rotationMatrix = vtk.vtkMatrix4x4()
+        pointNode.GetMatrixTransformToParent(rotationMatrix)
+        rotationCenterPointCoord = segcentroid_ras
+        finalTransform = vtk.vtkTransform()
+        finalTransform.Translate(rotationCenterPointCoord)
+        finalTransform.Concatenate(rotationMatrix)
+        finalTransform.Translate(-rotationCenterPointCoord[0], -rotationCenterPointCoord[1], -rotationCenterPointCoord[2])
+        transformNode.SetAndObserveMatrixTransformToParent(finalTransform.GetMatrix())
+
+      rotationTransformNodeObserver = pointNode.AddObserver(slicer.vtkMRMLTransformNode.TransformModifiedEvent, updateFinalTransform)
+      pointNode.RemoveObserver(rotationTransformNodeObserver)
+
+      transform = transformNode.GetDisplayNode()
+      if transform != None:  
+        if transform.GetEditorVisibility() == False:
+          sliders=self.ui.RotatorSliders
+          sliders.setMRMLScene(slicer.mrmlScene)
+          sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+          sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
+          sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+          
+      if transform == None:  
+        sliders=self.ui.RotatorSliders
+        sliders.setMRMLScene(slicer.mrmlScene)
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION    
+        #sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
+    
+  
+
+
     import SegmentStatistics
     segmentationNode.GetDisplayNode().SetSegmentVisibility(segmentId, True)
     segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
@@ -384,6 +426,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
     slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+    
 
     segcentroid_ras_new = segmentationNode.GetSegmentCenterRAS(segmentId)
     Centroid_diff = [0.0, 0.0, 0.0]  
@@ -396,8 +439,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     matrix.SetElement(0,3, trans_new.GetMatrixTransformToParent().GetElement(0,3) - Centroid_diff[0]) 
     matrix.SetElement(1,3, trans_new.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
     matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
-    trans_new.SetMatrixTransformToParent(matrix) 
-  
+    trans_new.SetMatrixTransformToParent(matrix)
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+
+        
   def onInteractive3DBox(self):
     """
     Run processing when user clicks "Interactive Rotate 3D View" button.
@@ -417,19 +462,105 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       if transformNode == None:
         transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
       transformNode.SetMatrixTransformToParent(matrix)
-      segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     elif segtransformNode == None:
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
-    transformNode.CreateDefaultDisplayNodes()
+    
     transform = transformNode.GetDisplayNode()
+    if transform == None:
+      transformNode.CreateDefaultDisplayNodes()
+      transform = transformNode.GetDisplayNode()
     transform.UpdateEditorBounds() 
+    transform.SetEditorTranslationEnabled(0)
     if transform.GetEditorVisibility() == False:
       transform.SetEditorVisibility(1)
+      self.ui.RotatorSliders.enabled = False
     elif transform.GetEditorVisibility() == True:
       transform.SetEditorVisibility(0)  
+      pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+      if pointNode != None:
+        self.ui.RotatorSliders.enabled = True
+        og_matrix = vtk.vtkMatrix4x4()
+        transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+        transformNode.GetMatrixTransformToParent(og_matrix)    
+        for i in range(0,3):
+          og_matrix.SetElement(i,3,0)
+        pointNode.SetAndObserveMatrixTransformToParent(og_matrix)  
+        sliders=self.ui.RotatorSliders
+        sliders.setMRMLScene(slicer.mrmlScene)
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
+        sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    
+          
   
+  
+  def initializeSliders(self):
+    """
+    Run processing when user clicks "Initialize Sliders".
+    """  
+    self.ui.RotatorSliders.enabled = True
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    volumeNode = self.ui.volumeSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetName()
+    
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+    if transformNode != None:
+      transform = transformNode.GetDisplayNode()
+      if transform != None:  
+        transformNode.GetDisplayNode().SetEditorVisibility(0)
+        self.ui.Interactive3DButton.checked = False    
+    if transformNode == None:
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
+      volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    pointflag = 0
+    if pointNode != None:
+      pointflag = 1
+    if pointNode == None:
+      pointNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "Segment Geometry Point Transformation")
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)  
+
+    og_matrix = vtk.vtkMatrix4x4()
+    transformNode.GetMatrixTransformToParent(og_matrix)    
+    for i in range(0,3):
+      og_matrix.SetElement(i,3,0)
+    pointNode.SetAndObserveMatrixTransformToParent(og_matrix)  
+
+    def updateFinalTransform(unusedArg1=None, unusedArg2=None, unusedArg3=None):
+      rotationMatrix = vtk.vtkMatrix4x4()
+      pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+      pointNode.GetMatrixTransformToParent(rotationMatrix)
+      rotationCenterPointCoord = segcentroid_ras
+      finalTransform = vtk.vtkTransform()
+      finalTransform.Translate(rotationCenterPointCoord)
+      finalTransform.Concatenate(rotationMatrix)
+      finalTransform.Translate(-rotationCenterPointCoord[0], -rotationCenterPointCoord[1], -rotationCenterPointCoord[2])
+      transformNode.SetAndObserveMatrixTransformToParent(finalTransform.GetMatrix())
+     
+    if pointflag == 1:
+      rotationTransformNodeObserver = pointNode.AddObserver(slicer.vtkMRMLTransformNode.TransformModifiedEvent, updateFinalTransform)
+      pointNode.RemoveObserver(rotationTransformNodeObserver)
+
+    # Manual initial update
+    updateFinalTransform()  
+    # Automatic update when point is moved or transform is modified
+    rotationTransformNodeObserver = pointNode.AddObserver(slicer.vtkMRMLTransformNode.TransformModifiedEvent, updateFinalTransform)
+
+    #initialize the sliders
+    sliders=self.ui.RotatorSliders
+    sliders.setMRMLScene(slicer.mrmlScene)
+    sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+    sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
+    sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
+    sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
+    
+    #pointNode.RemoveObserver(rotationTransformNodeObserver)
+    
+
   def onApplyButton(self):
     """
     Run processing when user clicks "Apply" button.

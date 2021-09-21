@@ -45,14 +45,19 @@ the sample data set or your own.
 4. Create a new Linear Transform in the Transforms module.
 5. Switch to the Segment Geometry module.
 6. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
-7. Select the "Long Axis". This is the slice view perpendicular to the desired measurement axis. Put differently, it should be the slice view that contains the cross-sections you want to compute on.
-8. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
-9. Using the Transformation Tools, rotate the segment to align it with the desired long axis/slice view. You may automatically align your segment with its principal axes and/or manually rotate the segment with an interactive bounding box. Click the "Rotate Segment in 3D View" button to enable and disable the interactive mode. Click and drag the sides of the bounding box to rotate the segment and hold shift while clicking and dragging to move the whole segment.
+7. Use the provided Transformation Tools to rotate the segment and align it with the desired long axis/slice view. 
+8. Select the "Slice View" perpendicular to the desired measurement axis. It should be the slice view that contains the cross-sections you want to compute on.
+9. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
 10. Choose which computations should be performed.
 11. Select an output table and a chart node. 
 12. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 13. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
+### Transformation Tools
+Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
+* **Align With Principal Axes** will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
+* **Rotate Segment In 3D View** will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
+* **Initialize Rotation Sliders** click to initialize the sliders that will rotate the segment around its centroid.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To set the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents the angle be between the neutral axis and the horizontal, starting from the right side and moving in clockwise direction. By default, the netural axis is parallel to the horizontal axis.
