@@ -441,6 +441,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
     trans_new.SetMatrixTransformToParent(matrix)
     pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    if pointNode != None:
+      pointNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)  
 
         
   def onInteractive3DBox(self):
@@ -1420,8 +1422,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                   y2 = perimy[j]
                   Fdiam = max(Fdiam, np.sqrt((x2-x1)**2 +(y2-y1)**2) * PixelWidthMm)
             FeretArray.InsertNextValue(Fdiam)
-            sampleMin = int(max(sampleSlices)*.05)
-            sampleMax = int(max(sampleSlices)*.95)
+            sampleMin = int(max(sampleSlices)*.1)
+            sampleMax = int(max(sampleSlices)*.9)
             if i >= sampleMin and i <= sampleMax:
               if FdiamMin == None and Fdiam > 0:
                 FdiamMin = (numSlices * PixelDepthMm)
