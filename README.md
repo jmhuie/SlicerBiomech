@@ -2,7 +2,7 @@
 
 This is the repository for Segment Geometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Click the video to watch a quick demo of Segment Geometry.
+Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
 ![image](https://user-images.githubusercontent.com/52302862/134274249-79000a1a-81db-46e3-a2d9-e7ff71e61248.png)
 
