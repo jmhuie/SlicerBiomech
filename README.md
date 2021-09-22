@@ -2,7 +2,7 @@
 
 This is the repository for Segment Geometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Click the video to watch a quick demo of Segment Geometry.
+Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
 ![image](https://user-images.githubusercontent.com/52302862/134274249-79000a1a-81db-46e3-a2d9-e7ff71e61248.png)
 
@@ -54,7 +54,7 @@ isolated humerus and solid humerus segment for measuring compactness, and a line
 
 # Advanced Tools
 
-### Transform Tools and Computations
+### Segment Transformation Tools
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
 * **Align With Principal Axes** - will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
 * **Rotate Segment In 3D View** - will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
