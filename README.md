@@ -2,9 +2,9 @@
 
 This is the repository for Segment Geometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. 
+Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Click the video to watch a quick demo of Segment Geometry.
 
-<img width="1792" alt="overview" src="https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png">
+[![Click to watch demo video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://youtu.be/N7cSVIR6tik)
 
 # Installation
 
@@ -34,24 +34,21 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 Below are instructions for how to use Segment Geometry, including a step-by-step guide for general use cases and 
 details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a>, a segmentation file that contains an 
-isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. You may choose to follow along with the instructions using 
-the sample data set or your own.
- 
+isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. You may choose to follow along with the instructions using the sample data set or your own.
 
 ### General Use Case
 1. Start 3D Slicer.
 2. Load in CT Data.
 3. Segment bone or structure of interest in the Segment Editor module.
-4. Create a new Linear Transform in the Transforms module.
-5. Switch to the Segment Geometry module.
-6. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
-7. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. 
-8. Select the "Slice View" perpendicular to the desired measurement axis. It should be the slice view that contains the cross-sections you want to compute on.
-9. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
-10. Choose which computations should be performed.
-11. Select an output table and a chart node. 
-12. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
-13. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
+4. Switch to the Segment Geometry module.
+5. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
+6. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. 
+7. Select the "Slice View" perpendicular to the desired measurement axis. It should be the slice view that contains the cross-sections you want to compute on.
+8. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
+9. Choose which computations should be performed.
+10. Select an output table and a chart node. 
+11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
+12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
 ### Transform Tools
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
