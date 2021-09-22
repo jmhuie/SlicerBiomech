@@ -4,7 +4,7 @@ This is the repository for Segment Geometry, an extension for <a href="https://s
 
 Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Click the video to watch a quick demo of Segment Geometry.
 
-[![Click to watch demo video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://youtu.be/N7cSVIR6tik)
+![image](https://user-images.githubusercontent.com/52302862/134274249-79000a1a-81db-46e3-a2d9-e7ff71e61248.png)
 
 # Installation
 
@@ -30,11 +30,10 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 * Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
 
 
-# Workflows
-Below are instructions for how to use Segment Geometry, including a step-by-step guide for general use cases and 
-details on the more technical tools. Segment Geometry provides an example dataset in the Sample Data module. It consists of a salamander 
+# Workflow Example
+Below are general instructions on how to use Segment Geometry, including a step-by-step guide for general use cases and a demo video. Segment Geometry provides an example dataset in the Sample Data module that consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a>, a segmentation file that contains an 
-isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. You may choose to follow along with the instructions using the sample data set or your own.
+isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. New users are encouraged to follow along with guide and demo video using the sample data set or their own.
 
 ### General Use Case
 1. Start 3D Slicer.
@@ -50,11 +49,16 @@ isolated humerus and solid humerus segment for measuring compactness, and a line
 11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
-### Transform Tools
+### Demo Video
+[![Demo Video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://www.youtube.com/watch?v=N7cSVIR6tik)
+
+# Advanced Tools
+
+### Transform Tools and Computations
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
-* **Align With Principal Axes** will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
-* **Rotate Segment In 3D View** will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
-* **Initialize Rotation Sliders** click to initialize the sliders that will rotate the segment around its centroid.
+* **Align With Principal Axes** - will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
+* **Rotate Segment In 3D View** - will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
+* **Initialize Rotation Sliders** - click to initialize the sliders that will rotate the segment around its centroid.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To set the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents the angle be between the neutral axis and the horizontal, starting from the right side and moving in clockwise direction. By default, the netural axis is parallel to the horizontal axis.
@@ -62,9 +66,9 @@ If the direction of the loading axis is known, a custom neutral axis can be used
 ### Compute Unitless Variables
 Three methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
 
-* **Length normalization** from Doube et al. (2009). With this method, cross-sectional area, second moment of area, and section modulus are corrected based on the length of the segment. The respective root of the variables are taken to make them linear; then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
-* **Material normalization** from Summers et al. (2004). With this method, second moment of area/section modulus values are divided by the second moment of area/section modulus of a solid circle with the same cross-sectional area. Normalized values represent how well the structure's material is distributed relative to an idealized beam. 
-* **Compactness** is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities). To measure compactness, the user must provide a separate segment that contains the the whole structure including the vacuities. The <a href="https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify" target ="_blank">SurfaceWrapSolidify</a> extension, implemented in the Segment Editor module (with the ExtraSegmentEditorEffects extension), 
+* **Length normalization** -  from Doube et al. (2009). With this method, cross-sectional area, second moment of area, and section modulus are corrected based on the length of the segment. The respective root of the variables are taken to make them linear; then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
+* **Material normalization** -  from Summers et al. (2004). With this method, second moment of area/section modulus values are divided by the second moment of area/section modulus of a solid circle with the same cross-sectional area. Normalized values represent how well the structure's material is distributed relative to an idealized beam. 
+* **Compactness** - is a method for normalizing cross-sectional area. Compactness is the area of a slice occupied by the segment divided by the total area of the section (area of the segment + area of any internal vacuities). To measure compactness, the user must provide a separate segment that contains the the whole structure including the vacuities. The <a href="https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify" target ="_blank">SurfaceWrapSolidify</a> extension, implemented in the Segment Editor module (with the ExtraSegmentEditorEffects extension), 
 can automatically generate a segment with the vacuities filled in. 
 
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
