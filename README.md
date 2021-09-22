@@ -54,7 +54,7 @@ isolated humerus and solid humerus segment for measuring compactness, and a line
 
 # Advanced Tools
 
-### Transform Tools and Computations
+### Segment Transformation Tools
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
 * **Align With Principal Axes** - will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
 * **Rotate Segment In 3D View** - will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
