@@ -1404,26 +1404,49 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Circularity = 4*np.pi*CSA*areaOfPixelMm2/(perimeter*PixelWidthMm)**2
             CircularityArray.InsertNextValue(Circularity)
           
-          # calculate maximum diameter
+          # calculate maximum diameter manually using all points
+          # TODO: calculate convex hull without python packages
+          #if segmentID == segmentNode:
+          #  Fdiam = 0
+          #  if np.count_nonzero(slicetemp) == 0:
+          #    Fdiam = 0
+          #  elif isinstance(coords_Ijk[0],np.int64):
+          #    Fdiam = 1
+          #  elif len(coords_Ijk[0]) == 2:
+          #    Fdiam = 2
+          #  elif len(coords_Ijk[0]) >= 3: 
+          #    for h in range(len(coords_Ijk[0])):
+          #      x1 = coords_Ijk[0][h]
+          #      y1 = coords_Ijk[1][h]
+          #      for j in range(len(coords_Ijk[0])):
+          #        x2 = coords_Ijk[0][j]
+          #        y2 = coords_Ijk[1][j]
+          #        Fdiam = max(Fdiam, np.sqrt((x2-x1)**2 +(y2-y1)**2) * PixelWidthMm)
+          
+          # calculate maximum diameter from convex hull
           if segmentID == segmentNode:
+            from scipy.spatial.qhull import ConvexHull
+            from scipy.spatial.distance import euclidean
             Fdiam = 0
             if np.count_nonzero(slicetemp) == 0:
               Fdiam = 0
-            elif isinstance(perimx,np.int64):
+            elif isinstance(coords_Ijk[0],np.int64):
               Fdiam = 1
-            elif len(perimx) == 2:
+            elif len(coords_Ijk[0]) == 2:
               Fdiam = 2
-            elif len(perimx) >= 3: 
-              for h in range(len(perimx)):
-                x1 = perimx[h]
-                y1 = perimy[h]
-                for j in range(len(perimx)):
-                  x2 = perimx[j]
-                  y2 = perimy[j]
-                  Fdiam = max(Fdiam, np.sqrt((x2-x1)**2 +(y2-y1)**2) * PixelWidthMm)
+            elif len(coords_Ijk[0]) >= 3: 
+              points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
+              hull = ConvexHull(points)
+              Fdiam = 0
+              for i in hull.vertices:
+                pt1 = points[i]
+                for j in hull.vertices:
+                  pt2 = points[j]
+                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2)* PixelWidthMm)
             FeretArray.InsertNextValue(Fdiam)
-            sampleMin = int(max(sampleSlices)*.1)
-            sampleMax = int(max(sampleSlices)*.9)
+            # find smallest, largest diameter to calculate aspect ratio
+            sampleMin = int(max(sampleSlices)*.05)
+            sampleMax = int(max(sampleSlices)*.95)
             if i >= sampleMin and i <= sampleMax:
               if FdiamMin == None and Fdiam > 0:
                 FdiamMin = (numSlices * PixelDepthMm)
@@ -1431,8 +1454,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 FdiamMin = min(FdiamMin,Fdiam)
                 AR = (numSlices * PixelDepthMm)/FdiamMin
                 if AR > 10:
-                  eulerflag = 0          
- 
+                  eulerflag = 0     
                             
           # set up variables for calculations
           Sn = np.count_nonzero(slicetemp)
