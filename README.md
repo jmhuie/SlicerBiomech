@@ -8,9 +8,9 @@ Segment Geometry iterates slice-by-slice through a segment to calculate the seco
 
 # Installation
 
-The official method for installing Segment Geometry is through 3D Slicer's built-in Extension Manager. To install Segment Geometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
-In 3D Slicer, open the Extensions Manager module and search for "Segment Geometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, Segment Geometry should be fully functional and located in the Quantification 
-module category.
+The official method for installing Segment Geometry is through 3D Slicer's built-in Extensions Manager. To install Segment Geometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
+In 3D Slicer, open the Extensions Manager module and search for "SegmentGeometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, Segment Geometry should be fully functional and located in the Quantification 
+module category. If there is an update for Segment Geometry, there will be the option to update the extension in the Extension Manager once it has already been installed.
 
 # How to Cite
 
@@ -32,8 +32,8 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 
 # Workflow Example
 Below are general instructions on how to use Segment Geometry, including a step-by-step guide for general use cases and a demo video. Segment Geometry provides an example dataset in the Sample Data module that consists of a salamander 
-CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a>, a segmentation file that contains an 
-isolated humerus and solid humerus segment for measuring compactness, and a linear transformation node. New users are encouraged to follow along with guide and demo video using the sample data set or their own.
+CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a> and a segmentation file that contains an 
+isolated humerus and solid humerus segment for measuring compactness. New users are encouraged to follow along with guide and demo video using the sample data set or their own.
 
 ### General Use Case
 1. Start 3D Slicer.

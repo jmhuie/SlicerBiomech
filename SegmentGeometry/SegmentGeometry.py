@@ -65,16 +65,7 @@ def registerSampleData():
         thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoSegment.png'),
         loadFileType='SegmentationFile',
         )
-    SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        category="Segment Geometry",
-        sampleName='DemoTransform',
-        uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_LinearTransform_3.h5',
-        fileNames='DemoTransform.h5',
-        nodeNames='DemoTransform',
-        thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoTransform.png'),
-        loadFileType='TransformFile',
-        )
-        
+
 #
 
 #
