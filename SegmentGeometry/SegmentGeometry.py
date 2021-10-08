@@ -1425,7 +1425,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               Fdiam = 1
             elif len(coords_Ijk[0]) == 2:
               Fdiam = 2
-            elif len(coords_Ijk[0]) >= 3: 
+            elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) == 1:  
+              Fdiam = max(coords_Ijk[1]) - min(coords_Ijk[1])
+            elif len(coords_Ijk[1]) >= 3 and len(set(coords_Ijk[1])) == 1:  
+              Fdiam = max(coords_Ijk[0]) - min(coords_Ijk[0])
+            elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) > 1  and len(set(coords_Ijk[1])) > 1: 
               points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
               hull = ConvexHull(points)
               Fdiam = 0
