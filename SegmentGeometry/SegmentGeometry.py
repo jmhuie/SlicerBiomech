@@ -198,18 +198,14 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     wasBlocked = self.ui.volumeSelector.blockSignals(True)
     self.ui.volumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("Volume"))
     self.ui.volumeSelector.blockSignals(wasBlocked)
-
-    wasBlocked = self.ui.axisSelectorBox.blockSignals(True)
-    self.ui.axisSelectorBox.currentText = self._parameterNode.GetParameter("Axis")
-    self.ui.axisSelectorBox.blockSignals(wasBlocked)
     
     wasBlocked = self.ui.tableSelector.blockSignals(True)
     self.ui.tableSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsTable"))
     self.ui.tableSelector.blockSignals(wasBlocked)
     
-    wasBlocked = self.ui.axisSelectorBox.blockSignals(True)
+    wasBlocked = self.ui.chartSelector.blockSignals(True)
     self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
-    self.ui.axisSelectorBox.blockSignals(wasBlocked)
+    self.ui.chartSelector.blockSignals(wasBlocked)
 
     wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
     self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
@@ -630,8 +626,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     """
 
     import numpy as np
+    import time
 
+    start = time.time()
     logging.info('Processing started')
+    
 
     if not segmentationNode:
       raise ValueError("Segmentation node is invalid")
@@ -1070,17 +1069,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             slicetemp = narray[:, :, i] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[:,:,i])
             if volumeNode != None and IntensitycheckBox == True:
-              meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:,:,i]>0)]) 
+              meanIntensity = np.mean(voxelArray[:,:,i][np.where(voxelArray[:,:,i])]) 
           elif axisIndex == 1:
             slicetemp = narray[:, i, :] # get the ijk coordinates for all voxels in the label map     
             CSA = np.count_nonzero(narray[:, i, :])
             if volumeNode != None and IntensitycheckBox == True:
-              meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:,i,:]>0)]) 
+              meanIntensity = np.mean(voxelArray[:,i,:][np.where(voxelArray[:,i,:])]) 
           elif axisIndex == 2:
             slicetemp = narray[i, :, :] # get the ijk coordinates for all voxels in the label map
             CSA = np.count_nonzero(narray[i, :, :])
             if volumeNode != None and IntensitycheckBox == True:
-              meanIntensity = np.mean(voxelArray[i,:,:][np.where(voxelArray[i, :, :]>0)]) 
+              meanIntensity = np.mean(voxelArray[i,:,:][np.where(voxelArray[i, :, :])]) 
 
           if segmentID == segmentNode:
           # add values to calculations 
@@ -1425,19 +1424,19 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               Fdiam = 1
             elif len(coords_Ijk[0]) == 2:
               Fdiam = 2
-            elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) == 1:  
-              Fdiam = max(coords_Ijk[1]) - min(coords_Ijk[1])
-            elif len(coords_Ijk[1]) >= 3 and len(set(coords_Ijk[1])) == 1:  
-              Fdiam = max(coords_Ijk[0]) - min(coords_Ijk[0])
             elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) > 1  and len(set(coords_Ijk[1])) > 1: 
               points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
               hull = ConvexHull(points)
               Fdiam = 0
-              for i in hull.vertices:
-                pt1 = points[i]
+              for h in hull.vertices:
+                pt1 = points[h]
                 for j in hull.vertices:
                   pt2 = points[j]
                   Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2)* PixelWidthMm)
+            elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) == 1:  
+              Fdiam = max(coords_Ijk[1]) - min(coords_Ijk[1])
+            elif len(coords_Ijk[1]) >= 3 and len(set(coords_Ijk[1])) == 1:  
+              Fdiam = max(coords_Ijk[0]) - min(coords_Ijk[0])
             FeretArray.InsertNextValue(Fdiam)
             # find smallest, largest diameter to calculate aspect ratio
             sampleMin = int(max(sampleSlices)*.05)
@@ -1917,6 +1916,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
 
     logging.info('Processing completed')
+    end = time.time()
+    TotalTime = np.round(end - start,2)
+    print("Total time elapsed:", TotalTime, "seconds")
 
 
 #
