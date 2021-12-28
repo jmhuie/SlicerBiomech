@@ -85,7 +85,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     VTKObservationMixin.__init__(self)  # needed for parameter node observation
     self.logic = None
     self._parameterNode = None
-
+    
   def setup(self):
     """
     Called when the user opens the module the first time and the widget is initialized.
@@ -107,7 +107,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # so that when the scene is saved and reloaded, these settings are restored.
     self.logic = SegmentGeometryLogic()
     self.ui.parameterNodeSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
-    self.setParameterNode(self.logic.getParameterNode())
+    self.setParameterNode(self.logic.getParameterNode())      
+    
 
     # Connections
     self.ui.parameterNodeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.setParameterNode)
@@ -119,17 +120,22 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.regionSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     self.ui.volumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.onChangeAxis)
     self.ui.resamplespinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.tableSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.chartSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.OrientationcheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
-    self.ui.orientationspinBox.connect("valueChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.OrientationcheckBox.connect('stateChanged(int)', self.initializeAxisLine)
+    self.ui.orientationspinBox.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.orientationspinBox.connect("valueChanged(double)", self.updateAxisLineAngle)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
     self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
     self.ui.Interactive3DButton.connect("clicked(bool)", self.onInteractive3DBox)
     self.ui.RotatorSliders.connect("valueChanged(double)", self.initializeSliders)
     self.ui.RotationInitButton.connect("clicked(bool)", self.initializeSliders)
+    self.ui.ShowAxisButton.connect("clicked(bool)", self.ShowAxis)
+    self.ui.ResetButton.connect("clicked(bool)", self.ResetButton)
 
     
     # initialize the result label under the apply button
@@ -199,6 +205,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.volumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("Volume"))
     self.ui.volumeSelector.blockSignals(wasBlocked)
     
+    #wasBlocked = self.ui.orientationspinBox.blockSignals(True)
+    #self.ui.orientationspinBox.value = float(self._parameterNode.GetParameter("Angle"))
+    #self.ui.orientationspinBox.blockSignals(wasBlocked)    
+    
     wasBlocked = self.ui.tableSelector.blockSignals(True)
     self.ui.tableSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsTable"))
     self.ui.tableSelector.blockSignals(wasBlocked)
@@ -223,7 +233,18 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.Interactive3DButton.toolTip = "Interactively rotate segment in 3D view"
       self.ui.RotationInitButton.enabled = True
       self.ui.RotationInitButton.toolTip = "Initialize rotation sliders"
+      self.ui.OrientationcheckBox.enabled = True
+      self.ui.OrientationcheckBox.toolTip = "Defne and use custom neutral axis"
+      self.ui.ResetButton.enabled = True
+      self.ui.ResetButton.toolTip = "Reset segment transformation"
+      if self.ui.CompactnesscheckBox.checked == True:
+        self.ui.areaSegmentSelector.toolTip = "Select solid segment to measure total area and compactness"
+        self.ui.areaSegmentSelector.enabled = True
+      else: 
+       self.ui.areaSegmentSelector.toolTip = "Select option to compute compactness" 
+       self.ui.areaSegmentSelector.enabled = False     
 
+      
     else:
       self.ui.applyButton.toolTip = "Select segmentation and volume nodes"
       self.ui.applyButton.enabled = False
@@ -233,6 +254,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.Interactive3DButton.toolTip = "Select segmentation and volume nodes"
       self.ui.RotationInitButton.enabled = False
       self.ui.RotationInitButton.toolTip = "Select segmentation and volume nodes"
+      self.ui.OrientationcheckBox.enabled = False
+      self.ui.OrientationcheckBox.toolTip = "Select segmentation and volume nodes"
+      self.ui.ResetButton.enabled = False
+      self.ui.ResetButton.toolTip = "Select segmentation and volume nodes"
+
     
     if self._parameterNode.GetNodeReference("Segmentation"):
       self.ui.regionSegmentSelector.toolTip = "Select segment"
@@ -260,42 +286,44 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     else:
       self.ui.chartSelector.toolTip = "Select output chart"
             
-    if self.ui.OrientationcheckBox.checked == True:
+   
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    if lineNode != None:
+      def CopyLine(unused1 = None, unused2 = None):
+        centroid_ras = lineNode.GetNthControlPointPosition(0)
+        lineA_newpos = lineNode.GetNthControlPointPosition(1)
+        lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
+      copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
+
+            
+    if self.ui.OrientationcheckBox.checked == True and self.ui.OrientationcheckBox.enabled == True:
       self.ui.OrientationcheckBox.toolTip = "Check to use custom neutral axis"
       self.ui.orientationspinBox.toolTip = "Enter the angle between the horizontal and neutral axes. By default, the neutral axis is the horizontal axis."
       self.ui.orientationspinBox.enabled = True
-      self.ui.SMAcheckBox_2.toolTip = "Compute second moment of area around the neutral and loading axes"
-      self.ui.SMAcheckBox_2.enabled = True
-      self.ui.MODcheckBox_2.toolTip = "Compute section modulus around the neutral and loading axes"
-      self.ui.MODcheckBox_2.enabled = True
-      self.ui.RcheckBox_2.toolTip = "Compute the max distances from the neutral and loading axes"
-      self.ui.RcheckBox_2.enabled = True
-      self.ui.DegradioButton.enabled = True
-      self.ui.DegradioButton.toolTip = "Define netural axis angle in degrees"
-      self.ui.RadradioButton.enabled = True
-      self.ui.RadradioButton.toolTip = "Define netural axis angle in radians"
-
+      self.ui.ShowAxisButton.enabled = True
+      self.ui.ShowAxisButton.toolTip = "Jump to the neutral axis in slice view"
+      lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+      if lineNode != None:
+        lineNode.SetDisplayVisibility(1)
+      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+      if lineNode2 != None:
+        lineNode2.SetDisplayVisibility(1)
+        
     else:
-      self.ui.OrientationcheckBox.toolTip = "Uncheck to use custom neutral axis"
+      self.ui.OrientationcheckBox.toolTip = "Select segmentation and volum nodes"
       self.ui.orientationspinBox.toolTip = "Select option use the neutral axis"
       self.ui.orientationspinBox.enabled = False
-      self.ui.SMAcheckBox_2.toolTip = "Select option to use neutral axis"
-      self.ui.SMAcheckBox_2.enabled = False
-      self.ui.MODcheckBox_2.toolTip = "Select option to use neutral axis"
-      self.ui.MODcheckBox_2.enabled = False
-      self.ui.RcheckBox_2.toolTip = "Select option to use neutral axis"
-      self.ui.RcheckBox_2.enabled = False
-      self.ui.DegradioButton.enabled = False      
-      self.ui.DegradioButton.toolTip = "Select option to use neutral axis"
-      self.ui.RadradioButton.enabled = False
-      self.ui.RadradioButton.toolTip = "Select option to use neutral axis"
-    
-    if self.ui.CompactnesscheckBox.checked == True:
-      self.ui.areaSegmentSelector.toolTip = "Select solid segment to measure total area and compactness"
-      self.ui.areaSegmentSelector.enabled = True
-    else: 
-      self.ui.areaSegmentSelector.toolTip = "Select option to compute compactness" 
-      self.ui.areaSegmentSelector.enabled = False     
+      self.ui.ShowAxisButton.enabled = False
+      self.ui.ShowAxisButton.toolTip = "Select option use the neutral axis"   
+      lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+      if lineNode != None:
+        lineNode.SetDisplayVisibility(0)
+      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+      if lineNode2 != None:
+        lineNode2.SetDisplayVisibility(0)
+
+      
     # other tooltips
     self.ui.segmentationSelector.toolTip = "Select input segmentation node"
     self.ui.axisSelectorBox.toolTip = "Select slice view to compute on. Should be perpendicular to the long axis"
@@ -333,6 +361,23 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetParameter("Angle", str(self.ui.orientationspinBox.value))
     self._parameterNode.SetParameter("Compactness", str(self.ui.CompactnesscheckBox.checked))
  
+  def onChangeAxis(self): 
+    """
+    Run processing when user clicks "Align Segment with Principal Axes" button.
+    """
+    
+    self.ui.OrientationcheckBox.checked = False  
+
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    if lineNode != None:
+      slicer.mrmlScene.RemoveNode(lineNode)
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    if lineNode2 != None:
+      slicer.mrmlScene.RemoveNode(lineNode2)  
+
+    self.ui.orientationspinBox.value = 0
+
+ 
   def onPrincipalAxes(self):
     """
     Run processing when user clicks "Align Segment with Principal Axes" button.
@@ -346,6 +391,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
     if transformNode == None:
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      if newFolder == 0:
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+      transformItem = shNode.GetItemByDataNode(transformNode)
+      shNode.SetItemParent(transformItem, newFolder)
+      shNode.SetItemExpanded(newFolder,0)
     segmentationNode.SetAndObserveTransformNodeID(None)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
 
@@ -381,7 +433,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION    
         #sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
     
-  
 
 
     import SegmentStatistics
@@ -450,9 +501,23 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
       if transformNode == None:
         transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+        shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+        newFolder = shNode.GetItemByName("Segment Geometry Misc")
+        if newFolder == 0:
+          newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+        transformItem = shNode.GetItemByDataNode(transformNode)
+        shNode.SetItemParent(transformItem, newFolder)
+        shNode.SetItemExpanded(newFolder,0)
       transformNode.SetMatrixTransformToParent(matrix)
     elif segtransformNode == None:
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      if newFolder == 0:
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+      transformItem = shNode.GetItemByDataNode(transformNode)
+      shNode.SetItemParent(transformItem, newFolder)
+      shNode.SetItemExpanded(newFolder,0)
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     
     transform = transformNode.GetDisplayNode()
@@ -484,7 +549,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     
           
   
-  
   def initializeSliders(self):
     """
     Run processing when user clicks "Initialize Sliders".
@@ -505,12 +569,26 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
       volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
+      shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      if newFolder == 0:
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+      transformItem = shNode.GetItemByDataNode(transformNode)
+      shNode.SetItemParent(transformItem, newFolder)
+      shNode.SetItemExpanded(newFolder,0)
     pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
     pointflag = 0
     if pointNode != None:
       pointflag = 1
     if pointNode == None:
       pointNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "Segment Geometry Point Transformation")
+      shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      if newFolder == 0:
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+      pointItem = shNode.GetItemByDataNode(pointNode)
+      shNode.SetItemParent(pointItem, newFolder)
+      shNode.SetItemExpanded(newFolder,0)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)  
 
     og_matrix = vtk.vtkMatrix4x4()
@@ -547,8 +625,232 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
     sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
     
-    #pointNode.RemoveObserver(rotationTransformNodeObserver)
+
+  def ResetButton(self):
+    """
+    Clears everything in the Misc folder.
+    """ 
+    shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+    shFolderItemId = shNode.GetItemByName("Segment Geometry Misc")
+    childIds = vtk.vtkIdList()
+    shNode.GetItemChildren(shFolderItemId, childIds)
+    self.ui.OrientationcheckBox.checked = False
+    self.ui.OrientationcheckBox.enabled = True
+    self.ui.applyButton.enabled = True
+    self.ui.axisSelectorBox.enabled = True
+    self.ui.RotatorSliders.enabled = False
+    self.ui.Interactive3DButton.checked = False
+    self.ui.orientationspinBox.value = 0
+
+
+    if childIds.GetNumberOfIds() > 0:
+      for itemIdIndex in range(childIds.GetNumberOfIds()):
+        shItemId = childIds.GetId(itemIdIndex)
+        dataNode = shNode.GetItemDataNode(shItemId)
+        slicer.mrmlScene.RemoveNode(dataNode)
+    shNode.RemoveItem(shFolderItemId)    
+
+  def initializeAxisLine(self):
+    """
+    Draws initial neutral axis line when user clicks the button.
+    """  
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetName()
+    axis = self.ui.axisSelectorBox.currentText
+
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
+      horiz_point = segcentroid_ras[1] + 2
+    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
+      horiz_point = segcentroid_ras[1] - 2
+    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+
+    def CopyLine(unused1 = None, unused2 = None):
+      centroid_ras = lineNode.GetNthControlPointPosition(0)
+      lineA_newpos = lineNode.GetNthControlPointPosition(1)
+      lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
+
+    def ShowAngle(unused1 = None, unused2 = None):
+      import numpy as np
+      lineDirectionVectors = []
+      lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+      if axis=="R (Yellow)":
+        lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+      if axis=="A (Green)":
+        lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+      if axis=="S (Red)":
+        lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+      lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+      lineDirectionVectors.append(lineDirectionVector)
+      lineEndPos = np.zeros(3)
+      lineNode.GetNthControlPointPositionWorld(1,lineEndPos)
+      lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+      lineDirectionVectors.append(lineDirectionVector)
+      angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
+      angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
+      if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+        angleDeg = (180 - angleDeg) + 180
+      if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+        angleDeg = (180 - angleDeg) + 180
+      if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
+        angleDeg = (180 - angleDeg) + 180
+      angleDeg = np.around(angleDeg,3)
+      self.ui.orientationspinBox.value = angleDeg
+
+
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    if lineNode == None:
+      lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "Segment Geometry Neutral Axis A")
+      lineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
+      lineNode.GetDisplayNode().SetSelectedColor((0.4, 1.0, 0.0))
+      lineNode.GetDisplayNode().SetActiveColor((0.4, 1.0, 0.0))
+      lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
+      if axis=="R (Yellow)":
+        lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+        lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeYellow'))
+      if axis=="A (Green)":
+        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeGreen'))
+      if axis=="S (Red)":
+        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeRed'))
+      lineNode.SetNthControlPointLocked(0,1)
+      lineNode.SetNthControlPointLocked(1,0)
+    anglewatcher = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,ShowAngle)
+
+
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    if lineNode2 == None:
+      lineNode2 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "Segment Geometry Neutral Axis B")
+      lineNode2.GetDisplayNode().SetPropertiesLabelVisibility(False)
+      lineNode2.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
+      lineNode2.GetDisplayNode().SetColor((1.0, 0.5000076295109483, 0.5000076295109483))
+      lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
+      if axis=="R (Yellow)":
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],segcentroid_ras[1]+2,segcentroid_ras[2]))
+        lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeYellow'))
+      if axis=="A (Green)":
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+2,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeGreen'))
+      if axis=="S (Red)":
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+2,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeRed'))
+      lineNode2.SetNthControlPointLocked(0,1)
+      lineNode2.SetNthControlPointLocked(1,1)
+    copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
+
+
+    shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
+    newFolder = shNode.GetItemByName("Segment Geometry Misc")
+    if newFolder == 0:
+      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+    shNode.SetItemParent(shNode.GetItemByDataNode(lineNode), newFolder)
+    shNode.SetItemParent(shNode.GetItemByDataNode(lineNode2), newFolder)
+    shNode.SetItemExpanded(newFolder,0)    
+
+
+  def updateAxisLineAngle(self):
+    """
+    Update axis line with angle 
+    """
+    import numpy as np
+    import math
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetName()
+    axis = self.ui.axisSelectorBox.currentText
+
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
+      horiz_point = segcentroid_ras[1] + 2
+    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
+      horiz_point = segcentroid_ras[1] - 2
+    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+      
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    if lineNode != None:
+      def GetAngle(unused1 = None, unused2 = None):
+        import numpy as np
+        lineDirectionVectors = []
+        lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+        if axis=="R (Yellow)":
+          lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+        if axis=="A (Green)":
+          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        if axis=="S (Red)":
+          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+        lineDirectionVectors.append(lineDirectionVector)
+        lineEndPos = np.zeros(3)
+        lineNode.GetNthControlPointPositionWorld(1,lineEndPos)
+        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+        lineDirectionVectors.append(lineDirectionVector)
+        angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
+        angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
+        if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+          angleDeg = (180 - angleDeg) + 180
+        if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+          angleDeg = (180 - angleDeg) + 180
+        if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
+          angleDeg = (180 - angleDeg) + 180
+        angleDeg = np.around(angleDeg,3)
+        return angleDeg
     
+      currentangle = GetAngle()
+      newangle = self.ui.orientationspinBox.value
+      Theta = newangle - currentangle
+      Theta = Theta * np.pi/180 * -1
+
+      if axis == "R (Yellow)":
+        ogX = lineNode.GetNthControlPointPosition(1)[1] - segcentroid_ras[1]
+        ogY = lineNode.GetNthControlPointPosition(1)[2] - segcentroid_ras[2]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[1]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
+        lineNode.SetNthControlPointPosition(1, segcentroid_ras[0], newX,newY)
+   
+      if axis == "A (Green)":
+        ogX = lineNode.GetNthControlPointPosition(1)[0] - segcentroid_ras[0]
+        ogY = lineNode.GetNthControlPointPosition(1)[2] - segcentroid_ras[2]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
+        lineNode.SetNthControlPointPosition(1, newX, segcentroid_ras[1],newY)
+    
+      if axis == "S (Red)":
+        ogX = lineNode.GetNthControlPointPosition(1)[0] - segcentroid_ras[0]
+        ogY = lineNode.GetNthControlPointPosition(1)[1] - segcentroid_ras[1]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[1] 
+        lineNode.SetNthControlPointPosition(1, newX, newY, segcentroid_ras[2])
+      
+  def ShowAxis(self):
+    """
+    Jump to the neutral axis.
+    """    
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetName()
+    axis = self.ui.axisSelectorBox.currentText
+
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+
 
   def onApplyButton(self):
     """
@@ -590,9 +892,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                      self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
-                     self.ui.OrientationcheckBox.checked, self.ui.SMAcheckBox_2.checked, 
-                     self.ui.MODcheckBox_2.checked, self.ui.RcheckBox_2.checked, self.ui.orientationspinBox.value, 
-                     self.ui.DegradioButton.checked, self.ui.RadradioButton.checked, self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
+                     self.ui.OrientationcheckBox.checked, self.ui.orientationspinBox.value, 
+                     self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
                      self.ui.CompactnesscheckBox.checked, self.ui.areaSegmentSelector.currentNode(),self.ui.areaSegmentSelector.currentSegmentID(),
                      self.ui.CentroidcheckBox.checked,self.ui.PerimcheckBox.checked,self.ui.ResultsText)
@@ -619,7 +920,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
 
   def run(self, segmentationNode, segmentNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
-  MODcheckBox_1, OrientationcheckBox, SMAcheckBox_2, MODcheckBox_2, RcheckBox_2, angle, DegButton, RadButton, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
+  MODcheckBox_1, OrientationcheckBox, angle, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
   CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox, PerimcheckBox, ResultsText):
     """
     Run the processing algorithm.
@@ -1459,7 +1760,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             if segmentID == segmentNode:
               CxArray.InsertNextValue(0)
               CyArray.InsertNextValue(0)
-              ThetaMinArray.InsertNextValue(0)       
+              
+              MinArray.InsertNextValue(0)       
               ThetaMaxArray.InsertNextValue(0)       
               ImajorArray.InsertNextValue(0)
               IminorArray.InsertNextValue(0)
@@ -1574,10 +1876,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
            
               # use custom neutral axis  
               if OrientationcheckBox == True: 
-                if RadButton == True:
-                  Theta = angle 
-                if DegButton == True:
-                  Theta = angle * np.pi/180  
+                Theta = angle * np.pi/180  
 
                 #neutral axis
                 Ina = 0
@@ -1639,7 +1938,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           if eulerflag == 1:
             ResultsText.setText("Warning! {} aspect ratio ({}) is less than 10. The no-shear assumption may be violated.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))
             ResultsText.setStyleSheet("color: red; background: transparent; border: transparent")
-        elif OrientationcheckBox == True and SMAcheckBox_2 == True or MODcheckBox_2 == True: 
+        elif OrientationcheckBox == True and SMAcheckBox_1 == True or MODcheckBox_1 == True: 
           if eulerflag == 0:
             ResultsText.setText("{} aspect ratio: {}.".format(segmentationNode.GetSegmentation().GetSegment(segmentNode).GetName(),round(AR,2)))   
             ResultsText.setStyleSheet("background: transparent; border: transparent")
@@ -1734,7 +2033,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(RmajorArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(RmajorArray.GetName(), "Max distance from the major principal axis") 
    
-      if OrientationcheckBox == True and SMAcheckBox_2 == True:  
+      if OrientationcheckBox == True and SMAcheckBox_1 == True:  
         tableNode.AddColumn(InaArray)
         tableNode.SetColumnUnitLabel(InaArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray.GetName(), "Second moment of area around the neutral axis")
@@ -1743,7 +2042,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IlaArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray.GetName(), "Second moment of area around the loading axis")
               
-      if OrientationcheckBox == True and MODcheckBox_2 == True:
+      if OrientationcheckBox == True and MODcheckBox_1 == True:
         tableNode.AddColumn(ZnaArray)
         tableNode.SetColumnUnitLabel(ZnaArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray.GetName(), "Section modulus around the neutral axis")
@@ -1752,7 +2051,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ZlaArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZlaArray.GetName(), "Section modulus around the loading axis")
         
-      if RcheckBox_2 == True and OrientationcheckBox == True:
+      if RcheckBox == True and OrientationcheckBox == True:
         tableNode.AddColumn(RnaArray)
         tableNode.SetColumnUnitLabel(RnaArray.GetName(), "mm")  # TODO: use length unit
         tableNode.SetColumnDescription(RnaArray.GetName(), "Max distance from the neutral axis") 
@@ -1784,7 +2083,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ZmajorArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZmajorArray_Doube.GetName(), "Zmajor^(1/3)/Length")
       
-      if DoubecheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
+      if DoubecheckBox == True and SMAcheckBox_1 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Doube)
         tableNode.SetColumnUnitLabel(InaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray_Doube.GetName(), "Ina^(1/4)/Length")
@@ -1793,7 +2092,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IlaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray_Doube.GetName(), "Ila^(1/4)/Length")
 
-      if DoubecheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
+      if DoubecheckBox == True and MODcheckBox_1 == True and OrientationcheckBox == True:
         tableNode.AddColumn(ZlaArray_Doube)
         tableNode.SetColumnUnitLabel(ZlaArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZlaArray_Doube.GetName(), "Zla^(1/3)/Length")  
@@ -1820,7 +2119,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ZmajorArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZmajorArray_Summers.GetName(), "Zmajor divided by the section modulus of a solid circle with the same cross-sectional area")    
         
-      if SummerscheckBox == True and SMAcheckBox_2 == True and OrientationcheckBox == True:
+      if SummerscheckBox == True and SMAcheckBox_1 == True and OrientationcheckBox == True:
         tableNode.AddColumn(InaArray_Summers)
         tableNode.SetColumnUnitLabel(InaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(InaArray_Summers.GetName(), "Ina divided by the second moment of area of a solid circle with the same cross-sectional area")
@@ -1829,7 +2128,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(IlaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(IlaArray_Summers.GetName(), "Ila divided by the second moment of area of a solid circle with the same cross-sectional area") 
         
-      if SummerscheckBox == True and MODcheckBox_2 == True and OrientationcheckBox == True:
+      if SummerscheckBox == True and MODcheckBox_1 == True and OrientationcheckBox == True:
         tableNode.AddColumn(ZnaArray_Summers)
         tableNode.SetColumnUnitLabel(ZnaArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ZnaArray_Summers.GetName(), "Zna divided by the section modulus of a solid circle with the same cross-sectional area")
@@ -1856,7 +2155,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           plotChartNode.AddAndObservePlotSeriesNodeID(plotSeriesNode.GetID())
       
       #plotChartNode.SetXAxisTitle("Percent of Length")
-      if OrientationcheckBox == True and SMAcheckBox_2 == True: 
+      if OrientationcheckBox == True and SMAcheckBox_1 == True: 
         if slicer.mrmlScene.GetFirstNodeByName(segName + " Ina (mm^4)") != None and plotChartNode.GetPlotSeriesNodeID() != None:
           plotSeriesNode2 = slicer.mrmlScene.GetFirstNodeByName(segName + " Ina (mm^4)")
         else:
@@ -1988,9 +2287,10 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Segment Geometry test table")
     plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
     
+    
     logic = SegmentGeometryLogic()
-    logic.run(segmentationNode, segmentId, masterVolumeNode, "S (Red)", 0, tableNode, plotChartNode, True, True, True, False, True, 
-    True, True, True, True, True, 0, True, False, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
+    logic.run(segmentationNode, segmentId, masterVolumeNode, "S (Red)", 0, tableNode, plotChartNode, True, True, True, False, True, True,
+    True, 0, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
     import math
     # Compute CSA error
     crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "CSA (mm^2)")

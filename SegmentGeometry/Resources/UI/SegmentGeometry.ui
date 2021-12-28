@@ -244,7 +244,7 @@
          <item row="2" column="0">
           <widget class="QPushButton" name="PrincipalButton">
            <property name="text">
-            <string>Align With Principal Axes</string>
+            <string>Align w/ Principal Axes</string>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -269,7 +269,7 @@
          <item row="2" column="1">
           <widget class="QPushButton" name="Interactive3DButton">
            <property name="text">
-            <string>Rotate Segment In 3D View</string>
+            <string>Rotate in 3D View</string>
            </property>
            <property name="checkable">
             <bool>true</bool>
@@ -294,7 +294,7 @@
          <item row="2" column="2">
           <widget class="QPushButton" name="RotationInitButton">
            <property name="text">
-            <string>Initialize Rotation Sliders</string>
+            <string>Initialize Sliders</string>
            </property>
            <property name="checkable">
             <bool>false</bool>
@@ -316,7 +316,31 @@
            </property>
           </widget>
          </item>
-        </layout>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="ResetButton">
+           <property name="text">
+            <string> Reset </string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>        </layout>
        </widget>
       </item>
       <item row="11" column="0" colspan="2">
@@ -489,7 +513,7 @@
             <item row="0" column="0">
              <widget class="QCheckBox" name="LengthcheckBox">
               <property name="text">
-               <string>Segment length</string>
+               <string>Segment Length</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -519,7 +543,7 @@
             <item row="2" column="0">
              <widget class="QCheckBox" name="SMAcheckBox_1">
               <property name="text">
-               <string>Second Moment Of Area</string>
+               <string>Second Moment of Area</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -576,7 +600,7 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
+            <item row="4" column="0">
              <widget class="QCheckBox" name="IntensitycheckBox">
               <property name="text">
                <string>Mean Brightness</string>
@@ -606,26 +630,26 @@
         </property>
         <property name="collapsed" stdset="0">
          <bool>false</bool>
-        </property>
-        <layout class="QFormLayout" name="formLayout_6">
-         <item row="0" column="0">
-          <widget class="QFrame" name="frame_4">
-           <layout class="QGridLayout" name="gridLayout_11">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <property name="verticalSpacing">
-             <number>0</number>
-            </property>
+        </property> 
+        <layout class="QFormLayout" name="formLayout_4">
+        <item row="0" column="0" colspan="2">
+         <widget class="QFrame" name="frame_3">
+          <layout class="QGridLayout" name="gridLayout_7">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>2</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>0</number>
+           </property>            
             <item row="0" column="0">
              <widget class="QCheckBox" name="OrientationcheckBox">
               <property name="text">
@@ -634,10 +658,13 @@
               <property name="checkable">
                <bool>true</bool>
               </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>            
              </widget>
-            </item>
+            </item>            
             <item row="0" column="1">
-             <widget class="QDoubleSpinBox" name="orientationspinBox">
+             <widget class="qMRMLSpinBox" name="orientationspinBox">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -651,96 +678,41 @@
                <double>1.000000000000000</double>
               </property>
              </widget>
-            </item>
+            </item> 
             <item row="0" column="2">
-             <widget class="QRadioButton" name="DegradioButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
+             <widget class="QPushButton" name="ShowAxisButton">
               <property name="text">
-               <string>Degrees</string>
+               <string>Jump to Neutral Axis</string>
+              </property>
+              <property name="checkable">
+               <bool>false</bool>
               </property>
               <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <widget class="QRadioButton" name="RadradioButton">
-              <property name="enabled">
                <bool>false</bool>
               </property>
-              <property name="text">
-               <string>Radians</string>
+              <property name="autoRepeat">
+               <bool>false</bool>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
+              <property name="default">
+               <bool>false</bool>
+              </property>
+              <property name="flat">
+               <bool>false</bool>
+              </property>
+              <property name="enabled">
+               <bool>false</bool>
+              </property>             
              </widget>
-            </item>
+            </item>           
            </layout>
           </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QFrame" name="frame_4">
-           <layout class="QGridLayout" name="gridLayout_8">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <property name="verticalSpacing">
-             <number>0</number>
-            </property>
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="SMAcheckBox_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Second moment of area</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="MODcheckBox_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Section modulus</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="RcheckBox_2">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="text">
-               <string>Chord Length</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
+         </item>        
+        </layout>       
+       </widget> 
+      </item> 
       <item row="14" column="0">
        <widget class="Line" name="line_3">
         <property name="orientation">
@@ -795,10 +767,31 @@
               </property>
              </widget>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QFrame" name="frame_4">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
             <item row="1" column="0">
              <widget class="QCheckBox" name="CompactnesscheckBox">
               <property name="text">
-               <string>Compactness</string>
+               <string>Compactness:</string>
               </property>
               <property name="checked">
                <bool>false</bool>
@@ -826,11 +819,11 @@
                <bool>true</bool>
               </property>
              </widget>
-            </item>
+            </item>    
            </layout>
           </widget>
          </item>
-        </layout>
+        </layout>               
        </widget>
       </item>
      </layout>
@@ -895,6 +888,12 @@
    <header>ctkcollapsiblegroupbox.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>qMRMLSpinBox</class>
+   <extends>qMRMLWidget</extends>
+   <header>qMRMLSpinBox.h</header>
+   <container>1</container>
+  </customwidget> 
   <customwidget>
    <class>qMRMLSegmentSelectorWidget</class>
    <extends>qMRMLWidget</extends>
