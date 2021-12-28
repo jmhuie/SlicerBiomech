@@ -888,7 +888,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.chartSelector.setCurrentNode(plotChartNode)  
 
      
-      hm = self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
+      self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
@@ -902,7 +902,64 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
       import traceback
       traceback.print_exc()
+      
 
+    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segName = segmentationNode.GetName()
+    axis = self.ui.axisSelectorBox.currentText
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
+      horiz_point = segcentroid_ras[1] + 2
+    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
+      horiz_point = segcentroid_ras[1] - 2
+    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
+      horiz_point = segcentroid_ras[0] + 2
+    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
+      horiz_point = segcentroid_ras[0] - 2
+
+    if lineNode != None:
+      def CopyLine(unused1 = None, unused2 = None):
+        centroid_ras = lineNode.GetNthControlPointPosition(0)
+        lineA_newpos = lineNode.GetNthControlPointPosition(1)
+        lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
+      copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
+
+      def ShowAngle(unused1 = None, unused2 = None):
+        import numpy as np
+        lineDirectionVectors = []
+        lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+        if axis=="R (Yellow)":
+          lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+        if axis=="A (Green)":
+          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        if axis=="S (Red)":
+          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+        lineDirectionVectors.append(lineDirectionVector)
+        lineEndPos = np.zeros(3)
+        lineNode.GetNthControlPointPositionWorld(1,lineEndPos)
+        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
+        lineDirectionVectors.append(lineDirectionVector)
+        angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
+        angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
+        if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+          angleDeg = (180 - angleDeg) + 180
+        if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
+          angleDeg = (180 - angleDeg) + 180
+        if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
+          angleDeg = (180 - angleDeg) + 180
+        angleDeg = np.around(angleDeg,3)
+        self.ui.orientationspinBox.value = angleDeg
+      anglewatcher = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,ShowAngle)
 
 #
 # SegmentGeometryLogic
