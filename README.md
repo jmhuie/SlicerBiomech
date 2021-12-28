@@ -58,10 +58,14 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
 * **Align With Principal Axes** - will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
 * **Rotate Segment In 3D View** - will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
-* **Initialize Rotation Sliders** - click to initialize the sliders that will rotate the segment around its centroid.
+* **Initialize Rotation Sliders** - will initialize the sliders that can be used to rotate the segment around its centroid.
+* **Reset** - will reset transformations applied through Segment Geometry and the custom neutral axis, if defined.
 
 ### Use Custom Neutral Axis
-If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and section modulus. To set the neutral axis, check the "Use custom neutral axis" box and enter a positive value that represents the angle be between the neutral axis and the horizontal, starting from the right side and moving in clockwise direction. By default, the netural axis is parallel to the horizontal axis.
+If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markup line will be created and visible in the selected slice view and the 3D view. 
+The line represents the custom neutral axis and can be repositioned by clicking and dragging the green end of the line to rotate it. Alternatively, the user can enter a value that represents the angle between the horizontal and green end of the neutral axis (in degrees), starting from the right and moving in clockwise direction. 
+Values can range from 0 to 360 degrees in case the direction of the neutral axis is important. 
+
 
 ### Compute Unitless Variables
 Three methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
@@ -116,17 +120,17 @@ Below contains brief information on the possible computations.
 
 - Rmajor: Distance to the furthest pixel from the major principal axis.
 
-- Ina: Second moment of area around the neutral axis.
+- Ina: Second moment of area around the custom neutral axis.
 
-- Ila: Second moment of area around the loading axis.
+- Ila: Second moment of area around the loading axis perpendicular to the custom neutral axis.
 
-- Zna: Section modulus around the neutral axis.
+- Zna: Section modulus around the custom neutral axis.
 
-- Zla: Section modulus around the loading axis.
+- Zla: Section modulus around the loading axis perpendicular to the custom neutral axis.
 
-- Rna: Distance to the furthest pixel from the neutral axis.
+- Rna: Distance to the furthest pixel from the custom neutral axis.
 
-- Rla: Distance to the furthest pixel from the force axis.
+- Rla: Distance to the furthest pixel from the loading axis perpendicular to the custom neutral axis.
 
 - Material Normalization: Material normalized values are indicated with "MatNorm"
 
