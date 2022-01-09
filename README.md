@@ -112,6 +112,8 @@ Below contains brief information on the possible computations.
 
 - Imajor: Second moment of area around the major principal axis.
 
+- Jz: Polar moment of inertia.
+
 - Zminor: Section modulus around the minor principal axis.
 
 - Zmajor: Section modulus around the major principal axis. 
