@@ -117,7 +117,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
     self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    self.ui.regionSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
+    self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onChangeAxis)
+    self.ui.regionSegmentSelector.connect("currentSegmentChanged(QString)", self.updateParameterNodeFromGUI)
+    self.ui.regionSegmentSelector.connect("currentSegmentChanged(QString)", self.onChangeAxis)
     self.ui.volumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.onChangeAxis)
@@ -129,7 +131,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.orientationspinBox.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.orientationspinBox.connect("valueChanged(double)", self.updateAxisLineAngle)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
-    self.ui.areaSegmentSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.updateParameterNodeFromGUI)
+    self.ui.areaSegmentSelector.connect('currentSegmentChanged(QString)', self.updateParameterNodeFromGUI)
     self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
     self.ui.Interactive3DButton.connect("clicked(bool)", self.onInteractive3DBox)
     self.ui.RotatorSliders.connect("valueChanged(double)", self.initializeSliders)
@@ -330,6 +332,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.resamplespinBox.toolTip = "Perform computations in percent increments along the length of the segment. Enter zero to compute values on every slice"
     self.ui.CSAcheckBox.toolTip = "Compute cross-sectional area"
     self.ui.SMAcheckBox_1.toolTip = "Compute second moment of area around the principal axes"
+    self.ui.JzcheckBox.toolTip = "Compute polar moment of area"
     self.ui.MODcheckBox_1.toolTip = "Compute section modulus around the principal axes"
     self.ui.LengthcheckBox.toolTip = "Compute the length of the segment along the chosen axis"
     self.ui.ThetacheckBox.toolTip = "Compute how much the minor axis deviates from the horizontal axis in a clockwise direction"
@@ -351,7 +354,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if self._parameterNode is None:
       return
       
-    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.segmentationSelector.currentNodeID)  
+    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.segmentationSelector.currentNodeID) 
     self._parameterNode.SetNodeReferenceID("Volume", self.ui.volumeSelector.currentNodeID)
     self._parameterNode.SetParameter("Axis", self.ui.axisSelectorBox.currentText)
     self._parameterNode.SetParameter("Resample", str(self.ui.resamplespinBox.value))
@@ -363,7 +366,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
  
   def onChangeAxis(self): 
     """
-    Run processing when user clicks "Align Segment with Principal Axes" button.
+    Run processing when user changes axis or segment.
     """
     
     self.ui.OrientationcheckBox.checked = False  
@@ -891,7 +894,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
-                     self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked,
+                     self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked, self.ui.JzcheckBox.checked,
                      self.ui.OrientationcheckBox.checked, self.ui.orientationspinBox.value, 
                      self.ui.ThetacheckBox.checked, self.ui.RcheckBox.checked,
                      self.ui.DoubecheckBox.checked, self.ui.SummerscheckBox.checked, 
@@ -977,7 +980,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
 
   def run(self, segmentationNode, segmentNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
-  MODcheckBox_1, OrientationcheckBox, angle, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
+  MODcheckBox_1, JzcheckBox, OrientationcheckBox, angle, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
   CompactnesscheckBox, areaSegementationNode, areaSegmentID, CentroidcheckBox, PerimcheckBox, ResultsText):
     """
     Run the processing algorithm.
@@ -1123,6 +1126,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       
       CyArray = vtk.vtkFloatArray()
       CyArray.SetName("Cy")
+      
+      JzArray = vtk.vtkFloatArray()
+      JzArray.SetName("Jz (mm^4)")
               
       ImajorArray = vtk.vtkFloatArray()
       ImajorArray.SetName("Imajor (mm^4)")
@@ -1817,7 +1823,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             if segmentID == segmentNode:
               CxArray.InsertNextValue(0)
               CyArray.InsertNextValue(0)
-              
+              JzArray.InsertNextValue(0)
+                            
               MinArray.InsertNextValue(0)       
               ThetaMaxArray.InsertNextValue(0)       
               ImajorArray.InsertNextValue(0)
@@ -1871,6 +1878,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Iy = 0
             for  s in range(Sn):
               Iy = Iy + 1/12 + (Cx - coords_Ijk[0][s])**2
+              
+            # calculated polar moment of inertia
+            Jz = 0
+            for s in range(Sn):
+              Jz = [Jz] + ((Cx - coords_Ijk[0][s])**2 + (Cy - coords_Ijk[1][s])**2)
 
             # deteRminore how far the major principal axis is from the horizontal 
             Ixy = 0
@@ -1909,7 +1921,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             if segmentID == segmentNode:
             # add values to calculations                       
               ThetaMinArray.InsertNextValue((Theta + np.pi/2)*180/np.pi )       
-              ThetaMaxArray.InsertNextValue((Theta*180/np.pi) + 180)       
+              ThetaMaxArray.InsertNextValue((Theta*180/np.pi) + 180)    
+              JzArray.InsertNextValue(Jz * unitOfPixelMm4)   
               ImajorArray.InsertNextValue(Imajor * unitOfPixelMm4)
               IminorArray.InsertNextValue(Iminor * unitOfPixelMm4)
               RmajorArray.InsertNextValue(Rmajor * PixelWidthMm)
@@ -2080,6 +2093,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ZmajorArray)
         tableNode.SetColumnUnitLabel(ZmajorArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZmajorArray.GetName(), "Section modulus around the major principal axis (smaller Z)")
+
+      if JzcheckBox == True:
+        tableNode.AddColumn(JzArray)
+        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm^4")  # TODO: use length unit
+        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia")
 
       if RcheckBox == True:  
         tableNode.AddColumn(RminorArray)

@@ -607,7 +607,17 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
+             <widget class="QCheckBox" name="JzcheckBox">
+              <property name="text">
+               <string>Polar Moment of Inertia</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
              <widget class="QCheckBox" name="IntensitycheckBox">
               <property name="text">
                <string>Mean Brightness</string>
