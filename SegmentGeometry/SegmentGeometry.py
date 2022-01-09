@@ -2085,6 +2085,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ImajorArray.GetName(), "mm^4")  # TODO: use length unit
         tableNode.SetColumnDescription(ImajorArray.GetName(), "Second moment of area around the major principal axis (smaller I)")
 
+      if JzcheckBox == True:
+        tableNode.AddColumn(JzArray)
+        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm^4")  # TODO: use length unit
+        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia")
+
       if MODcheckBox_1 == True:
         tableNode.AddColumn(ZminorArray)
         tableNode.SetColumnUnitLabel(ZminorArray.GetName(), "mm^3")  # TODO: use length unit
@@ -2093,11 +2098,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ZmajorArray)
         tableNode.SetColumnUnitLabel(ZmajorArray.GetName(), "mm^3")  # TODO: use length unit
         tableNode.SetColumnDescription(ZmajorArray.GetName(), "Section modulus around the major principal axis (smaller Z)")
-
-      if JzcheckBox == True:
-        tableNode.AddColumn(JzArray)
-        tableNode.SetColumnUnitLabel(JzArray.GetName(), "mm^4")  # TODO: use length unit
-        tableNode.SetColumnDescription(JzArray.GetName(), "Polar moment of inertia")
 
       if RcheckBox == True:  
         tableNode.AddColumn(RminorArray)
@@ -2365,7 +2365,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, "S (Red)", 0, tableNode, plotChartNode, True, True, True, False, True, True,
-    True, 0, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
+    True, True, 0, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
     import math
     # Compute CSA error
     crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "CSA (mm^2)")
