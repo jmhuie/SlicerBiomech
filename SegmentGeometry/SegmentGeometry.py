@@ -1215,6 +1215,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         ZlaArray_Doube = vtk.vtkFloatArray()
         ZlaArray_Doube.SetName("Zla (LenNorm)")
+        
+        JzArray_Doube = vtk.vtkFloatArray()
+        JzArray_Doube.SetName("Jz (LenNorm)")
 
       if SummerscheckBox == True:
         ImajorArray_Summers = vtk.vtkFloatArray()
@@ -1240,6 +1243,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         
         ZlaArray_Summers = vtk.vtkFloatArray()       
         ZlaArray_Summers.SetName("Zla (MatNorm)")
+
+        JzArray_Summers = vtk.vtkFloatArray()
+        JzArray_Summers.SetName("Jz (MatNorm)")
 
       
       # leave in the capabilities to go back to multiple segments
@@ -1838,11 +1844,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IminorArray_Summers.InsertNextValue(0)
                 ZmajorArray_Summers.InsertNextValue(0)
                 ZminorArray_Summers.InsertNextValue(0)
+                JzArray_Summers.InsertNextValue(0)
               if DoubecheckBox == True:
                 ImajorArray_Doube.InsertNextValue(0)
                 IminorArray_Doube.InsertNextValue(0)
                 ZmajorArray_Doube.InsertNextValue(0)
                 ZminorArray_Doube.InsertNextValue(0)
+                JzArray_Doube.InsertNextValue(0)
               if OrientationcheckBox == True: 
                 IlaArray.InsertNextValue(0)
                 InaArray.InsertNextValue(0)
@@ -1936,6 +1944,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IminorArray_Summers.InsertNextValue(Iminor/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
                 ZmajorArray_Summers.InsertNextValue(Zmajor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
                 ZminorArray_Summers.InsertNextValue(Zminor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
+                JzArray_Summers.InsertNextValue(Jz/((2*np.sqrt(CSA/np.pi))**4 * np.pi / 32))
               
               # do size correction
               if DoubecheckBox == True:
@@ -1943,6 +1952,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IminorArray_Doube.InsertNextValue(Iminor**(1/4) / numSlices)
                 ZmajorArray_Doube.InsertNextValue(Zmajor**(1/3) / numSlices)
                 ZminorArray_Doube.InsertNextValue(Zminor**(1/3) / numSlices)
+                JzArray_Doube.InsertNextValue(Jz**(1/4) / numSlices)
            
               # use custom neutral axis  
               if OrientationcheckBox == True: 
@@ -2148,7 +2158,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.AddColumn(ImajorArray_Doube)
         tableNode.SetColumnUnitLabel(ImajorArray_Doube.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ImajorArray_Doube.GetName(), "Imajor^(1/4)/Length")
-
+      
+      if DoubecheckBox == True and JzcheckBox == True:
+        tableNode.AddColumn(JzArray_Doube)
+        tableNode.SetColumnUnitLabel(JzArray_Doube.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(JzArray_Doube.GetName(), "Jz^(1/4)/Length")
+   
       if DoubecheckBox == True and MODcheckBox_1 == True:
         tableNode.AddColumn(ZminorArray_Doube)
         tableNode.SetColumnUnitLabel(ZminorArray_Doube.GetName(), "none")  # TODO: use length unit
@@ -2185,6 +2200,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         tableNode.SetColumnUnitLabel(ImajorArray_Summers.GetName(), "none")  # TODO: use length unit
         tableNode.SetColumnDescription(ImajorArray_Summers.GetName(), "Imajor divided by the second moment of area of a solid circle with the same cross-sectional area")        
 
+      if SummerscheckBox == True and JzcheckBox == True:
+        tableNode.AddColumn(JzArray_Summers)
+        tableNode.SetColumnUnitLabel(JzArray_Summers.GetName(), "none")  # TODO: use length unit
+        tableNode.SetColumnDescription(JzArray_Summers.GetName(), "Jz divided by the polar moment of inertia of a solid circle with the same cross-sectional area") 
+        
       if SummerscheckBox == True and MODcheckBox_1 == True:
         tableNode.AddColumn(ZminorArray_Summers)
         tableNode.SetColumnUnitLabel(ZminorArray_Summers.GetName(), "none")  # TODO: use length unit
