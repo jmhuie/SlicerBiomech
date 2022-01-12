@@ -50,7 +50,7 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
 ### Demo Video
-[![Demo Video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://www.youtube.com/watch?v=N7cSVIR6tik)
+[![Demo Video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://youtu.be/fBaTM5utQC0)
 
 # Advanced Tools
 

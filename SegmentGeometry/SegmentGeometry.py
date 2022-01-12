@@ -659,23 +659,25 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """  
     segmentationNode = self.ui.regionSegmentSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    volumeNode = self.ui.volumeSelector.currentNode()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
 
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
     slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+    linevalue = (40 * volumeNode.GetSpacing()[0])
     if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
-      horiz_point = segcentroid_ras[1] + 2
+      horiz_point = segcentroid_ras[1] + linevalue
     if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
-      horiz_point = segcentroid_ras[1] - 2
+      horiz_point = segcentroid_ras[1] - linevalue
     if axis=="A (Green)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
+      horiz_point = segcentroid_ras[0] + linevalue
     if axis=="A (Green)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
+      horiz_point = segcentroid_ras[0] - linevalue
     if axis=="S (Red)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
+      horiz_point = segcentroid_ras[0] + linevalue
     if axis=="S (Red)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
+      horiz_point = segcentroid_ras[0] - linevalue
 
     def CopyLine(unused1 = None, unused2 = None):
       centroid_ras = lineNode.GetNthControlPointPosition(0)
@@ -739,13 +741,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       lineNode2.GetDisplayNode().SetColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
       if axis=="R (Yellow)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],segcentroid_ras[1]+2,segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],segcentroid_ras[1]+linevalue,segcentroid_ras[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeYellow'))
       if axis=="A (Green)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+2,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+linevalue,segcentroid_ras[1],segcentroid_ras[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeGreen'))
       if axis=="S (Red)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+2,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+linevalue,segcentroid_ras[1],segcentroid_ras[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeRed'))
       lineNode2.SetNthControlPointLocked(0,1)
       lineNode2.SetNthControlPointLocked(1,1)
