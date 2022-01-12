@@ -63,7 +63,7 @@ Segment Geometry provides three tools for rotating and aligning segments with th
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markups line will be created and visible in both the selected slice view and the 3D view. 
-The representative line can be rotated by clicking and dragging the green end of the line. Alternatively, the user can enter a value between 0 and 360 that represents the angle (in degrees) between the horizontal and the green end of the neutral axis, starting from the right and moving in clockwise direction. 
+The representative line can be rotated by clicking and dragging the green end of the line. Note that the line crosses the center of the segment and not necessarily the centroid of the middle slice. Alternatively, the user can enter a value between 0 and 360 that represents the angle (in degrees) between the horizontal and the green end of the neutral axis, starting from the right and moving in clockwise direction. 
 The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view.
 
 
