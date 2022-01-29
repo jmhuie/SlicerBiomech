@@ -49,8 +49,10 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
-### Demo Video
-[![Demo Video](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryVideoScreenshot.png)](https://youtu.be/fBaTM5utQC0)
+### Demo Videos
+Here are some example videos that demonstrate how to use Segment Geometry for different purposes.
+1. <a href="https://youtu.be/fBaTM5utQC0" target ="_blank">How to calculate second moment of area and compactness of a salamander limb bone</a> 
+2. <a href="https://youtu.be/fI5xFT7_81I" target ="_blank">How to calculate second moment of area of a cat mandible</a> 
 
 # Advanced Tools
 
