@@ -136,6 +136,16 @@ Below contains brief information on the possible computations.
 
 - Length Normalization: Length normalized values are indicated with "LenNorm"
 
+# Frequently Asked Questions
+
+1. I think I need help using Segment Geometry, received an error, or think you found a bug. What do I do?
+
+First, make sure that you have the most recent version of Segment Geometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie). I will do my best to address problems in a timely manner.
+
+2. I have a suggestion or feature request for how to improve Segment Geometry. What do I do?
+
+Fantastic! I am always trying to improve the ease and utility of Segment Geometry and would love to hear your suggestions. Again, it's best if you make a post on the 3D Slicer discourse page detailing your idea and tag me.
+
 # Funding Acknowledgement
 
 Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
