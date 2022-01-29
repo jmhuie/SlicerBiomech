@@ -38,7 +38,7 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 ### General Use Case
 1. Start 3D Slicer.
 2. Load in CT Data.
-3. Segment bone or structure of interest in the Segment Editor module.
+3. Isolate and segment the bone or structure of interest in the Segment Editor module.
 4. Switch to the Segment Geometry module.
 5. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
 6. Select the "Slice View" that will run along the length of the desired measurement (long) axis. Generally, it is easier to use the default "Slice View" and rotate the segment accordingly. Changing the "Slice View" is only recommended when no transformations are needed, but the desired cross-sections are not visibile in the red view (default).
