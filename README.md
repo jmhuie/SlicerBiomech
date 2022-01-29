@@ -41,9 +41,9 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 3. Segment bone or structure of interest in the Segment Editor module.
 4. Switch to the Segment Geometry module.
 5. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
-6. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. 
-7. Select the "Slice View" perpendicular to the desired measurement axis. It should be the slice view that contains the cross-sections you want to compute on.
-8. Choose whether to compute on every slice in the segment or only some of them. For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
+6. Select the "Slice View" that will run along the length of the desired measurement (long) axis. Generally, it is easier to use the default "Slice View" and rotate the segment accordingly. Changing the "Slice View" is only recommended when no transformations are needed, but the desired cross-sections are not visibile in the red view (default).
+7. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. You should be able to scroll through the selected "Slice View" and see the exact cross-sections you want to compute on.
+8. Choose whether to compute on every slice in the segment or only some of them and change the "Percent Interval". For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
 9. Choose which computations should be performed.
 10. Select an output table and a chart node. 
 11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
@@ -63,8 +63,8 @@ Segment Geometry provides three tools for rotating and aligning segments with th
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markups line will be created and visible in both the selected slice view and the 3D view. 
-The representative line can be rotated by clicking and dragging the green end of the line. Note that the line crosses the center of the segment and not necessarily the centroid of the middle slice. Alternatively, the user can enter a value between 0 and 360 that represents the angle (in degrees) between the horizontal and the green end of the neutral axis, starting from the right and moving in clockwise direction. 
-The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view.
+The representative line can be rotated by clicking and dragging the closed circle on one end of the line. Alternatively, the user can enter a value between 0 and 180 that represents the angle (in degrees) between the horizontal and the neutral axis, starting from the right and moving in clockwise direction. 
+Note that the Markups line crosses the center of the segment and not necessarily the centroid of the center slice, but only the angle between the line and the horizontal will be used for computations. The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view.
 
 
 ### Compute Unitless Variables
@@ -104,9 +104,7 @@ Below contains brief information on the possible computations.
 
 - Cy: Centroid y-coordinates that correspond to the resampled and cropped volume exported by Segment Geometry. Presented in IJK format.
 
-- Theta minor: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
-
-- Theta major: Angle (degrees) between the major principal axis and horizontal axis in the clockwise direction, starting from the right side.
+- Theta: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
 - Iminor: Second moment of area around the minor principal axis.
 
@@ -140,5 +138,5 @@ Below contains brief information on the possible computations.
 
 # Funding Acknowledgement
 
-Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a Harlan Research Fellowship.
+Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
 

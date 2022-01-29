@@ -703,21 +703,21 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
       angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
       if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-        angleDeg = (180 - angleDeg) + 180
+        angleDeg = (180 - angleDeg) 
       if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-        angleDeg = (180 - angleDeg) + 180
+        angleDeg = (180 - angleDeg)
       if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
-        angleDeg = (180 - angleDeg) + 180
-      angleDeg = np.around(angleDeg,3)
-      self.ui.orientationspinBox.value = angleDeg
+        angleDeg = (180 - angleDeg) 
+      angleDeg = np.around(angleDeg,5)
+      self.ui.orientationspinBox.value = angleDeg 
 
 
     lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
     if lineNode == None:
       lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "Segment Geometry Neutral Axis A")
       lineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
-      lineNode.GetDisplayNode().SetSelectedColor((0.4, 1.0, 0.0))
-      lineNode.GetDisplayNode().SetActiveColor((0.4, 1.0, 0.0))
+      lineNode.GetDisplayNode().SetSelectedColor((1.0, 0.5000076295109483, 0.5000076295109483))
+      lineNode.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
       if axis=="R (Yellow)":
         lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
@@ -739,6 +739,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       lineNode2.GetDisplayNode().SetPropertiesLabelVisibility(False)
       lineNode2.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode2.GetDisplayNode().SetColor((1.0, 0.5000076295109483, 0.5000076295109483))
+      lineNode2.GetDisplayNode().SetGlyphType(2)
       lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
       if axis=="R (Yellow)":
         lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],segcentroid_ras[1]+linevalue,segcentroid_ras[2]))
@@ -810,12 +811,12 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
         angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
         if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg) + 180
+          angleDeg = (180 - angleDeg) 
         if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg) + 180
+          angleDeg = (180 - angleDeg) 
         if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
-          angleDeg = (180 - angleDeg) + 180
-        angleDeg = np.around(angleDeg,3)
+          angleDeg = (180 - angleDeg) 
+        angleDeg = np.around(angleDeg,5)
         return angleDeg
     
       currentangle = GetAngle()
@@ -957,12 +958,12 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
         angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
         if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg) + 180
+          angleDeg = (180 - angleDeg) 
         if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg) + 180
+          angleDeg = (180 - angleDeg)
         if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
-          angleDeg = (180 - angleDeg) + 180
-        angleDeg = np.around(angleDeg,3)
+          angleDeg = (180 - angleDeg) 
+        angleDeg = np.around(angleDeg,5)
         self.ui.orientationspinBox.value = angleDeg
       anglewatcher = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,ShowAngle)
 
@@ -1139,7 +1140,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       IminorArray.SetName("Iminor (mm^4)")
                     
       ThetaMinArray = vtk.vtkFloatArray()
-      ThetaMinArray.SetName("Theta minor (deg)")
+      ThetaMinArray.SetName("Theta (deg)")
       
       ThetaMaxArray = vtk.vtkFloatArray()
       ThetaMaxArray.SetName("Theta major (deg)")
@@ -1833,7 +1834,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
               CyArray.InsertNextValue(0)
               JzArray.InsertNextValue(0)
                             
-              MinArray.InsertNextValue(0)       
+              ThetaMinArray.InsertNextValue(0)       
               ThetaMaxArray.InsertNextValue(0)       
               ImajorArray.InsertNextValue(0)
               IminorArray.InsertNextValue(0)
@@ -1930,8 +1931,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                        
             if segmentID == segmentNode:
             # add values to calculations                       
-              ThetaMinArray.InsertNextValue((Theta + np.pi/2)*180/np.pi )       
-              ThetaMaxArray.InsertNextValue((Theta*180/np.pi) + 180)    
+              ThetaMinArray.InsertNextValue((Theta + np.pi/2)*180/np.pi)       
+              ThetaMaxArray.InsertNextValue(Theta*180/np.pi)
               JzArray.InsertNextValue(Jz * unitOfPixelMm4)   
               ImajorArray.InsertNextValue(Imajor * unitOfPixelMm4)
               IminorArray.InsertNextValue(Iminor * unitOfPixelMm4)
@@ -2082,11 +2083,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if ThetacheckBox == True:    
         tableNode.AddColumn(ThetaMinArray)
         tableNode.SetColumnUnitLabel(ThetaMinArray.GetName(), "degrees")  # TODO: use length unit
-        tableNode.SetColumnDescription(ThetaMinArray.GetName(), "Angle of the minor principal axis")  
+        tableNode.SetColumnDescription(ThetaMinArray.GetName(), "Angle between the minor principal axis and the horizontal (right side), in a clockwise direction")  
         
-        tableNode.AddColumn(ThetaMaxArray)
-        tableNode.SetColumnUnitLabel(ThetaMaxArray.GetName(), "degrees")  # TODO: use length unit
-        tableNode.SetColumnDescription(ThetaMaxArray.GetName(), "Angle of the major principal axis")  
+        #tableNode.AddColumn(ThetaMaxArray)
+        #tableNode.SetColumnUnitLabel(ThetaMaxArray.GetName(), "degrees")  # TODO: use length unit
+        #tableNode.SetColumnDescription(ThetaMaxArray.GetName(), "Angle of the major principal axis")  
       
       if SMAcheckBox_1 == True:  
         tableNode.AddColumn(IminorArray)
