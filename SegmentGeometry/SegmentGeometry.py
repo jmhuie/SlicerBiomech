@@ -1047,7 +1047,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
       trans_new.SetMatrixTransformToParent(matrix) 
     
-    # crop volume if segment is partially outside
+    # use crop volume to expand volume if segment is partially outside
     segmentBounds = [0,]*6
     segmentationNode.GetRASBounds(segmentBounds)
     combinedBounds = [0,]*6   
@@ -1072,6 +1072,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     
     spacingflag = 0
     spacing = volumeNode.GetSpacing() 
+    trans = segmentationNode.GetTransformNodeID()
     if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
       spacingflag = 1
    
@@ -1085,7 +1086,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       parameters.SetInputVolumeNodeID(volumeNode.GetID())
       parameters.SetOutputVolumeNodeID(newVolume.GetID())
       parameters.SetROINodeID(roi.GetID())
-      if spacingflag == 1:
+      if volumetransformNode != None and spacingflag == 1:
         parameters.SetIsotropicResampling(True)
       slicer.modules.cropvolume.logic().Apply(parameters)
       volumeNode.SetAndObserveTransformNodeID(volumetransformNode)
@@ -1415,8 +1416,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         ###### DO CALCULATIONS ######
         spacing = tempSegmentLabelmapVolumeNode.GetSpacing()
         narray = slicer.util.arrayFromVolume(tempSegmentLabelmapVolumeNode)
-        if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
-          raise ValueError("Voxels are anisotropic! Resample the volume")            
+        #if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
+        #  raise ValueError("Voxels are anisotropic! Resample the volume")            
   
         if axisIndex == 0:
           PixelDepthMm = spacing[0] # get mm for length
