@@ -16,13 +16,13 @@ class SegmentGeometry(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "Segment Geometry"
+    self.parent.title = "SegmentGeometry"
     self.parent.categories = ["Quantification"]
     self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
     For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
-    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a Harlan Research Fellowship."""
+    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship."""
 
     # Additional initialization step after application startup is complete
     slicer.app.connect("startupCompleted()", registerSampleData)
@@ -45,10 +45,10 @@ def registerSampleData():
     # it is recommended to store data sets that are larger than a few MB in a Github release.
 
     
-    # load demo Segment Geometry data
+    # load demo SegmentGeometry data
     
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        category="Segment Geometry",
+        category="SegmentGeometry",
         sampleName='DemoForelimb',
         uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs.nrrd',
         fileNames='DemoForelimb.nrrd',
@@ -57,7 +57,7 @@ def registerSampleData():
         loadFileType='VolumeFile',
         )
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        category="Segment Geometry",
+        category="SegmentGeometry",
         sampleName='DemoSegment',
         uris='https://github.com/jmhuie/Slicer-SegmentGeometry/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_Segmentation.seg.nrrd',
         fileNames='DemoSegment.seg.nrrd',
@@ -289,8 +289,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.chartSelector.toolTip = "Select output chart"
             
    
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
     if lineNode != None:
       def CopyLine(unused1 = None, unused2 = None):
         centroid_ras = lineNode.GetNthControlPointPosition(0)
@@ -305,10 +305,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.orientationspinBox.enabled = True
       self.ui.ShowAxisButton.enabled = True
       self.ui.ShowAxisButton.toolTip = "Jump to the neutral axis in slice view"
-      lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+      lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
       if lineNode != None:
         lineNode.SetDisplayVisibility(1)
-      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
       if lineNode2 != None:
         lineNode2.SetDisplayVisibility(1)
         
@@ -318,10 +318,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.orientationspinBox.enabled = False
       self.ui.ShowAxisButton.enabled = False
       self.ui.ShowAxisButton.toolTip = "Select option use the neutral axis"   
-      lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+      lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
       if lineNode != None:
         lineNode.SetDisplayVisibility(0)
-      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+      lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
       if lineNode2 != None:
         lineNode2.SetDisplayVisibility(0)
 
@@ -371,10 +371,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     
     self.ui.OrientationcheckBox.checked = False  
 
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     if lineNode != None:
       slicer.mrmlScene.RemoveNode(lineNode)
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
     if lineNode2 != None:
       slicer.mrmlScene.RemoveNode(lineNode2)  
 
@@ -391,20 +391,20 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     
-    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode == None:
-      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
       shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      newFolder = shNode.GetItemByName("SegmentGeometry Misc")
       if newFolder == 0:
-        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
       transformItem = shNode.GetItemByDataNode(transformNode)
       shNode.SetItemParent(transformItem, newFolder)
       shNode.SetItemExpanded(newFolder,0)
     segmentationNode.SetAndObserveTransformNodeID(None)
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
 
-    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
     if pointNode != None:
       def updateFinalTransform(unusedArg1=None, unusedArg2=None, unusedArg3=None):
         rotationMatrix = vtk.vtkMatrix4x4()
@@ -434,7 +434,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION    
-        #sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
+        #sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation"))
     
 
 
@@ -462,7 +462,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     obb_center_ras = obb_origin_ras+0.5*(obb_diameter_mm[0] * obb_direction_ras_x + obb_diameter_mm[1] * obb_direction_ras_y + obb_diameter_mm[2] * obb_direction_ras_z)
     boundingBoxToRasTransform = np.row_stack((np.column_stack((obb_direction_ras_x, obb_direction_ras_y, obb_direction_ras_z, [0,0,0])), (0, 0, 0, 1)))
     boundingBoxToRasTransformMatrix = slicer.util.vtkMatrixFromArray(boundingBoxToRasTransform)
-    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     transformNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)
     segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
@@ -481,7 +481,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     matrix.SetElement(1,3, trans_new.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
     matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
     trans_new.SetMatrixTransformToParent(matrix)
-    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
     if pointNode != None:
       pointNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)  
 
@@ -501,23 +501,23 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       segtransformNode = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
       matrix = vtk.vtkMatrix4x4()
       segtransformNode.GetMatrixTransformToParent(matrix)
-      transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+      transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
       if transformNode == None:
-        transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+        transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        newFolder = shNode.GetItemByName("Segment Geometry Misc")
+        newFolder = shNode.GetItemByName("SegmentGeometry Misc")
         if newFolder == 0:
-          newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+          newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
         transformItem = shNode.GetItemByDataNode(transformNode)
         shNode.SetItemParent(transformItem, newFolder)
         shNode.SetItemExpanded(newFolder,0)
       transformNode.SetMatrixTransformToParent(matrix)
     elif segtransformNode == None:
-      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
       shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      newFolder = shNode.GetItemByName("SegmentGeometry Misc")
       if newFolder == 0:
-        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
       transformItem = shNode.GetItemByDataNode(transformNode)
       shNode.SetItemParent(transformItem, newFolder)
       shNode.SetItemExpanded(newFolder,0)
@@ -534,11 +534,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.RotatorSliders.enabled = False
     elif transform.GetEditorVisibility() == True:
       transform.SetEditorVisibility(0)  
-      pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+      pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
       if pointNode != None:
         self.ui.RotatorSliders.enabled = True
         og_matrix = vtk.vtkMatrix4x4()
-        transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+        transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
         transformNode.GetMatrixTransformToParent(og_matrix)    
         for i in range(0,3):
           og_matrix.SetElement(i,3,0)
@@ -562,33 +562,33 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     
-    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " Segment Geometry Transformation")
+    transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode != None:
       transform = transformNode.GetDisplayNode()
       if transform != None:  
         transformNode.GetDisplayNode().SetEditorVisibility(0)
         self.ui.Interactive3DButton.checked = False    
     if transformNode == None:
-      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " Segment Geometry Transformation")
+      transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
       segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
       volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
       shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      newFolder = shNode.GetItemByName("SegmentGeometry Misc")
       if newFolder == 0:
-        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
       transformItem = shNode.GetItemByDataNode(transformNode)
       shNode.SetItemParent(transformItem, newFolder)
       shNode.SetItemExpanded(newFolder,0)
-    pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+    pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
     pointflag = 0
     if pointNode != None:
       pointflag = 1
     if pointNode == None:
-      pointNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "Segment Geometry Point Transformation")
+      pointNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "SegmentGeometry Point Transformation")
       shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-      newFolder = shNode.GetItemByName("Segment Geometry Misc")
+      newFolder = shNode.GetItemByName("SegmentGeometry Misc")
       if newFolder == 0:
-        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+        newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
       pointItem = shNode.GetItemByDataNode(pointNode)
       shNode.SetItemParent(pointItem, newFolder)
       shNode.SetItemExpanded(newFolder,0)
@@ -602,7 +602,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def updateFinalTransform(unusedArg1=None, unusedArg2=None, unusedArg3=None):
       rotationMatrix = vtk.vtkMatrix4x4()
-      pointNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation")
+      pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
       pointNode.GetMatrixTransformToParent(rotationMatrix)
       rotationCenterPointCoord = segcentroid_ras
       finalTransform = vtk.vtkTransform()
@@ -626,7 +626,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
-    sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Point Transformation"))
+    sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation"))
     
 
   def ResetButton(self):
@@ -634,7 +634,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Clears everything in the Misc folder.
     """ 
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    shFolderItemId = shNode.GetItemByName("Segment Geometry Misc")
+    shFolderItemId = shNode.GetItemByName("SegmentGeometry Misc")
     childIds = vtk.vtkIdList()
     shNode.GetItemChildren(shFolderItemId, childIds)
     self.ui.OrientationcheckBox.checked = False
@@ -712,9 +712,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.orientationspinBox.value = angleDeg 
 
 
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     if lineNode == None:
-      lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "Segment Geometry Neutral Axis A")
+      lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "SegmentGeometry Neutral Axis A")
       lineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
       lineNode.GetDisplayNode().SetSelectedColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
@@ -733,9 +733,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     anglewatcher = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,ShowAngle)
 
 
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
     if lineNode2 == None:
-      lineNode2 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "Segment Geometry Neutral Axis B")
+      lineNode2 = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "SegmentGeometry Neutral Axis B")
       lineNode2.GetDisplayNode().SetPropertiesLabelVisibility(False)
       lineNode2.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode2.GetDisplayNode().SetColor((1.0, 0.5000076295109483, 0.5000076295109483))
@@ -756,9 +756,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
 
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    newFolder = shNode.GetItemByName("Segment Geometry Misc")
+    newFolder = shNode.GetItemByName("SegmentGeometry Misc")
     if newFolder == 0:
-      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Segment Geometry Misc")      
+      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "SegmentGeometry Misc")      
     shNode.SetItemParent(shNode.GetItemByDataNode(lineNode), newFolder)
     shNode.SetItemParent(shNode.GetItemByDataNode(lineNode2), newFolder)
     shNode.SetItemExpanded(newFolder,0)    
@@ -790,7 +790,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if axis=="S (Red)" and segcentroid_ras[0] < 0: 
       horiz_point = segcentroid_ras[0] - 2
       
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     if lineNode != None:
       def GetAngle(unused1 = None, unused2 = None):
         import numpy as np
@@ -869,7 +869,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       segName = segment.GetName()
       
       tableNode = self.ui.tableSelector.currentNode()
-      expTable = segName + " Segment Geometry table"
+      expTable = segName + " SegmentGeometry table"
       if not tableNode:
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", expTable)
         self.ui.tableSelector.setCurrentNode(tableNode)
@@ -882,15 +882,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       
       
       plotChartNode = self.ui.chartSelector.currentNode()
-      expChart = segName + " Segment Geometry plot"
+      expChart = segName + " SegmentGeometry plot"
       if not plotChartNode:
-        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Segment Geometry plot")
+        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " SegmentGeometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)
       if plotChartNode.GetName() != expChart and slicer.mrmlScene.GetFirstNodeByName(expChart) != None:
         plotChartNode = slicer.mrmlScene.GetFirstNodeByName(expChart)
         self.ui.chartSelector.setCurrentNode(plotChartNode)
       if plotChartNode.GetName() != expChart and slicer.mrmlScene.GetFirstNodeByName(expChart) == None:
-        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " Segment Geometry plot")
+        plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", segName + " SegmentGeometry plot")
         self.ui.chartSelector.setCurrentNode(plotChartNode)  
 
      
@@ -914,8 +914,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis A")
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("Segment Geometry Neutral Axis B")
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
 
     segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
     slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
@@ -1270,11 +1270,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           # Create volume for output
           volumetransformNode = volumeNode.GetTransformNodeID()
           volumeNode.SetAndObserveTransformNodeID(None)
-          outputVolume = slicer.util.getFirstNodeByName(segName + " Segment Geometry Resampled Volume")
+          outputVolume = slicer.util.getFirstNodeByName(segName + " SegmentGeometry Resampled Volume")
           if outputVolume != None:
             slicer.mrmlScene.RemoveNode(outputVolume) 
-          outputVolume = volumesLogic.CloneVolumeGeneric(slicer.mrmlScene, volumeNode, segName + " Segment Geometry Resampled Volume")
-          outputVolume.SetName(segName + " Segment Geometry Resampled Volume")
+          outputVolume = volumesLogic.CloneVolumeGeneric(slicer.mrmlScene, volumeNode, segName + " SegmentGeometry Resampled Volume")
+          outputVolume.SetName(segName + " SegmentGeometry Resampled Volume")
           
           
           # resample volume if user is calculating mean pixel brightness and has a transformed segment
@@ -2383,8 +2383,8 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
                                                                            [1.0, 0.0, 0.0])
     segmentNode = segmentationNode.GetSegmentation().GetSegment(segmentId)                                                                       
 
-    tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "Segment Geometry test table")
-    plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "Segment Geometry test plot")
+    tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", "SegmentGeometry test table")
+    plotChartNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLPlotChartNode", "SegmentGeometry test plot")
     
     
     logic = SegmentGeometryLogic()

@@ -1,20 +1,20 @@
-# Segment Geometry
+# SegmentGeometry
 
-This is the repository for Segment Geometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
+This is the repository for SegmentGeometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
-Segment Geometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
+SegmentGeometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
 ![image](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png)
 
 # Installation
 
-The official method for installing Segment Geometry is through 3D Slicer's built-in Extensions Manager. To install Segment Geometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
-In 3D Slicer, open the Extensions Manager module and search for "SegmentGeometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, Segment Geometry should be fully functional and located in the Quantification 
-module category. If using the current stable release of Slicer, Segment Geometry can be updated in the Extension Manager. If using the Preview Release of Slicer, the most recent build must be downloaded and installed to update Segment Geometry.
+The official method for installing SegmentGeometry is through 3D Slicer's built-in Extensions Manager. To install SegmentGeometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
+In 3D Slicer, open the Extensions Manager module and search for "SegmentGeometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, SegmentGeometry should be fully functional and located in the Quantification 
+module category. If using the current stable release of Slicer, SegmentGeometry can be updated in the Extension Manager. If using the Preview Release of Slicer, the most recent build must be downloaded and installed to update SegmentGeometry.
 
 # How to Cite
 
-Citable paper for Segment Geometry coming soon. Below are other relevant citations.
+Citable paper for SegmentGeometry coming soon. Below are other relevant citations.
 
 To cite 3D Slicer as a general image analysis platform, please use: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
@@ -31,7 +31,7 @@ Some source code was ported from BoneJ. To cite BoneJ or find out more, please u
 
 
 # Workflow Example
-Below are general instructions on how to use Segment Geometry, including a step-by-step guide for general use cases and a demo video. Segment Geometry provides an example dataset in the Sample Data module that consists of a salamander 
+Below are general instructions on how to use SegmentGeometry, including a step-by-step guide for general use cases and a demo video. SegmentGeometry provides an example dataset in the Sample Data module that consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a> and a segmentation file that contains an 
 isolated humerus and solid humerus segment for measuring compactness. New users are encouraged to follow along with guide and demo video using the sample data set or their own.
 
@@ -39,29 +39,29 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 1. Start 3D Slicer.
 2. Load in CT Data.
 3. Isolate and segment the bone or structure of interest in the Segment Editor module.
-4. Switch to the Segment Geometry module.
+4. Switch to the SegmentGeometry module.
 5. Select your inputs. "Segmentation" is the Segmentation node that contains your segment and "Volume" is the corresponding Volume node. Both are required.
 6. Select the "Slice View" that will run along the length of the desired measurement (long) axis. Generally, it is easier to use the default "Slice View" and rotate the segment accordingly. Changing the "Slice View" is only recommended when no transformations are needed, but the desired cross-sections are not visibile in the red view (default).
 7. Use the provided Transform Tools to rotate the segment and align it with the desired long axis/slice view. You should be able to scroll through the selected "Slice View" and see the exact cross-sections you want to compute on.
-8. Choose whether to compute on every slice in the segment or only some of them and change the "Percent Interval". For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, Segment Geometry will sample sections in 1% increments. Enter "0" to compute on every slice.
+8. Choose whether to compute on every slice in the segment or only some of them and change the "Percent Interval". For large datasets, it may be beneficial to sample slices in intervals representing some percentage of segment length. By default, SegmentGeometry will sample sections in 1% increments. Enter "0" to compute on every slice.
 9. Choose which computations should be performed.
 10. Select an output table and a chart node. 
 11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
 ### Demo Videos
-Here are some example videos that demonstrate how to use Segment Geometry for different purposes.
+Here are some example videos that demonstrate how to use SegmentGeometry for different purposes.
 1. <a href="https://youtu.be/fBaTM5utQC0" target ="_blank">How to calculate second moment of area and compactness of a salamander limb bone</a> 
 2. <a href="https://youtu.be/fI5xFT7_81I" target ="_blank">How to calculate second moment of area of a cat mandible</a> 
 
 # Advanced Tools
 
 ### Segment Transformation Tools
-Segment Geometry provides three tools for rotating and aligning segments with the desired long axis. 
+SegmentGeometry provides three tools for rotating and aligning segments with the desired long axis. 
 * **Align With Principal Axes** - will use the Segment Statistics module to calculate the segment's principal axes and align them with the XYZ axes.
 * **Rotate Segment In 3D View** - will generate an interactive 3D bounding box that can be used to rotate the segment in 3D space. Click+Drag the sides of the box to rotate it. Click button again to disable rotation in 3D view.
 * **Initialize Rotation Sliders** - will initialize the sliders that can be used to rotate the segment around its centroid.
-* **Reset** - will reset transformations applied through Segment Geometry and the custom neutral axis, if defined.
+* **Reset** - will reset transformations applied through SegmentGeometry and the custom neutral axis, if defined.
 
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markups line will be created and visible in both the selected slice view and the 3D view. 
@@ -70,7 +70,7 @@ Note that the Markups line crosses the center of the segment and not necessarily
 
 
 ### Compute Unitless Variables
-Three methods for normalizing variables to remove the effects of size are implemented in Segment Geometry. 
+Three methods for normalizing variables to remove the effects of size are implemented in SegmentGeometry. 
 
 * **Length normalization** -  from Doube et al. (2009). With this method, cross-sectional area, second moment of area, and section modulus are corrected based on the length of the segment. The respective root of the variables are taken to make them linear; then they are divided by total segment length. For example, cross-sectional area has a unit of mm^2 so the square root of CSA is calculated and the result is divided by segment length.
 * **Material normalization** -  from Summers et al. (2004). With this method, second moment of area/section modulus values are divided by the second moment of area/section modulus of a solid circle with the same cross-sectional area. Normalized values represent how well the structure's material is distributed relative to an idealized beam. 
@@ -80,13 +80,13 @@ can automatically generate a segment with the vacuities filled in.
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
 # Output Details
-Segment Geometry presents the results as a table and automatically plots second moment of area over percent length of the segment. Segment Geometry also generates a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. 
-When calculating second moment of area or section modulus, Segment Geometry will approximate the segment's aspect ratio and alert the user when the no-shear assumption of Euler-Bernoulli's beam theory may not be met. 
+SegmentGeometry presents the results as a table and automatically plots second moment of area over percent length of the segment. SegmentGeometry also generates a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. 
+When calculating second moment of area or section modulus, SegmentGeometry will approximate the segment's aspect ratio and alert the user when the no-shear assumption of Euler-Bernoulli's beam theory may not be met. 
 Below contains brief information on the possible computations.
 
 - Segment: Segment name.
 
-- Slice Index: Segment slice numbers that correspond to the resampled and cropped volume exported by Segment Geometry.
+- Slice Index: Segment slice numbers that correspond to the resampled and cropped volume exported by SegmentGeometry.
 
 - Percent: Percent of total segment length.
 
@@ -102,9 +102,9 @@ Below contains brief information on the possible computations.
 
 - Compactness: Ratio between cross-sectional area and the provided total cross-sectional area.
 
-- Cx: Centroid x-coordinates that correspond to the resampled and cropped volume exported by Segment Geometry. Presented in IJK format.
+- Cx: Centroid x-coordinates that correspond to the resampled and cropped volume exported by SegmentGeometry. Presented in IJK format.
 
-- Cy: Centroid y-coordinates that correspond to the resampled and cropped volume exported by Segment Geometry. Presented in IJK format.
+- Cy: Centroid y-coordinates that correspond to the resampled and cropped volume exported by SegmentGeometry. Presented in IJK format.
 
 - Theta: Angle (degrees) between the minor principal axis and horizontal axis in the clockwise direction, starting from the right side.
 
@@ -140,13 +140,13 @@ Below contains brief information on the possible computations.
 
 # Frequently Asked Questions
 
-1. I think I need help using Segment Geometry, received an error, or think you found a bug. What do I do?
+1. I think I need help using SegmentGeometry, received an error, or think you found a bug. What do I do?
 
-First, make sure that you have the most recent version of Segment Geometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie). I will do my best to address problems in a timely manner.
+First, make sure that you have the most recent version of SegmentGeometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie). I will do my best to address problems in a timely manner.
 
-2. I have a suggestion or feature request for how to improve Segment Geometry. What do I do?
+2. I have a suggestion or feature request for how to improve SegmentGeometry. What do I do?
 
-Fantastic! I am always trying to improve the ease and utility of Segment Geometry and would love to hear your suggestions. Again, it's best if you make a post on the 3D Slicer discourse page detailing your idea and tag me.
+Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. Again, it's best if you make a post on the 3D Slicer discourse page detailing your idea and tag me.
 
 # Funding Acknowledgement
 
