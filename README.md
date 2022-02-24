@@ -66,7 +66,8 @@ SegmentGeometry provides three tools for rotating and aligning segments with the
 ### Use Custom Neutral Axis
 If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markups line will be created and visible in both the selected slice view and the 3D view. 
 The representative line can be rotated by clicking and dragging the closed circle on one end of the line. Alternatively, the user can enter a value between 0 and 180 that represents the angle (in degrees) between the horizontal and the neutral axis, starting from the right and moving in clockwise direction. 
-Note that the Markups line crosses the center of the segment and not necessarily the centroid of the center slice, but only the angle between the line and the horizontal will be used for computations. The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view.
+The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view. Note that the location of the Markups line is currently a work in progress and crosses the center of the segment; not necessarily the centroid of the center slice. That is okay, only the angle between the line and the horizontal will be used for computations. 
+In the future, the line will pass through the centroid of the slice and will be viewable on any given slice.
 
 
 ### Compute Unitless Variables
@@ -140,7 +141,7 @@ Below contains brief information on the possible computations.
 
 # Frequently Asked Questions
 
-1. I think I need help using SegmentGeometry, received an error, or think you found a bug. What do I do?
+1. I need help using SegmentGeometry, I received an error, or I think I found a bug. What do I do?
 
 First, make sure that you have the most recent version of SegmentGeometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie). I will do my best to address problems in a timely manner.
 
