@@ -293,8 +293,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
     if lineNode != None:
       def CopyLine(unused1 = None, unused2 = None):
-        centroid_ras = lineNode.GetNthControlPointPosition(0)
-        lineA_newpos = lineNode.GetNthControlPointPosition(1)
+        import numpy as np
+        centroid_ras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(0,centroid_ras)
+        lineA_newpos = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,lineA_newpos)
         lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
       copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
 
@@ -680,8 +683,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       horiz_point = segcentroid_ras[0] - linevalue
 
     def CopyLine(unused1 = None, unused2 = None):
-      centroid_ras = lineNode.GetNthControlPointPosition(0)
-      lineA_newpos = lineNode.GetNthControlPointPosition(1)
+      import numpy as np
+      centroid_ras = np.zeros(3)
+      lineNode.GetNthControlPointPosition(0,centroid_ras)
+      lineA_newpos = np.zeros(3)
+      lineNode.GetNthControlPointPosition(1,lineA_newpos)
       lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
 
     def ShowAngle(unused1 = None, unused2 = None):
@@ -825,22 +831,34 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       Theta = Theta * np.pi/180 * -1
 
       if axis == "R (Yellow)":
-        ogX = lineNode.GetNthControlPointPosition(1)[1] - segcentroid_ras[1]
-        ogY = lineNode.GetNthControlPointPosition(1)[2] - segcentroid_ras[2]
+        Xras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Xras)
+        ogX = Xras[1] - segcentroid_ras[1]
+        Yras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Yras)
+        ogY = Yras[2] - segcentroid_ras[2]
         newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[1]
         newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
         lineNode.SetNthControlPointPosition(1, segcentroid_ras[0], newX,newY)
    
       if axis == "A (Green)":
-        ogX = lineNode.GetNthControlPointPosition(1)[0] - segcentroid_ras[0]
-        ogY = lineNode.GetNthControlPointPosition(1)[2] - segcentroid_ras[2]
+        Xras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Xras)
+        ogX = Xras[0] - segcentroid_ras[0]
+        Yras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Yras)
+        ogY = Yras[2] - segcentroid_ras[2]
         newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
         newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
         lineNode.SetNthControlPointPosition(1, newX, segcentroid_ras[1],newY)
     
       if axis == "S (Red)":
-        ogX = lineNode.GetNthControlPointPosition(1)[0] - segcentroid_ras[0]
-        ogY = lineNode.GetNthControlPointPosition(1)[1] - segcentroid_ras[1]
+        Xras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Xras)
+        ogX = Xras[0] - segcentroid_ras[0]
+        Yras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,Yras)
+        ogY = Yras[1] - segcentroid_ras[1]
         newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
         newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[1] 
         lineNode.SetNthControlPointPosition(1, newX, newY, segcentroid_ras[2])
@@ -934,8 +952,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     if lineNode != None:
       def CopyLine(unused1 = None, unused2 = None):
-        centroid_ras = lineNode.GetNthControlPointPosition(0)
-        lineA_newpos = lineNode.GetNthControlPointPosition(1)
+        import numpy as np
+        centroid_ras = np.zeros(3)
+        lineNode.GetNthControlPointPosition(0,centroid_ras)
+        lineA_newpos = np.zeros(3)
+        lineNode.GetNthControlPointPosition(1,lineA_newpos)
         lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
       copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
 
@@ -1894,7 +1915,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             # calculated polar moment of inertia
             Jz = 0
             for s in range(Sn):
-              Jz = [Jz] + ((Cx - coords_Ijk[0][s])**2 + (Cy - coords_Ijk[1][s])**2)
+              Jz = Jz + ((Cx - coords_Ijk[0][s])**2 + (Cy - coords_Ijk[1][s])**2)
 
             # deteRminore how far the major principal axis is from the horizontal 
             Ixy = 0
@@ -1911,7 +1932,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Rmajor = 0
             for s in range(Sn): 
               rad = ((coords_Ijk[1][s]-Cy)*np.cos(Theta) - (coords_Ijk[0][s]-Cx)*np.sin(Theta))**2
-              Imajor = [Imajor]+ (rad + 1/12)
+              Imajor = Imajor+ (rad + 1/12)
               Rmajor = max(Rmajor,np.sqrt(rad))
             if Rmajor == 0:
               Zmajor = Imajor
@@ -1923,7 +1944,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             Rminor = 0
             for s in range(Sn):
               rad = ((coords_Ijk[0][s]-Cx)*np.cos(Theta) + (coords_Ijk[1][s]-Cy)*np.sin(Theta))**2
-              Iminor = [Iminor]+ (rad + 1/12)
+              Iminor = Iminor + (rad + 1/12)
               Rminor = max(Rminor,np.sqrt(rad))
             if Rminor == 0:
               Zminor = Iminor
@@ -1967,7 +1988,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 Rna = 0
                 for s in range(Sn): 
                   rad = ((coords_Ijk[1][s]-Cy)*np.cos(Theta) - (coords_Ijk[0][s]-Cx)*np.sin(Theta))**2
-                  Ina = [Ina] +(rad + 1/12)
+                  Ina = Ina +(rad + 1/12)
                   Rna = max(Rna,np.sqrt(rad))
                 if Rna == 0:
                   Zna = Ina
@@ -1980,7 +2001,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 Rla = 0
                 for s in range(Sn):
                   rad = ((coords_Ijk[0][s]-Cx)*np.cos(Theta) + (coords_Ijk[1][s]-Cy)*np.sin(Theta))**2
-                  Ila = [Ila]+ (rad + 1/12)
+                  Ila = Ila+ (rad + 1/12)
                   Rla = max(Rla,np.sqrt(rad))
                 if Rla == 0:
                   Zla = Ila  
