@@ -393,16 +393,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode = self.ui.volumeSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
-    
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
-    if lineNode != None:
-      slicer.mrmlScene.RemoveNode(lineNode)
-      slicer.mrmlScene.RemoveNode(lineNode2)
-      self.ui.OrientationcheckBox.checked = False
-      self.ui.OrientationcheckBox.enabled = True  
-      self.ui.orientationspinBox.value = 0
-    
+        
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode == None:
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
@@ -505,16 +496,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode.SetAndObserveTransformNodeID(None)
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
-    
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
-    if lineNode != None:
-      slicer.mrmlScene.RemoveNode(lineNode)
-      slicer.mrmlScene.RemoveNode(lineNode2)
-      self.ui.OrientationcheckBox.checked = False
-      self.ui.OrientationcheckBox.enabled = True  
-      self.ui.orientationspinBox.value = 0
-        
+            
     segtransformNode = segmentationNode.GetTransformNodeID()
     if segtransformNode != None:
       segtransformNode = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
@@ -568,8 +550,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
-    
-          
   
   def initializeSliders(self):
     """
@@ -580,16 +560,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode = self.ui.volumeSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
-    
-    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
-    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
-    if lineNode != None:
-      slicer.mrmlScene.RemoveNode(lineNode)
-      slicer.mrmlScene.RemoveNode(lineNode2)
-      self.ui.OrientationcheckBox.checked = False
-      self.ui.OrientationcheckBox.enabled = True  
-      self.ui.orientationspinBox.value = 0
-
     
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode != None:
@@ -656,7 +626,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
     sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
     sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation"))
-    
+
 
   def ResetButton(self):
     """

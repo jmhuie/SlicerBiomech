@@ -65,9 +65,9 @@ SegmentGeometry provides three tools for rotating and aligning segments with the
 * **Reset** - will reset transformations applied through SegmentGeometry and the custom neutral axis, if defined.
 
 ### Use Custom Neutral Axis
-If the direction of the loading axis is known or hypothesized, a custom neutral axis can be used when calculating second moment of area and other relevant computations by checking the "Use custom neutral axis" box. Doing so will draw a line that represents the neutral axis. This line can be manually rotated by clicking and dragging the closed end of the line 
+If the direction of the loading axis is known or hypothesized, a custom neutral axis can be used to calculate second moment of area and other relevant computations. Checking the "Use custom neutral axis" box with enable the option and draw a line that represents the neutral axis. This line can be manually rotated by clicking and dragging the closed end of the line 
 in either the slice view or 3D view. Alternatively, the user may enter a value between 0 and 180 that represents the angle (in degrees) between the horizontal and the neutral axis, starting from the right and moving in clockwise direction. 
-The "Update Neutral Axis" button can be used to view the custom neutral axis for different slices of the segment, which is drawn at the middle of the segment by default. Navigate to a different slice and click the button to view the line on that slice. 
+The centroidal neutral axis line is presented at the middle of the segment by default, but the "Update Neutral Axis" button can be used to view the line on any slice of the segment or move it back to the centroid if is not longer there (e.g., after applying a transformation to the segment). 
 
 
 ### Compute Unitless Variables
