@@ -307,7 +307,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.orientationspinBox.toolTip = "Enter the angle between the horizontal and neutral axes. By default, the neutral axis is the horizontal axis."
       self.ui.orientationspinBox.enabled = True
       self.ui.ShowAxisButton.enabled = True
-      self.ui.ShowAxisButton.toolTip = "Jump to the neutral axis in slice view"
+      self.ui.ShowAxisButton.toolTip = "Move the neutral axis to the current slice view"
       lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
       if lineNode != None:
         lineNode.SetDisplayVisibility(1)
@@ -394,6 +394,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
+    if lineNode != None:
+      slicer.mrmlScene.RemoveNode(lineNode)
+      slicer.mrmlScene.RemoveNode(lineNode2)
+      self.ui.OrientationcheckBox.checked = False
+      self.ui.OrientationcheckBox.enabled = True  
+      self.ui.orientationspinBox.value = 0
+    
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode == None:
       transformNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", segName + " SegmentGeometry Transformation")
@@ -438,8 +447,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.TRANSLATION
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION    
         #sliders.setMRMLTransformNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation"))
-    
-
 
     import SegmentStatistics
     segmentationNode.GetDisplayNode().SetSegmentVisibility(segmentId, True)
@@ -499,6 +506,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
+    if lineNode != None:
+      slicer.mrmlScene.RemoveNode(lineNode)
+      slicer.mrmlScene.RemoveNode(lineNode2)
+      self.ui.OrientationcheckBox.checked = False
+      self.ui.OrientationcheckBox.enabled = True  
+      self.ui.orientationspinBox.value = 0
+        
     segtransformNode = segmentationNode.GetTransformNodeID()
     if segtransformNode != None:
       segtransformNode = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
@@ -564,6 +580,16 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     volumeNode = self.ui.volumeSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
+    
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
+    if lineNode != None:
+      slicer.mrmlScene.RemoveNode(lineNode)
+      slicer.mrmlScene.RemoveNode(lineNode2)
+      self.ui.OrientationcheckBox.checked = False
+      self.ui.OrientationcheckBox.enabled = True  
+      self.ui.orientationspinBox.value = 0
+
     
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
     if transformNode != None:
@@ -663,43 +689,104 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode = self.ui.regionSegmentSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     volumeNode = self.ui.volumeSelector.currentNode()
+    spacing = volumeNode.GetSpacing()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
+    
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    if lineNode == None:
+      #determine the centroid of the current slice
+      segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+      segmentBounds = [0,]*6
+      segmentationNode.GetRASBounds(segmentBounds)
+      roiCenter = [0.0, 0.0, 0.0]
+      roiRadius = [0.0, 0.0, 0.0]
+      for i in range(0,3):
+        roiCenter[i] = (segmentBounds[i*2+1] + segmentBounds[i*2])/2
+        roiRadius[i] = (segmentBounds[i*2+1] - segmentBounds[i*2])/2 
+      roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
+      #roi.SetDisplayVisibility(0)
+      if axis=="R (Yellow)":
+        roi.SetXYZ(segcentroid_ras[0], roiCenter[1], roiCenter[2])
+        roi.SetRadiusXYZ(spacing[0]/2, roiRadius[1], roiRadius[2]) 
+        imageSize = [ 1, int(roiRadius[1]/spacing[1]*2),int(roiRadius[2]/spacing[2]*2)] 
+        imageOrigin = [segcentroid_ras[0], roiCenter[1]-roiRadius[1],roiCenter[2]-roiRadius[2]]
+      if axis=="A (Green)":
+        roi.SetXYZ(roiCenter[0], segcentroid_ras[1], roiCenter[2])
+        roi.SetRadiusXYZ(roiRadius[0], spacing[1]/2, roiRadius[2])
+        imageSize = [int(roiRadius[0]/spacing[0]*2), 1, int(roiRadius[2]/spacing[2]*2)]
+        imageOrigin = [roiCenter[0]-roiRadius[0], segcentroid_ras[1], roiCenter[2]-roiRadius[2]]
+      if axis=="S (Red)":
+        roi.SetXYZ(roiCenter[0], roiCenter[1], segcentroid_ras[2])
+        roi.SetRadiusXYZ(roiRadius[0], roiRadius[1], spacing[2]/2)      
+        imageSize = [int(roiRadius[0]/spacing[0]*2), int(roiRadius[1]/spacing[1]*2), 1]
+        imageOrigin = [roiCenter[0]-roiRadius[0], roiCenter[1]-roiRadius[1], segcentroid_ras[2]]
+      # Create an empty image volume, filled with fillVoxelValue
+      imageData = vtk.vtkImageData()
+      imageData.SetDimensions(imageSize)
+      imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+      imageData.GetPointData().GetScalars().Fill(0)
+      # Create volume node
+      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode", "MyNewVolume")
+      newVolume.SetOrigin(imageOrigin)
+      newVolume.SetSpacing(spacing)
+      newVolume.SetIJKToRASDirections([[1,0,0], [0,1,0], [0,0,1]])
+      newVolume.SetAndObserveImageData(imageData)
+      newVolume.CreateDefaultDisplayNodes()
+      newVolume.CreateDefaultStorageNode()
+    
+      labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
+      segmentIds = vtk.vtkStringArray()
+      segmentIds.InsertNextValue(segmentId)
+      slicer.vtkSlicerSegmentationsModuleLogic.ExportSegmentsToLabelmapNode(segmentationNode, segmentIds, labelmapVolumeNode, newVolume)
 
-    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-    linevalue = (40 * volumeNode.GetSpacing()[0])
-    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
-      horiz_point = segcentroid_ras[1] + linevalue
-    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
-      horiz_point = segcentroid_ras[1] - linevalue
-    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + linevalue
-    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - linevalue
-    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + linevalue
-    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - linevalue
+      seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
+      slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
+      segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+      linecenter = seg.GetSegmentCenterRAS(segName)
+      slicer.modules.markups.logic().JumpSlicesToLocation(linecenter[0], linecenter[1], linecenter[2], True)
+    
+      slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
+      slicer.mrmlScene.RemoveNode(newVolume)
+      slicer.mrmlScene.RemoveNode(roi)
+      slicer.mrmlScene.RemoveNode(seg)
+    elif lineNode != None:
+      linecenter = [0,]*3
+      lineNode.GetNthControlPointPosition(0,linecenter)
+
+    linevalue = (50 * spacing[0])
+    if axis=="R (Yellow)" and linecenter[1] >= 0:
+      horiz_point = linecenter[1] + linevalue
+    if axis=="R (Yellow)" and linecenter[1] < 0: 
+      horiz_point = linecenter[1] - linevalue
+    if axis=="A (Green)" and linecenter[0] >= 0:
+      horiz_point = linecenter[0] + linevalue
+    if axis=="A (Green)" and linecenter[0] < 0: 
+      horiz_point = linecenter[0] - linevalue
+    if axis=="S (Red)" and linecenter[0] >= 0:
+      horiz_point = linecenter[0] + linevalue
+    if axis=="S (Red)" and linecenter[0] < 0: 
+      horiz_point = linecenter[0] - linevalue
 
     def CopyLine(unused1 = None, unused2 = None):
-      import numpy as np
-      centroid_ras = np.zeros(3)
-      lineNode.GetNthControlPointPosition(0,centroid_ras)
-      lineA_newpos = np.zeros(3)
+      linecenter = [0,]*3
+      lineNode.GetNthControlPointPosition(0,linecenter)
+      lineA_newpos = [0,]*3
       lineNode.GetNthControlPointPosition(1,lineA_newpos)
-      lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
+      lineNode2.SetNthControlPointPosition(1,linecenter[0]-lineA_newpos[0]+linecenter[0], linecenter[1]-lineA_newpos[1]+linecenter[1], linecenter[2]-lineA_newpos[2]+linecenter[2])
 
     def ShowAngle(unused1 = None, unused2 = None):
       import numpy as np
       lineDirectionVectors = []
-      lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+      #lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+      lineStartPos = np.zeros(3)
+      lineNode.GetNthControlPointPosition(0,lineStartPos)
       if axis=="R (Yellow)":
-        lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+        lineEndPos = np.asarray((lineStartPos[0],horiz_point, lineStartPos[2]))
       if axis=="A (Green)":
-        lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        lineEndPos = np.asarray((horiz_point,lineStartPos[1],lineStartPos[2])) 
       if axis=="S (Red)":
-        lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+        lineEndPos = np.asarray((horiz_point,lineStartPos[1],lineStartPos[2])) 
       lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
       lineDirectionVectors.append(lineDirectionVector)
       lineEndPos = np.zeros(3)
@@ -724,15 +811,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       lineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
       lineNode.GetDisplayNode().SetSelectedColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
-      lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
+      lineNode.AddControlPoint(vtk.vtkVector3d(linecenter))
       if axis=="R (Yellow)":
-        lineNode.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+        lineNode.AddControlPoint(vtk.vtkVector3d(linecenter[0],horiz_point, linecenter[2]))
         lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeYellow'))
       if axis=="A (Green)":
-        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,linecenter[1],linecenter[2]))
         lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeGreen'))
       if axis=="S (Red)":
-        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode.AddControlPoint(vtk.vtkVector3d(horiz_point,linecenter[1],linecenter[2]))
         lineNode.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeRed'))
       lineNode.SetNthControlPointLocked(0,1)
       lineNode.SetNthControlPointLocked(1,0)
@@ -746,15 +833,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       lineNode2.GetDisplayNode().SetActiveColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode2.GetDisplayNode().SetColor((1.0, 0.5000076295109483, 0.5000076295109483))
       lineNode2.GetDisplayNode().SetGlyphType(2)
-      lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras))
+      lineNode2.AddControlPoint(vtk.vtkVector3d(linecenter))
       if axis=="R (Yellow)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0],segcentroid_ras[1]+linevalue,segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(linecenter[0],linecenter[1]+linevalue,linecenter[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeYellow'))
       if axis=="A (Green)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+linevalue,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(linecenter[0]+linevalue,linecenter[1],linecenter[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeGreen'))
       if axis=="S (Red)":
-        lineNode2.AddControlPoint(vtk.vtkVector3d(segcentroid_ras[0]+linevalue,segcentroid_ras[1],segcentroid_ras[2]))
+        lineNode2.AddControlPoint(vtk.vtkVector3d(linecenter[0]+linevalue,linecenter[1],linecenter[2]))
         lineNode2.GetDisplayNode().SetViewNodeIDs(('vtkMRMLViewNode1', 'vtkMRMLSliceNodeRed'))
       lineNode2.SetNthControlPointLocked(0,1)
       lineNode2.SetNthControlPointLocked(1,1)
@@ -780,34 +867,37 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
-
-    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
-      horiz_point = segcentroid_ras[1] + 2
-    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
-      horiz_point = segcentroid_ras[1] - 2
-    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
-    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
-    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
-    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
-      
+    
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     if lineNode != None:
+      linecenter = [0,]*3
+      lineNode.GetNthControlPointPosition(0,linecenter)
+      slicer.modules.markups.logic().JumpSlicesToLocation(linecenter[0], linecenter[1], linecenter[2], True)
+      if axis=="R (Yellow)" and linecenter[1] >= 0:
+        horiz_point = linecenter[1] + 2
+      if axis=="R (Yellow)" and linecenter[1] < 0: 
+        horiz_point = linecenter[1] - 2
+      if axis=="A (Green)" and linecenter[0] >= 0:
+        horiz_point = linecenter[0] + 2
+      if axis=="A (Green)" and linecenter[0] < 0: 
+        horiz_point = linecenter[0] - 2
+      if axis=="S (Red)" and linecenter[0] >= 0:
+        horiz_point = linecenter[0] + 2
+      if axis=="S (Red)" and linecenter[0] < 0: 
+        horiz_point = linecenter[0] - 2
+        
+
       def GetAngle(unused1 = None, unused2 = None):
         import numpy as np
         lineDirectionVectors = []
-        lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
+        lineStartPos = [0,]*3
+        lineNode.GetNthControlPointPosition(0,lineStartPos)
         if axis=="R (Yellow)":
-          lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
+          lineEndPos = np.asarray((lineStartPos[0],horiz_point, lineStartPos[2]))
         if axis=="A (Green)":
-          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+          lineEndPos = np.asarray((horiz_point,lineStartPos[1],lineStartPos[2])) 
         if axis=="S (Red)":
-          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
+          lineEndPos = np.asarray((horiz_point,lineStartPos[1],lineStartPos[2])) 
         lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
         lineDirectionVectors.append(lineDirectionVector)
         lineEndPos = np.zeros(3)
@@ -831,50 +921,116 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       Theta = Theta * np.pi/180 * -1
 
       if axis == "R (Yellow)":
-        Xras = np.zeros(3)
+        Xras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Xras)
-        ogX = Xras[1] - segcentroid_ras[1]
-        Yras = np.zeros(3)
+        ogX = Xras[1] - linecenter[1]
+        Yras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Yras)
-        ogY = Yras[2] - segcentroid_ras[2]
-        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[1]
-        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
-        lineNode.SetNthControlPointPosition(1, segcentroid_ras[0], newX,newY)
+        ogY = Yras[2] - linecenter[2]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + linecenter[1]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + linecenter[2] 
+        lineNode.SetNthControlPointPosition(1, linecenter[0], newX,newY)
    
       if axis == "A (Green)":
-        Xras = np.zeros(3)
+        Xras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Xras)
-        ogX = Xras[0] - segcentroid_ras[0]
-        Yras = np.zeros(3)
+        ogX = Xras[0] - linecenter[0]
+        Yras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Yras)
-        ogY = Yras[2] - segcentroid_ras[2]
-        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
-        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[2] 
-        lineNode.SetNthControlPointPosition(1, newX, segcentroid_ras[1],newY)
+        ogY = Yras[2] - linecenter[2]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + linecenter[0]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + linecenter[2] 
+        lineNode.SetNthControlPointPosition(1, newX, linecenter[1],newY)
     
       if axis == "S (Red)":
-        Xras = np.zeros(3)
+        Xras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Xras)
-        ogX = Xras[0] - segcentroid_ras[0]
-        Yras = np.zeros(3)
+        ogX = Xras[0] - linecenter[0]
+        Yras = [0,]*3
         lineNode.GetNthControlPointPosition(1,Yras)
-        ogY = Yras[1] - segcentroid_ras[1]
-        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + segcentroid_ras[0]
-        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + segcentroid_ras[1] 
-        lineNode.SetNthControlPointPosition(1, newX, newY, segcentroid_ras[2])
+        ogY = Yras[1] - linecenter[1]
+        newX = (ogX*math.cos(Theta) + ogY*math.sin(Theta)) + linecenter[0]
+        newY = (-1*ogX*math.sin(Theta) + ogY*math.cos(Theta)) + linecenter[1] 
+        lineNode.SetNthControlPointPosition(1, newX, newY, linecenter[2])
       
   def ShowAxis(self):
     """
-    Jump to the neutral axis.
+    Update the neutral axis to display on current slice.
     """    
     segmentationNode = self.ui.regionSegmentSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     segName = segmentationNode.GetName()
+    volumeNode = self.ui.volumeSelector.currentNode()
+    spacing = volumeNode.GetSpacing() 
     axis = self.ui.axisSelectorBox.currentText
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
+    if lineNode != None:
+      segmentBounds = [0,]*6
+      segmentationNode.GetRASBounds(segmentBounds)
+      roiCenter = [0.0, 0.0, 0.0]
+      roiRadius = [0.0, 0.0, 0.0]
+      for i in range(0,3):
+        roiCenter[i] = (segmentBounds[i*2+1] + segmentBounds[i*2])/2
+        roiRadius[i] = (segmentBounds[i*2+1] - segmentBounds[i*2])/2 
+      crosshairNode=slicer.util.getNode("Crosshair")
+      sliceras=[0,0,0]
+      crosshairNode.GetCursorPositionRAS(sliceras)
+      roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
+      #roi.SetDisplayVisibility(0)
+      if axis=="R (Yellow)":
+        roi.SetXYZ(sliceras[0], roiCenter[1], roiCenter[2])
+        roi.SetRadiusXYZ(spacing[0]/2, roiRadius[1], roiRadius[2]) 
+        imageSize = [ 1, int(roiRadius[1]/spacing[1]*2),int(roiRadius[2]/spacing[2]*2)]
+        imageOrigin = [sliceras[0], roiCenter[1]-roiRadius[1], roiCenter[2]-roiRadius[2]]
+      if axis=="A (Green)":
+        roi.SetXYZ(roiCenter[0], sliceras[1], roiCenter[2])
+        roi.SetRadiusXYZ(roiRadius[0], spacing[1]/2, roiRadius[2])
+        imageSize = [int(roiRadius[0]/spacing[0]*2), 1, int(roiRadius[2]/spacing[2]*2)]
+        imageOrigin = [roiCenter[0]-roiRadius[0], sliceras[1], roiCenter[2]-roiRadius[2], ]
+      if axis=="S (Red)":
+        roi.SetXYZ(roiCenter[0], roiCenter[1], sliceras[2])
+        roi.SetRadiusXYZ(roiRadius[0], roiRadius[1], spacing[2]/2)      
+        imageSize = [int(roiRadius[0]/spacing[0]*2), int(roiRadius[1]/spacing[1]*2), 1]
+        imageOrigin = [roiCenter[0]-roiRadius[0], roiCenter[1]-roiRadius[1], sliceras[2]]
+      # Create an empty image volume, filled with fillVoxelValue
+      imageData = vtk.vtkImageData()
+      imageData.SetDimensions(imageSize)
+      imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
+      imageData.GetPointData().GetScalars().Fill(0)
+      # Create volume node
+      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode", "MyNewVolume")
+      newVolume.SetOrigin(imageOrigin)
+      newVolume.SetSpacing(spacing)
+      newVolume.SetIJKToRASDirections([[1,0,0], [0,1,0], [0,0,1]])
+      newVolume.SetAndObserveImageData(imageData)
+      newVolume.CreateDefaultDisplayNodes()
+      newVolume.CreateDefaultStorageNode()
+    
+      labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
+      segmentIds = vtk.vtkStringArray()
+      segmentIds.InsertNextValue(segmentId)
+      slicer.vtkSlicerSegmentationsModuleLogic.ExportSegmentsToLabelmapNode(segmentationNode, segmentIds, labelmapVolumeNode, newVolume)
 
-    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-
+      seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
+      slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
+      segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+      linecenter_new = seg.GetSegmentCenterRAS(segName)
+    
+      slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
+      slicer.mrmlScene.RemoveNode(newVolume)
+      slicer.mrmlScene.RemoveNode(roi)
+      slicer.mrmlScene.RemoveNode(seg)
+      
+      if linecenter_new != None:
+        linecenter = [0,]*3
+        lineNode.GetNthControlPointPosition(0,linecenter)
+        lineA_pos = [0,]*3
+        lineNode.GetNthControlPointPosition(1,lineA_pos)
+        lineNode.SetNthControlPointPosition(0,linecenter_new[0],linecenter_new[1],linecenter_new[2])
+        lineNode2.SetNthControlPointPosition(0,linecenter_new[0],linecenter_new[1],linecenter_new[2])
+        change = (linecenter_new[0]-linecenter[0],linecenter_new[1]-linecenter[1],linecenter_new[2]-linecenter[2])
+        lineNode.SetNthControlPointPosition(1,lineA_pos[0]+change[0],lineA_pos[1]+change[1],lineA_pos[2]+change[2])
 
   def onApplyButton(self):
     """
@@ -935,58 +1091,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
 
-    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-    slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-    if axis=="R (Yellow)" and segcentroid_ras[1] >= 0:
-      horiz_point = segcentroid_ras[1] + 2
-    if axis=="R (Yellow)" and segcentroid_ras[1] < 0: 
-      horiz_point = segcentroid_ras[1] - 2
-    if axis=="A (Green)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
-    if axis=="A (Green)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
-    if axis=="S (Red)" and segcentroid_ras[0] >= 0:
-      horiz_point = segcentroid_ras[0] + 2
-    if axis=="S (Red)" and segcentroid_ras[0] < 0: 
-      horiz_point = segcentroid_ras[0] - 2
-
-    if lineNode != None:
-      def CopyLine(unused1 = None, unused2 = None):
-        import numpy as np
-        centroid_ras = np.zeros(3)
-        lineNode.GetNthControlPointPosition(0,centroid_ras)
-        lineA_newpos = np.zeros(3)
-        lineNode.GetNthControlPointPosition(1,lineA_newpos)
-        lineNode2.SetNthControlPointPosition(1,centroid_ras[0]-lineA_newpos[0]+centroid_ras[0], centroid_ras[1]-lineA_newpos[1]+centroid_ras[1], centroid_ras[2]-lineA_newpos[2]+centroid_ras[2])
-      copycat = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,CopyLine)
-
-      def ShowAngle(unused1 = None, unused2 = None):
-        import numpy as np
-        lineDirectionVectors = []
-        lineStartPos = np.asarray(segmentationNode.GetSegmentCenterRAS(segmentId))
-        if axis=="R (Yellow)":
-          lineEndPos = np.asarray((segcentroid_ras[0],horiz_point, segcentroid_ras[2]))
-        if axis=="A (Green)":
-          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
-        if axis=="S (Red)":
-          lineEndPos = np.asarray((horiz_point,segcentroid_ras[1],segcentroid_ras[2])) 
-        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
-        lineDirectionVectors.append(lineDirectionVector)
-        lineEndPos = np.zeros(3)
-        lineNode.GetNthControlPointPositionWorld(1,lineEndPos)
-        lineDirectionVector = (lineEndPos - lineStartPos)/np.linalg.norm(lineEndPos-lineStartPos)
-        lineDirectionVectors.append(lineDirectionVector)
-        angleRad = vtk.vtkMath.AngleBetweenVectors(lineDirectionVectors[0],lineDirectionVectors[1])
-        angleDeg = vtk.vtkMath.DegreesFromRadians(angleRad)
-        if axis=="R (Yellow)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg) 
-        if axis=="A (Green)" and lineDirectionVectors[1][2] > lineDirectionVectors[0][2]:
-          angleDeg = (180 - angleDeg)
-        if axis=="S (Red)" and lineDirectionVectors[1][1] > lineDirectionVectors[0][1]:
-          angleDeg = (180 - angleDeg) 
-        angleDeg = np.around(angleDeg,5)
-        self.ui.orientationspinBox.value = angleDeg
-      anglewatcher = lineNode.AddObserver(slicer.vtkMRMLMarkupsLineNode.PointModifiedEvent,ShowAngle)
 
 #
 # SegmentGeometryLogic
@@ -1049,7 +1153,6 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     roiCenter = [0.0, 0.0, 0.0]
     for i in range(0,3):
       roiCenter[i] = (volumeBounds[i*2+1] + volumeBounds[i*2])/2 
-      #slicer.modules.markups.logic().JumpSlicesToLocation(roiCenter[0], roiCenter[1], roiCenter[2], True)    
 
     Centroid_diff = [0.0, 0.0, 0.0]  
     for i in range(0,3):
@@ -1081,6 +1184,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     for i in range(0,3):
       roiCenter[i] = (combinedBounds[i*2+1] + combinedBounds[i*2])/2
       roiRadius[i] = (combinedBounds[i*2+1] - combinedBounds[i*2])/2
+    # use annotation node because cropvolume doesn't use the markupsROI  
     roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
     roi.SetDisplayVisibility(0)
     roi.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
@@ -1091,12 +1195,14 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if combinedBounds[i] != volumeBounds[i]:
         boxflag = 1  
     
+    # assess whether volume is anisotropic
     spacingflag = 0
     spacing = volumeNode.GetSpacing() 
     trans = segmentationNode.GetTransformNodeID()
     if spacing[0] != spacing[1] or spacing[0] != spacing[2] or spacing[1] != spacing[2]:
       spacingflag = 1
    
+    # if segment is outside volume or volume is anisotropic, use crop volume
     if boxflag == 1 or spacingflag == 1:
       volumetransformNode = volumeNode.GetTransformNodeID()
       volumeNode.SetAndObserveTransformNodeID(None)

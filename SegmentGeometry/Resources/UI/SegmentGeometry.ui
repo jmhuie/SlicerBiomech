@@ -699,7 +699,7 @@
             <item row="0" column="2">
              <widget class="QPushButton" name="ShowAxisButton">
               <property name="text">
-               <string>Jump to Neutral Axis</string>
+               <string>Update Neutral Axis</string>
               </property>
               <property name="checkable">
                <bool>false</bool>

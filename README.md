@@ -64,10 +64,9 @@ SegmentGeometry provides three tools for rotating and aligning segments with the
 * **Reset** - will reset transformations applied through SegmentGeometry and the custom neutral axis, if defined.
 
 ### Use Custom Neutral Axis
-If the direction of the loading axis is known, a custom neutral axis can be used to calculate second moment of area and or other relevant computations (if selected). To do so, check the "Use custom neutral axis" box and a Markups line will be created and visible in both the selected slice view and the 3D view. 
-The representative line can be rotated by clicking and dragging the closed circle on one end of the line. Alternatively, the user can enter a value between 0 and 180 that represents the angle (in degrees) between the horizontal and the neutral axis, starting from the right and moving in clockwise direction. 
-The "Jump to Neutral Axis" button can be used in case the Markups line is no longer visible in the slice view. Note that the location of the Markups line is currently a work in progress and crosses the center of the segment; not necessarily the centroid of the center slice. That is okay, only the angle between the line and the horizontal will be used for computations. 
-In the future, the line will pass through the centroid of the slice and will be viewable on any given slice.
+If the direction of the loading axis is known or hypothesized, a custom neutral axis can be used when calculating second moment of area and other relevant computations by checking the "Use custom neutral axis" box. Doing so will draw a line that represents the neutral axis. This line can be manually rotated by clicking and dragging the closed end of the line 
+in either the slice view or 3D view. Alternatively, the user may enter a value between 0 and 180 that represents the angle (in degrees) between the horizontal and the neutral axis, starting from the right and moving in clockwise direction. 
+The "Update Neutral Axis" button can be used to view the custom neutral axis for different slices of the segment, which is drawn at the middle of the segment by default. Navigate to a different slice and click the button to view the line on that slice. 
 
 
 ### Compute Unitless Variables
