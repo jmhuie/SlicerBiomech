@@ -8,13 +8,14 @@ SegmentGeometry iterates slice-by-slice through a segment to calculate the secon
 
 # Installation
 
-The official method for installing SegmentGeometry is through 3D Slicer's built-in Extensions Manager. To install SegmentGeometry, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
+The official method for installing SegmentGeometry is through 3D Slicer's built-in Extensions Manager. To install SegmentGeometry, first install the most recent stable or preview release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
 In 3D Slicer, open the Extensions Manager module and search for "SegmentGeometry". Install the extension and its dependency (ExtraSegmentEditorEffects). After restarting the application, SegmentGeometry should be fully functional and located in the Quantification 
 module category. If using the current stable release of Slicer, SegmentGeometry can be updated in the Extension Manager. If using the Preview Release of Slicer, the most recent build must be downloaded and installed to update SegmentGeometry.
 
 # How to Cite
 
-Citable paper for SegmentGeometry coming soon. Below are other relevant citations.
+If you use SegmentGeometry in your work, please cite the follow publication:
+* Huie JM, Summers AP, Kawano SM. (in press) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology.
 
 To cite 3D Slicer as a general image analysis platform, please use: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
