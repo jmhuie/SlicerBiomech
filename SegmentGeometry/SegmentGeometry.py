@@ -689,12 +689,12 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode = self.ui.regionSegmentSelector.currentNode()
     segmentId = self.ui.regionSegmentSelector.currentSegmentID()
     volumeNode = self.ui.volumeSelector.currentNode()
-    spacing = volumeNode.GetSpacing()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
     
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     if lineNode == None:
+      spacing = volumeNode.GetSpacing()
       #determine the centroid of the current slice
       segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
       segmentBounds = [0,]*6
@@ -751,6 +751,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       slicer.mrmlScene.RemoveNode(roi)
       slicer.mrmlScene.RemoveNode(seg)
     elif lineNode != None:
+      spacing = volumeNode.GetSpacing()
       linecenter = [0,]*3
       lineNode.GetNthControlPointPosition(0,linecenter)
 
@@ -2424,21 +2425,68 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if trans != None:
         trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
         trans_new.SetMatrixTransformToParent(og_matrix) 
-      # Change layout to include plot and table
+      # Change layout to include plot and table      
+      customLayout = """
+      <layout type=\"vertical\" split=\"true\" >
+       <item splitSize=\"500\">
+        <layout type=\"horizontal\">
+         <item>
+          <view class=\"vtkMRMLViewNode\" singletontag=\"1\">
+           <property name=\"viewlabel\" action=\"default\">1</property>
+          </view>
+         </item>
+         <item>
+          <view class=\"vtkMRMLPlotViewNode\" singletontag=\"PlotView1\">
+           <property name=\"viewlabel\" action=\"default\">P</property>
+          </view>
+         </item>
+        </layout>
+       </item>
+       <item splitSize=\"500\">
+        <layout type=\"horizontal\">
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Red\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">R</property>
+           <property name=\"viewcolor\" action=\"default\">#F34A33</property>
+          </view>
+         </item>   
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Yellow\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">Y</property>
+           <property name=\"viewcolor\" action=\"default\">#EDD54C</property>
+          </view>
+         </item>    
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Green\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">G</property>
+           <property name=\"viewcolor\" action=\"default\">#6EB04B</property>
+          </view>
+         </item>  
+        </layout>
+       </item>
+       <item splitSize=\"500\">
+        <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableView1\">
+         <property name=\"viewlabel\" action=\"default\">T</property>
+        </view>
+       </item>
+      </layout>
+      """
+      
+      customLayoutId=666
+
       layoutManager = slicer.app.layoutManager()
-      layoutWithPlot = slicer.modules.plots.logic().GetLayoutWithPlot(layoutManager.layout)
-      layoutManager.setLayout(layoutWithPlot)
-      # Select chart in plot view
+      layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(customLayoutId, customLayout)
+
+      # Switch to the new custom layout
+      layoutManager.setLayout(customLayoutId)
       plotWidget = layoutManager.plotWidget(0)
       plotViewNode = plotWidget.mrmlPlotViewNode()
-      plotViewNode.SetPlotChartNodeID(plotChartNode.GetID())
-      
-      layoutWithPlot = slicer.modules.tables.logic().GetLayoutWithTable(layoutManager.layout)
-      layoutManager.setLayout(layoutWithPlot)
-      # Select chart in table view
+      plotViewNode.SetPlotChartNodeID(plotChartNode.GetID())      
       tableWidget = layoutManager.tableWidget(0)
       tableWidget.tableView().setMRMLTableNode(tableNode)
-
 
     logging.info('Processing completed')
     end = time.time()
