@@ -15,7 +15,7 @@ module category. If using the current stable release of Slicer, SegmentGeometry 
 # How to Cite
 
 If you use SegmentGeometry in your work, please cite the follow publication:
-* Huie JM, Summers AP, Kawano SM. (in press) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology.
+* Huie JM, Summers AP, Kawano SM. (2022) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology. https://doi.org/10.1093/iob/obac009
 
 To cite 3D Slicer as a general image analysis platform, please use: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
