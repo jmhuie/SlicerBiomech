@@ -113,8 +113,6 @@ Below contains brief information on the possible computations.
 
 - Imajor: Second moment of area around the major principal axis.
 
-- Jz: Polar moment of inertia.
-
 - Zminor: Section modulus around the minor principal axis.
 
 - Zmajor: Section modulus around the major principal axis. 
@@ -135,6 +133,12 @@ Below contains brief information on the possible computations.
 
 - Rla: Distance to the furthest pixel from the loading axis perpendicular to the custom neutral axis.
 
+- Jz: Polar moment of inertia.
+
+- Zpol: Polar section modulus.
+
+- Rmax: Maximum radius 
+
 - Material Normalization: Material normalized values are indicated with "MatNorm"
 
 - Length Normalization: Length normalized values are indicated with "LenNorm"
@@ -143,13 +147,13 @@ Below contains brief information on the possible computations.
 
 1. I need help using SegmentGeometry, I received an error, or I think I found a bug. What do I do?
 
-First, make sure that you have the most recent version of SegmentGeometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie). I will do my best to address problems in a timely manner.
+First, make sure that you have the most recent version of SegmentGeometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie) or you may email me (jonathanmhuie[at]gmail.com). I will do my best to address problems in a timely manner.
 
 2. I have a suggestion or feature request for how to improve SegmentGeometry. What do I do?
 
-Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. Again, it's best if you make a post on the 3D Slicer discourse page detailing your idea and tag me.
+Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. 
 
 # Funding Acknowledgement
 
-Jonathan Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
+Jonathan M. Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
 
