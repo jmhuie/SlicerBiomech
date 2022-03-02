@@ -151,7 +151,7 @@ First, make sure that you have the most recent version of SegmentGeometry by upd
 
 2. I have a suggestion or feature request for how to improve SegmentGeometry. What do I do?
 
-Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. 
+Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. Please reach out to me through 3D Slicer Discourse page or via email.
 
 # Funding Acknowledgement
 
