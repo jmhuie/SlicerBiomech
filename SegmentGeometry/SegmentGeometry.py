@@ -468,7 +468,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
     slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-    
 
     segcentroid_ras_new = segmentationNode.GetSegmentCenterRAS(segmentId)
     Centroid_diff = [0.0, 0.0, 0.0]  
@@ -485,6 +484,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
     if pointNode != None:
       pointNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)  
+
+    self.ui.OrientationcheckBox.checked = False  
+    lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
+    if lineNode != None:
+      slicer.mrmlScene.RemoveNode(lineNode)
+    lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
+    if lineNode2 != None:
+      slicer.mrmlScene.RemoveNode(lineNode2)  
+    self.ui.orientationspinBox.value = 0
 
         
   def onInteractive3DBox(self):
