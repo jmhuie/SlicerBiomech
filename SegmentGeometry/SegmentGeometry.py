@@ -675,44 +675,30 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       spacing = volumeNode.GetSpacing()
       #determine the centroid of the current slice
       segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-      segmentBounds = [0,]*6
-      segmentationNode.GetRASBounds(segmentBounds)
-      roiCenter = [0.0, 0.0, 0.0]
-      roiRadius = [0.0, 0.0, 0.0]
-      for i in range(0,3):
-        roiCenter[i] = (segmentBounds[i*2+1] + segmentBounds[i*2])/2
-        roiRadius[i] = (segmentBounds[i*2+1] - segmentBounds[i*2])/2 
-      roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
+      slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
       #roi.SetDisplayVisibility(0)
-      if axis=="R (Yellow)":
-        roi.SetXYZ(segcentroid_ras[0], roiCenter[1], roiCenter[2])
-        roi.SetRadiusXYZ(spacing[0]/2, roiRadius[1], roiRadius[2]) 
-        imageSize = [ 1, int(roiRadius[1]/spacing[1]*2),int(roiRadius[2]/spacing[2]*2)] 
-        imageOrigin = [segcentroid_ras[0], roiCenter[1]-roiRadius[1],roiCenter[2]-roiRadius[2]]
+      if axis=="R (Yellow)":     
+        sliceNodeID = "vtkMRMLSliceNodeYellow"
       if axis=="A (Green)":
-        roi.SetXYZ(roiCenter[0], segcentroid_ras[1], roiCenter[2])
-        roi.SetRadiusXYZ(roiRadius[0], spacing[1]/2, roiRadius[2])
-        imageSize = [int(roiRadius[0]/spacing[0]*2), 1, int(roiRadius[2]/spacing[2]*2)]
-        imageOrigin = [roiCenter[0]-roiRadius[0], segcentroid_ras[1], roiCenter[2]-roiRadius[2]]
-      if axis=="S (Red)":
-        roi.SetXYZ(roiCenter[0], roiCenter[1], segcentroid_ras[2])
-        roi.SetRadiusXYZ(roiRadius[0], roiRadius[1], spacing[2]/2)      
-        imageSize = [int(roiRadius[0]/spacing[0]*2), int(roiRadius[1]/spacing[1]*2), 1]
-        imageOrigin = [roiCenter[0]-roiRadius[0], roiCenter[1]-roiRadius[1], segcentroid_ras[2]]
-      # Create an empty image volume, filled with fillVoxelValue
-      imageData = vtk.vtkImageData()
-      imageData.SetDimensions(imageSize)
-      imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
-      imageData.GetPointData().GetScalars().Fill(0)
-      # Create volume node
-      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode", "MyNewVolume")
-      newVolume.SetOrigin(imageOrigin)
-      newVolume.SetSpacing(spacing)
-      newVolume.SetIJKToRASDirections([[1,0,0], [0,1,0], [0,0,1]])
-      newVolume.SetAndObserveImageData(imageData)
+        sliceNodeID = "vtkMRMLSliceNodeGreen"
+      if axis=="S (Red)":      
+        sliceNodeID = "vtkMRMLSliceNodeRed"
+      
+      # Get image data from slice view
+      sliceNode = slicer.mrmlScene.GetNodeByID(sliceNodeID)
+      appLogic = slicer.app.applicationLogic()
+      sliceLogic = appLogic.GetSliceLogic(sliceNode)
+      sliceLayerLogic = sliceLogic.GetBackgroundLayer()
+      reslice = sliceLayerLogic.GetReslice()
+      reslicedImage = vtk.vtkImageData()
+      reslicedImage.DeepCopy(reslice.GetOutput())
+
+      # Create new volume node using resliced image
+      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode","MyNewVolume")
+      newVolume.SetIJKToRASMatrix(sliceNode.GetXYToRAS())
+      newVolume.SetAndObserveImageData(reslicedImage)
       newVolume.CreateDefaultDisplayNodes()
       newVolume.CreateDefaultStorageNode()
-    
       labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
       segmentIds = vtk.vtkStringArray()
       segmentIds.InsertNextValue(segmentId)
@@ -722,11 +708,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
       segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
       linecenter = seg.GetSegmentCenterRAS(segName)
-      slicer.modules.markups.logic().JumpSlicesToLocation(linecenter[0], linecenter[1], linecenter[2], True)
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(newVolume)
-      slicer.mrmlScene.RemoveNode(roi)
       slicer.mrmlScene.RemoveNode(seg)
     elif lineNode != None:
       spacing = volumeNode.GetSpacing()
@@ -945,47 +929,28 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
     lineNode2 = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis B")
     if lineNode != None:
-      segmentBounds = [0,]*6
-      segmentationNode.GetRASBounds(segmentBounds)
-      roiCenter = [0.0, 0.0, 0.0]
-      roiRadius = [0.0, 0.0, 0.0]
-      for i in range(0,3):
-        roiCenter[i] = (segmentBounds[i*2+1] + segmentBounds[i*2])/2
-        roiRadius[i] = (segmentBounds[i*2+1] - segmentBounds[i*2])/2 
-      crosshairNode=slicer.util.getNode("Crosshair")
-      sliceras=[0,0,0]
-      crosshairNode.GetCursorPositionRAS(sliceras)
-      roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
-      #roi.SetDisplayVisibility(0)
-      if axis=="R (Yellow)":
-        roi.SetXYZ(sliceras[0], roiCenter[1], roiCenter[2])
-        roi.SetRadiusXYZ(spacing[0]/2, roiRadius[1], roiRadius[2]) 
-        imageSize = [ 1, int(roiRadius[1]/spacing[1]*2),int(roiRadius[2]/spacing[2]*2)]
-        imageOrigin = [sliceras[0], roiCenter[1]-roiRadius[1], roiCenter[2]-roiRadius[2]]
+      if axis=="R (Yellow)":     
+        sliceNodeID = "vtkMRMLSliceNodeYellow"
       if axis=="A (Green)":
-        roi.SetXYZ(roiCenter[0], sliceras[1], roiCenter[2])
-        roi.SetRadiusXYZ(roiRadius[0], spacing[1]/2, roiRadius[2])
-        imageSize = [int(roiRadius[0]/spacing[0]*2), 1, int(roiRadius[2]/spacing[2]*2)]
-        imageOrigin = [roiCenter[0]-roiRadius[0], sliceras[1], roiCenter[2]-roiRadius[2], ]
-      if axis=="S (Red)":
-        roi.SetXYZ(roiCenter[0], roiCenter[1], sliceras[2])
-        roi.SetRadiusXYZ(roiRadius[0], roiRadius[1], spacing[2]/2)      
-        imageSize = [int(roiRadius[0]/spacing[0]*2), int(roiRadius[1]/spacing[1]*2), 1]
-        imageOrigin = [roiCenter[0]-roiRadius[0], roiCenter[1]-roiRadius[1], sliceras[2]]
-      # Create an empty image volume, filled with fillVoxelValue
-      imageData = vtk.vtkImageData()
-      imageData.SetDimensions(imageSize)
-      imageData.AllocateScalars(vtk.VTK_UNSIGNED_CHAR, 1)
-      imageData.GetPointData().GetScalars().Fill(0)
-      # Create volume node
-      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode", "MyNewVolume")
-      newVolume.SetOrigin(imageOrigin)
-      newVolume.SetSpacing(spacing)
-      newVolume.SetIJKToRASDirections([[1,0,0], [0,1,0], [0,0,1]])
-      newVolume.SetAndObserveImageData(imageData)
+        sliceNodeID = "vtkMRMLSliceNodeGreen"
+      if axis=="S (Red)":      
+        sliceNodeID = "vtkMRMLSliceNodeRed"
+      
+      # Get image data from slice view
+      sliceNode = slicer.mrmlScene.GetNodeByID(sliceNodeID)
+      appLogic = slicer.app.applicationLogic()
+      sliceLogic = appLogic.GetSliceLogic(sliceNode)
+      sliceLayerLogic = sliceLogic.GetBackgroundLayer()
+      reslice = sliceLayerLogic.GetReslice()
+      reslicedImage = vtk.vtkImageData()
+      reslicedImage.DeepCopy(reslice.GetOutput())
+
+      # Create new volume node using resliced image
+      newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode","MyNewVolume")
+      newVolume.SetIJKToRASMatrix(sliceNode.GetXYToRAS())
+      newVolume.SetAndObserveImageData(reslicedImage)
       newVolume.CreateDefaultDisplayNodes()
       newVolume.CreateDefaultStorageNode()
-    
       labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
       segmentIds = vtk.vtkStringArray()
       segmentIds.InsertNextValue(segmentId)
@@ -998,7 +963,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(newVolume)
-      slicer.mrmlScene.RemoveNode(roi)
       slicer.mrmlScene.RemoveNode(seg)
       
       if linecenter_new != None:
