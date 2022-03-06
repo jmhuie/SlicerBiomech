@@ -671,12 +671,11 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     axis = self.ui.axisSelectorBox.currentText
     
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
-    if lineNode == None:
+    if lineNode == None and volumeNode != None:
       spacing = volumeNode.GetSpacing()
       #determine the centroid of the current slice
       segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
-      slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
-      #roi.SetDisplayVisibility(0)
+      #slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
       if axis=="R (Yellow)":     
         sliceNodeID = "vtkMRMLSliceNodeYellow"
       if axis=="A (Green)":
@@ -708,10 +707,47 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
       segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
       linecenter = seg.GetSegmentCenterRAS(segName)
+      
+      # if tried to draw line not over the segment, jump to the center
+      if linecenter == None:
+        segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+        slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
+        if axis=="R (Yellow)":     
+          sliceNodeID = "vtkMRMLSliceNodeYellow"
+        if axis=="A (Green)":
+          sliceNodeID = "vtkMRMLSliceNodeGreen"
+        if axis=="S (Red)":      
+          sliceNodeID = "vtkMRMLSliceNodeRed"
+      
+        # Get image data from slice view
+        sliceNode = slicer.mrmlScene.GetNodeByID(sliceNodeID)
+        appLogic = slicer.app.applicationLogic()
+        sliceLogic = appLogic.GetSliceLogic(sliceNode)
+        sliceLayerLogic = sliceLogic.GetBackgroundLayer()
+        reslice = sliceLayerLogic.GetReslice()
+        reslicedImage = vtk.vtkImageData()
+        reslicedImage.DeepCopy(reslice.GetOutput())
+  
+        # Create new volume node using resliced image
+        newVolume = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLScalarVolumeNode","MyNewVolume")
+        newVolume.SetIJKToRASMatrix(sliceNode.GetXYToRAS())
+        newVolume.SetAndObserveImageData(reslicedImage)
+        newVolume.CreateDefaultDisplayNodes()
+        newVolume.CreateDefaultStorageNode()
+        labelmapVolumeNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLabelMapVolumeNode")
+        segmentIds = vtk.vtkStringArray()
+        segmentIds.InsertNextValue(segmentId)
+        slicer.vtkSlicerSegmentationsModuleLogic.ExportSegmentsToLabelmapNode(segmentationNode, segmentIds, labelmapVolumeNode, newVolume)
+
+        seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
+        slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
+        segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+        linecenter = seg.GetSegmentCenterRAS(segName)
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(newVolume)
       slicer.mrmlScene.RemoveNode(seg)
+      
     elif lineNode != None:
       spacing = volumeNode.GetSpacing()
       linecenter = [0,]*3
