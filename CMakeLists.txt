@@ -20,6 +20,7 @@ include(${Slicer_USE_FILE})
 #-----------------------------------------------------------------------------
 # Extension modules
 add_subdirectory(SegmentGeometry)
+add_subdirectory(FunctionalHomodonty)
 ## NEXT_MODULE
 
 #-----------------------------------------------------------------------------

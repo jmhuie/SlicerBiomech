@@ -208,7 +208,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.volumeSelector.blockSignals(wasBlocked)
     
     #wasBlocked = self.ui.orientationspinBox.blockSignals(True)
-    #self.ui.orientationspinBox.value = float(self._parameterNode.GetParameter("Angle"))
+    #float(self.ui.orientationspinBox.value) = self._parameterNode.GetParameter("Angle")
     #self.ui.orientationspinBox.blockSignals(wasBlocked)    
     
     wasBlocked = self.ui.tableSelector.blockSignals(True)
@@ -2451,68 +2451,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
         trans_new.SetMatrixTransformToParent(og_matrix) 
       # Change layout to include plot and table      
-      customLayout = """
-      <layout type=\"vertical\" split=\"true\" >
-       <item splitSize=\"500\">
-        <layout type=\"horizontal\">
-         <item>
-          <view class=\"vtkMRMLViewNode\" singletontag=\"1\">
-           <property name=\"viewlabel\" action=\"default\">1</property>
-          </view>
-         </item>
-         <item>
-          <view class=\"vtkMRMLPlotViewNode\" singletontag=\"PlotView1\">
-           <property name=\"viewlabel\" action=\"default\">P</property>
-          </view>
-         </item>
-        </layout>
-       </item>
-       <item splitSize=\"500\">
-        <layout type=\"horizontal\">
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Red\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">R</property>
-           <property name=\"viewcolor\" action=\"default\">#F34A33</property>
-          </view>
-         </item>   
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Yellow\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">Y</property>
-           <property name=\"viewcolor\" action=\"default\">#EDD54C</property>
-          </view>
-         </item>    
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Green\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">G</property>
-           <property name=\"viewcolor\" action=\"default\">#6EB04B</property>
-          </view>
-         </item>  
-        </layout>
-       </item>
-       <item splitSize=\"500\">
-        <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableView1\">
-         <property name=\"viewlabel\" action=\"default\">T</property>
-        </view>
-       </item>
-      </layout>
-      """
+      slicer.app.layoutManager().setLayout(35)
       
-      customLayoutId=666
-
-      layoutManager = slicer.app.layoutManager()
-      layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(customLayoutId, customLayout)
-
-      # Switch to the new custom layout
-      layoutManager.setLayout(customLayoutId)
-      plotWidget = layoutManager.plotWidget(0)
-      plotViewNode = plotWidget.mrmlPlotViewNode()
-      plotViewNode.SetPlotChartNodeID(plotChartNode.GetID())      
-      tableWidget = layoutManager.tableWidget(0)
-      tableWidget.tableView().setMRMLTableNode(tableNode)
-
+      
     logging.info('Processing completed')
     end = time.time()
     TotalTime = np.round(end - start,2)
