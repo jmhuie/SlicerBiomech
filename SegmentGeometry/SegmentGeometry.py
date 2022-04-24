@@ -2144,7 +2144,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
 
       if CompactnesscheckBox == True:
        for s in range(TotalAreaArray.GetNumberOfTuples()):
-         CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
+         compactness = float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0])
+         if compactness > 1:
+           CompactnessArray.InsertNextValue(float(1))
+         else:
+           CompactnessArray.InsertNextValue(float(areaArray.GetTuple(s)[0])/float(TotalAreaArray.GetTuple(s)[0]))
+
       
       try:
         if SMAcheckBox_1 == True or MODcheckBox_1 == True:
