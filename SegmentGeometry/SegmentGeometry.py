@@ -2018,7 +2018,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
             for s in range(Sn):
               Jz = Jz + ((Cx - coords_Ijk[0][s])**2 + (Cy - coords_Ijk[1][s])**2)
 
-            # deteRminore how far the major principal axis is from the horizontal 
+            # determine how far the major principal axis is from the horizontal 
             Ixy = 0
             for s in range(Sn):
               Ixy = Ixy + (Cx - coords_Ijk[0][s]) * (Cy - coords_Ijk[1][s])
@@ -2079,7 +2079,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 ZmajorArray_Summers.InsertNextValue(Zmajor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
                 ZminorArray_Summers.InsertNextValue(Zminor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
                 JzArray_Summers.InsertNextValue(Jz/((2*np.sqrt(CSA/np.pi))**4 * np.pi / 32))
-                ZpolArray_Doube.InsertNextValue(Jz/np.sqrt(CSA/np.pi))
+                JzArray_Summers.InsertNextValue(Jz/np.sqrt(CSA/np.pi))
               
               # do size correction
               if DoubecheckBox == True:
@@ -2517,8 +2517,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       plotViewNode.SetPlotChartNodeID(plotChartNode.GetID())      
       tableWidget = layoutManager.tableWidget(0)
       tableWidget.tableView().setMRMLTableNode(tableNode)
-      
-      
+
     logging.info('Processing completed')
     end = time.time()
     TotalTime = np.round(end - start,2)
