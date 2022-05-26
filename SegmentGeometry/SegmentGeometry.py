@@ -1163,8 +1163,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
     for i in range(0,3):
       roiCenter[i] = (combinedBounds[i*2+1] + combinedBounds[i*2])/2
       roiRadius[i] = (combinedBounds[i*2+1] - combinedBounds[i*2])/2
-    # use annotation node because cropvolume doesn't use the markupsROI  
-    roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLAnnotationROINode", "TempAnnotationROI")
+    roi=slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsROINode", "TempMarkupsROI")
     roi.SetDisplayVisibility(0)
     roi.SetXYZ(roiCenter[0], roiCenter[1], roiCenter[2])
     roi.SetRadiusXYZ(roiRadius[0], roiRadius[1], roiRadius[2])        
@@ -2449,7 +2448,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("SegmentGeometryTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))
       slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("FullVolumeTemp_ColorTable"))     
-      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("TempAnnotationROI"))
+      slicer.mrmlScene.RemoveNode(slicer.mrmlScene.GetFirstNodeByName("TempMarkupsROI"))
 
       # move segment back to where it was originally
       if trans != None:
