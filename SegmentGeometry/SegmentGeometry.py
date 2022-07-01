@@ -1419,8 +1419,13 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
         # Crop temporary volume to avoid computing on empty slices
         maskExtent = [0] * 6
         fillValue = 0
-        import SegmentEditorMaskVolumeLib
-        maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
+        import SegmentEditorEffects
+        if not hasattr(SegmentEditorEffects,'SegmentEditorMaskVolumeEffect'):
+          # Slicer 4.11 and earlier - Mask volume is in an extension
+          import SegmentEditorMaskVolumeLib
+          maskVolumeWithSegment = SegmentEditorMaskVolumeLib.SegmentEditorEffect.maskVolumeWithSegment
+        else:        
+          maskVolumeWithSegment = SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment
         if IntensitycheckBox == True:
           maskVolumeWithSegment(segmentationNode, segmentID, "FILL_OUTSIDE", [0], volumeNodeformasking, outputVolume, maskExtent) 
         else: maskVolumeWithSegment(segmentationNode, segmentID, "FILL_INSIDE_AND_OUTSIDE", [1,0], volumeNodeformasking, outputVolume, maskExtent) 
@@ -2593,7 +2598,7 @@ class SegmentGeometryTest(ScriptedLoadableModuleTest):
     
     logic = SegmentGeometryLogic()
     logic.run(segmentationNode, segmentId, masterVolumeNode, "S (Red)", 0, tableNode, plotChartNode, True, True, True, False, True, True,
-    True, True, 0, True, True, True, True, True, segmentationNode, segmentId, True, True, True)
+    True, True, 0, True, True, True, True, True,True, segmentationNode, segmentId, True, True, True)
     import math
     # Compute CSA error
     crossSectionAreas = slicer.util.arrayFromTableColumn(tableNode, "CSA (mm^2)")
