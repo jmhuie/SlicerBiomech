@@ -50,6 +50,16 @@ isolated humerus and solid humerus segment for measuring compactness. New users 
 11. Click Apply. Loading times can vary between 1-30 seconds depending on the size of the data set.
 12. Save results by exporting the table or copying and pasting the table values to a separate spreadsheet.
 
+### Using a Pre-made Mesh
+Sometimes the raw image data are not available and you only have a segmented 3D model/mesh (.stl, .obj, .ply) downloaded or created elsewhere. SegmentGeometry can still be used to analyze the mesh so long as the internal geometry of the mesh reflects the actual structure. Note: some mesh file formats do not retain information about size, but using the material normalization method circumvents this problem. When possible, exporting as a .ply is recommended.
+1. Load in mesh file.
+2. In the Data module, right click the mesh and click "Convert model to segmentation node"
+3. A segmentation node with your model should have been made. Right click it and click "Export visible segments to binary labelmap"
+4. A labelmap should have been made. Right click it and click "Edit properties" or navigate to the Volume module.
+5. In the Volume module, ensure the labelmap is the Active volume, and expand the "Volume Information"
+6. Navigate to where it says "Convert to scalar volume" and click the "Convert" button.
+7. Now you have a Segmentation node and a Volume node that can be used with SegmentGeometry like normal.
+
 ### Demo Videos
 Here are some example videos that demonstrate how to use SegmentGeometry for different purposes.
 1. <a href="https://youtu.be/fBaTM5utQC0" target ="_blank">How to calculate second moment of area and compactness of a salamander limb bone</a> 
