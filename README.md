@@ -34,14 +34,12 @@ To cite 3D Slicer as a general image analysis platform, please cite:
 * [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
 ## Dependencies
-SlicerBiomech has no required dependencies, but there are a few extensions we recommend installing that are used in many SlicerBiomech workflows.
+The following extensions are automatically installed with SlicerBiomech. Although SlicerBiomech does not directly rely on these extensions, they provide a suite a of tools for importing, visualizing, and segmenting 3D specimen data that are useful for users of SlicerBiomech.
+* [**SlicerMorph:**](https://github.com/SlicerMorph/SlicerMorph) Streamlines digital morphology research by enabling effortless data import, visualization, measurement, annotation, and geometric morphometric analysis on 3D data
+* [**SegmentEditorExtraEffects:**](https://github.com/lassoan/SlicerSegmentEditorExtraEffects) Provides additional segmentation effects and utilities.
 
 ## Recommended extensions to install manually
-The following extension provides many tools for Slicer that are useful for importing, visualizing, and analyzing specimen morphology data. 
-* [**SlicerMorph:**](https://github.com/SlicerMorph/SlicerMorph) A segment editor effect useful for isolating endocasts or filling spaces.
-The following extension provides many segmentation tools that is are often useful for SlicerBiomech users.
-* [**SlicerSegmentEditorExtraEffects:**](https://github.com/lassoan/SlicerSegmentEditorExtraEffects) Provides additional segmentation effects and utilities.
-The following extension is used in many workflows for  SegmentGeoemtry and Dental Dynamics.
+The following extension is used in many workflows for SegmentGeoemtry and Dental Dynamics.
 * [**SurfaceWrapSolidify:**](https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify) A segment editor effect useful for isolating endocasts or filling spaces.
 
 
