@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometry.png" width="256" height="256">
+  <img src="https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SlicerBiomech.png" width="256" height="256">
 </p>
 
 
@@ -8,14 +8,14 @@ This is the repository for the SlicerBiomech extension for <a href="https://slic
 SlicerBiomech enables the collection and modeling of biomechanical data from 3D specimen data, within the 3D Slicer application. 
 
 
-# Installation
+## Installation
 
 The official method of obtaining SlicerBiomech is through 3D Slicer's built-in Extensions Manager. To obtain SlicerBiomech, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (currently r31382, 5.2.2). 
 Use the 3D Slicer Extensions Manager module to search for SlicerBiomech and install the extension. After restarting 3D Slicer, SlicerBiomech modules will be available to use in the application. 
 
 Future updates to SlicerBiomech can also be obtained through the Extensions Manager module. To make sure you have the latest version, use the "Check for Updates" button and restart the application.
 
-# How to Cite
+## How to Cite
 
 If you use SlicerBiomech in your work, please cite one or more relevant publications:
 
@@ -28,12 +28,24 @@ If you use SlicerBiomech in your work, please cite one or more relevant publicat
 To cite 3D Slicer as a general image analysis platform, please cite: 
 * Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
 
-# Module Descriptions
+## Module Descriptions
 
-* **SegmentGeometry:** Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
+* [**SegmentGeometry:**](https://github.com/jmhuie/Slicer-SegmentGeoemtry/main/Docs/SegmentGeoemtry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
 * **DentalDynamics:** Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
-# Frequently Asked Questions
+## Dependencies
+SlicerBiomech has no required dependencies, but there are a few extensions we recommend installing that are often used in accompanying workflows.
+
+## Recommended extensions to install manually
+The following extension provides many tools for Slicer that are useful for importing, visualizing, and analyzing specimen morphology data. 
+* [**SlicerMorph:**](https://github.com/SlicerMorph/SlicerMorph) A segment editor effect useful for isolating endocasts or filling spaces.
+The following extension provides many useful segmentation tools that is are often used in SlicerBiomech workflows.
+* [**SlicerSegmentEditorExtraEffects:**](https://github.com/lassoan/SlicerSegmentEditorExtraEffects) Provides additional segmentation effects and utilities, such as the SplitSegment function that allows saving the 3D volume into multiple smaller, individual volumes using the provided segmentation.
+The following extension is required for many workflows using both SegmentGeoemtry and DentalDynamics
+* [**SurfaceWrapSolidify:**](https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify) A segment editor effect useful for isolating endocasts or filling spaces.
+
+
+## Frequently Asked Questions
 
 1. I need help using SlicerBiomech, I received an error, or I think I found a bug. What do I do?
 
