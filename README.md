@@ -30,8 +30,8 @@ To cite 3D Slicer as a general image analysis platform, please cite:
 
 ## Module Descriptions
 
-* [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
-* [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
+* [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
+* [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
 ## Dependencies
 SlicerBiomech has no required dependencies, but there are a few extensions we recommend installing that are used in many SlicerBiomech workflows.

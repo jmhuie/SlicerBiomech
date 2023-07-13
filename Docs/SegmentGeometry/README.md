@@ -42,7 +42,7 @@ Here are some example videos that demonstrate how to use SegmentGeometry for dif
 1. <a href="https://youtu.be/fBaTM5utQC0" target ="_blank">How to calculate second moment of area and compactness of a salamander limb bone</a> 
 2. <a href="https://youtu.be/fI5xFT7_81I" target ="_blank">How to calculate second moment of area of a cat mandible</a> 
 
-# Advanced Tools
+## Advanced Tools
 
 ### Segment Transformation Tools
 SegmentGeometry provides three tools for rotating and aligning segments with the desired long axis. 

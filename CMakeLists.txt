@@ -4,13 +4,13 @@ project(SegmentGeometry)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "https://github.com/jmhuie/Slicer-SegmentGeometry")
+set(EXTENSION_HOMEPAGE "https://github.com/jmhuie/SlicerBiomech")
 set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Jonathan Huie (George Washington University)")
 set(EXTENSION_DESCRIPTION "This extension enables the calculation of biomechanical traits and properties from 3D specimen data.")
-set(EXTENSION_ICONURL "https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry.png")
-set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/DentalDynamics/Resources/Icons/DentalDynamicsScreenshot1.png")
-set(EXTENSION_DEPENDS "SegmentEditorExtraEffects") # Specified as a list or "NA" if no dependencies
+set(EXTENSION_ICONURL "https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SlicerBiomech.png")
+set(EXTENSION_SCREENSHOTURLS "https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/DentalDynamics/Resources/Icons/DentalDynamicsScreenshot1.png")
+set(EXTENSION_DEPENDS "SlicerMorph") # Specified as a list or "NA" if no dependencies
 
 #-----------------------------------------------------------------------------
 # Extension dependencies
