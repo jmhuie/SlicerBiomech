@@ -1,20 +1,13 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/Slicer-DentalDynamics/main/DentalDynamics/Resources/Icons/DentalDynamics.png" width="256" height="256">
+  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/DentalDynamics/Resources/Icons/DentalDynamics.png" width="256" height="256">
 </p>
 
 # Dental Dynamics
-
-This is the repository for Dental Dynamics, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
 
 Dental Dynamics automates tooth stress calculations for modeling and analyzing tooth function.
 
 ![image](https://raw.githubusercontent.com/jmhuie/Slicer-DentalDynamics/main/DentalDynamics/Resources/Icons/DentalDynamicsScreenshot1.png)
 
-# Installation
-
-The official method for installing Dental Dynamics is through 3D Slicer's built-in Extensions Manager. First, install the most recent stable or preview release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a>. 
-In 3D Slicer, open the Extensions Manager module and search for "Dental Dynamics". Install the extension and restart the application. After, Dental Dynamics should be fully functional and located in the Quantification 
-module category. If using the current stable release of Slicer, Dental Dynamics can be updated in the Extension Manager. If using the Preview Release of Slicer, the most recent build must be downloaded and installed to update Dental Dynamics.
 
 # Workflow Example
 Below are brief instructions on how to use Dental Dynamics.
@@ -37,7 +30,3 @@ Below are brief instructions on how to use Dental Dynamics.
 
 Coming Soon
 
-
-# Funding Acknowledgement
-
-Jonathan M. Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914).

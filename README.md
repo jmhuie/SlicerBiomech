@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SlicerBiomech.png" width="256" height="256">
+  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SlicerBiomech.png" width="256" height="256">
 </p>
 
 
@@ -22,7 +22,7 @@ If you use SlicerBiomech in your work, please cite one or more relevant publicat
 **SegmentGeometry**
 * Huie JM, Summers AP, Kawano SM. (2022) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology 4(1): 1-10.  https://doi.org/10.1093/iob/obac009
 
-**DentalDynamics**
+**Dental Dynamics**
 * Coming Soon
 
 To cite 3D Slicer as a general image analysis platform, please cite: 
@@ -30,18 +30,18 @@ To cite 3D Slicer as a general image analysis platform, please cite:
 
 ## Module Descriptions
 
-* [**SegmentGeometry:**](https://github.com/jmhuie/Slicer-SegmentGeoemtry/main/Docs/SegmentGeoemtry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
-* **DentalDynamics:** Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
+* [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
+* [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
 ## Dependencies
-SlicerBiomech has no required dependencies, but there are a few extensions we recommend installing that are often used in accompanying workflows.
+SlicerBiomech has no required dependencies, but there are a few extensions we recommend installing that are used in many SlicerBiomech workflows.
 
 ## Recommended extensions to install manually
 The following extension provides many tools for Slicer that are useful for importing, visualizing, and analyzing specimen morphology data. 
 * [**SlicerMorph:**](https://github.com/SlicerMorph/SlicerMorph) A segment editor effect useful for isolating endocasts or filling spaces.
-The following extension provides many useful segmentation tools that is are often used in SlicerBiomech workflows.
-* [**SlicerSegmentEditorExtraEffects:**](https://github.com/lassoan/SlicerSegmentEditorExtraEffects) Provides additional segmentation effects and utilities, such as the SplitSegment function that allows saving the 3D volume into multiple smaller, individual volumes using the provided segmentation.
-The following extension is required for many workflows using both SegmentGeoemtry and DentalDynamics
+The following extension provides many segmentation tools that is are often useful for SlicerBiomech users.
+* [**SlicerSegmentEditorExtraEffects:**](https://github.com/lassoan/SlicerSegmentEditorExtraEffects) Provides additional segmentation effects and utilities.
+The following extension is used in many workflows for  SegmentGeoemtry and Dental Dynamics.
 * [**SurfaceWrapSolidify:**](https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify) A segment editor effect useful for isolating endocasts or filling spaces.
 
 

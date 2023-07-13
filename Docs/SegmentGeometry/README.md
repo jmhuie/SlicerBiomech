@@ -1,37 +1,14 @@
-# SegmentGeometry
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SegmentGeometry/Resources/Icons/SegmentGeometry.png" width="256" height="256">
+</p>
 
-This is the repository for SegmentGeometry, an extension for <a href="https://slicer.org/" target ="_blank">3D Slicer</a>.
+## SegmentGeometry
 
 SegmentGeometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
 
 ![image](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png)
 
-# Installation
-
-The official method for installing SegmentGeometry is through 3D Slicer's built-in Extensions Manager. First, install the most recent stable or preview release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (r29738 or later). 
-In 3D Slicer, open the Extensions Manager module and search for "SegmentGeometry". Install the extension and restart the application. After, SegmentGeometry should be fully functional and located in the Quantification 
-module category. If using the current stable release of Slicer, SegmentGeometry can be updated in the Extension Manager. If using the Preview Release of Slicer, the most recent build must be downloaded and installed to update SegmentGeometry.
-
-# How to Cite
-
-If you use SegmentGeometry in your work, please cite the follow publication:
-* Huie JM, Summers AP, Kawano SM. (2022) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology. https://doi.org/10.1093/iob/obac009
-
-To cite 3D Slicer as a general image analysis platform, please use: 
-* Kikinis R, Pieper, SD, Vosburgh KG. (2014) 3D Slicer: A Platform for Subject-Specific Image Analysis, Visualization, and Clinical Support. In Intraoperative Imaging and Image-Guided Therapy (pp. 277–289). Springer, New York, NY. https://doi.org/10.1007/978-1-4614-7657-3_19
-
-To cite the length normalization method, please use: 
-* Doube M, Conroy AW, Christiansen P, Hutchinson JR, Shefelbine S. (2009) Three-dimensional geometric analysis of felid limb bone allometry. PloS one. 4(3):e4742. https://doi.org/10.1371/journal.pone.0004742
-
-To cite the material normalization method, please use: 
-* Summers AP, Ketcham RA, Rowe T. (2004) Structure and function of the horn shark (Heterodontus francisci) cranium through ontogeny: development of a hard prey specialist. Journal of Morphology. 260(1):1-2. https://doi.org/10.1002/jmor.10141
-
-Some source code was ported from BoneJ. To cite BoneJ or find out more, please use:
-* Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
-* Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
-
-
-# Workflow Example
+## Workflow Example
 Below are general instructions on how to use SegmentGeometry, including a step-by-step guide for general use cases and a demo video. SegmentGeometry provides an example dataset in the Sample Data module that consists of a salamander 
 CT scan from <a href="https://www.morphosource.org/media/000049486" target ="_blank">MorphoSource</a> and a segmentation file that contains an 
 isolated humerus and solid humerus segment for measuring compactness. New users are encouraged to follow along with guide and demo video using the sample data set or their own.
@@ -89,7 +66,7 @@ can automatically generate a segment with the vacuities filled in.
 
 To normalize a variable, enable the check boxes of both the variables you want and the desired normalization method(s). If you use either the length or material normalization in your research, please cite the relevant papers. See the "How to Cite" section.
 
-# Output Details
+## Output Details
 SegmentGeometry presents the results as a table and automatically plots second moment of area over percent length of the segment. SegmentGeometry also generates a resampled and cropped volume of the segment for easy visualization of the individual slice geometries. 
 When calculating second moment of area or section modulus, SegmentGeometry will approximate the segment's aspect ratio and alert the user when the no-shear assumption of Euler-Bernoulli's beam theory may not be met. 
 Below contains brief information on the possible computations.
@@ -152,17 +129,12 @@ Below contains brief information on the possible computations.
 
 - Length Normalization: Length normalized values are indicated with "LenNorm"
 
-# Frequently Asked Questions
+## How to Cite
 
-1. I need help using SegmentGeometry, I received an error, or I think I found a bug. What do I do?
+If you use SegmentGeometry in your work, please cite the follow publication:
+* Huie JM, Summers AP, Kawano SM. (2022) SegmentGeometry: a tool for measuring second moment of area in 3D Slicer. Integrative Organismal Biology. https://doi.org/10.1093/iob/obac009
 
-First, make sure that you have the most recent version of SegmentGeometry by updating the extension (stable release) or re-downloading 3D Slicer (preview release). If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie) or you may email me (jonathanmhuie[at]gmail.com). I will do my best to address problems in a timely manner.
-
-2. I have a suggestion or feature request for how to improve SegmentGeometry. What do I do?
-
-Fantastic! I am always trying to improve the ease and utility of SegmentGeometry and would love to hear your suggestions. Please reach out to me through 3D Slicer Discourse page or via email.
-
-# Funding Acknowledgement
-
-Jonathan M. Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
+Some source code was ported from BoneJ. To cite BoneJ or find out more, please use:
+* Doube M, Kłosowski MM, Arganda-Carreras I, Cordeliéres F, Dougherty RP, Jackson J, Schmid B, Hutchinson JR, Shefelbine SJ. (2010) BoneJ: free and extensible bone image analysis in ImageJ. Bone 47:1076-9. https://doi.org/10.1016/j.bone.2010.08.023 
+* Domander R, Felder AA, Doube M. (2021) BoneJ2 - refactoring established research software. Wellcome Open Research. 6:37. https://doi.org/10.12688/wellcomeopenres.16619.2
 
