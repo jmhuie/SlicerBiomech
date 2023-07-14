@@ -42,16 +42,18 @@ The following extensions are automatically installed with SlicerBiomech. Althoug
 The following extension is used in many workflows for SegmentGeoemtry and Dental Dynamics.
 * [**SurfaceWrapSolidify:**](https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify) A segment editor effect useful for isolating endocasts or filling spaces.
 
+## Slicer Biomech Tutorials
+[Learn how to use SlicerBiomech modules through step-by-step tutorials and videos.](https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials)
 
 ## Frequently Asked Questions
 
-1. I need help using SlicerBiomech, I received an error, or I think I found a bug. What do I do?
+1. I received an error or found a bug. What do I do?
 
-First, make sure that you have the most recent version of SlicerBiomech by updating the extension. If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie) or you may email me (jonathanmhuie[at]gmail.com). I will do my best to address problems in a timely manner.
+Make sure that you have the most recent version of SlicerBiomech by updating the extension. If the error still persists, you can report your issues on the <a href="https://discourse.slicer.org/" target ="_blank">3D Slicer discourse page</a> and tag me (@jmhuie) or you may email me (jonathanmhuie[at]gmail.com). 
 
-2. I have a suggestion or feature request for how to improve SlicerBiomech. What do I do?
+2. I have a suggestion or feature request for SlicerBiomech. What do I do?
 
-Fantastic! I am always trying to improve the ease and utility of SlicerBiomech modules and would love to hear your suggestions. Please reach out to me through 3D Slicer Discourse page or via email.
+Fantastic! We are always trying to improve the ease and utility of SlicerBiomech modules and would love to hear your suggestions. Please reach out to me through 3D Slicer Discourse page or via email.
 
 # Funding Acknowledgement
 
