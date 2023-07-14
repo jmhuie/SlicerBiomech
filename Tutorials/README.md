@@ -4,6 +4,6 @@ These tutorials show how to use SlicerBiomech modules and related Slicer protoco
 
 ## Tutorial Descriptions
 
-1. SegmentGeometry: 
-2. DentalDynamics:
+1. [SegmentGeometry](https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials/SegmentGeometry)
+2. [DentalDynamics](https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials/DentalDynamics)
 
