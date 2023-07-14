@@ -1,13 +1,8 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/DentalDynamics/Resources/Icons/DentalDynamics.png" width="256" height="256">
-</p>
+![image](https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/DentalDynamics/Resources/Icons/DentalDynamicsScreenshot1.png)
 
 # Dental Dynamics
 
 Dental Dynamics automates tooth stress calculations for modeling and analyzing tooth function.
-
-![image](https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/DentalDynamics/Resources/Icons/DentalDynamicsScreenshot1.png)
-
 
 # Workflow Example
 Below are brief instructions on how to use Dental Dynamics.

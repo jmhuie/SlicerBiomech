@@ -1,12 +1,8 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SegmentGeometry/Resources/Icons/SegmentGeometry.png" width="256" height="256">
-</p>
+![image](https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png)
 
 ## SegmentGeometry
 
 SegmentGeometry iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations.
-
-![image](https://raw.githubusercontent.com/jmhuie/Slicer-SegmentGeometry/main/SegmentGeometry/Resources/Icons/SegmentGeometryScreenshot1.png)
 
 ## Workflow Example
 Below are general instructions on how to use SegmentGeometry, including a step-by-step guide for general use cases and a demo video. SegmentGeometry provides an example dataset in the Sample Data module that consists of a salamander 
