@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SlicerBiomech.png" width="256" height="256">
+  <img src="https://raw.githubusercontent.com/jmhuie/SlicerBiomech/main/SlicerBiomech_git.png" width="256" height="256">
 </p>
 
 
@@ -33,6 +33,9 @@ To cite 3D Slicer as a general image analysis platform, please cite:
 * [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
 * [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
+## Slicer Biomech Tutorials
+[Learn how to use SlicerBiomech modules through step-by-step tutorials and videos.](https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials)
+
 ## Dependencies
 The following extensions are automatically installed with SlicerBiomech. Although SlicerBiomech does not directly rely on these extensions, they provide a suite a of tools for importing, visualizing, and segmenting 3D specimen data that are useful for users of SlicerBiomech.
 * [**SlicerMorph:**](https://github.com/SlicerMorph/SlicerMorph) Streamlines digital morphology research by enabling effortless data import, visualization, measurement, annotation, and geometric morphometric analysis on 3D data
@@ -41,9 +44,6 @@ The following extensions are automatically installed with SlicerBiomech. Althoug
 ## Recommended extensions to install manually
 The following extension is used in many workflows for SegmentGeoemtry and Dental Dynamics.
 * [**SurfaceWrapSolidify:**](https://github.com/sebastianandress/Slicer-SurfaceWrapSolidify) A segment editor effect useful for isolating endocasts or filling spaces.
-
-## Slicer Biomech Tutorials
-[Learn how to use SlicerBiomech modules through step-by-step tutorials and videos.](https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials)
 
 ## Frequently Asked Questions
 
