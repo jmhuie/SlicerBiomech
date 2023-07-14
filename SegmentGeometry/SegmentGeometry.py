@@ -20,9 +20,8 @@ class SegmentGeometry(ScriptedLoadableModule):
     self.parent.categories = ["Quantification"]
     self.parent.dependencies = []
     self.parent.contributors = ["Jonathan Huie"]
-    self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties.
-    For more information please see the <a href="https://github.com/jmhuie/SlicerBiomech">online documentation</a>."""
-    self.parent.acknowledgementText = """This module was developed by Jonathan Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship."""
+    self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties. For more information please see the <a href="https://github.com/jmhuie/SlicerBiomech">online documentation</a>."""
+    self.parent.acknowledgementText = """This module was developed by Jonathan M. Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship."""
 
     # Additional initialization step after application startup is complete
     slicer.app.connect("startupCompleted()", registerSampleData)

@@ -20,9 +20,8 @@ class DentalDynamics(ScriptedLoadableModule):
     self.parent.categories = ["Quantification"] 
     self.parent.dependencies = []  # TODO: add here list of module names that this module requires
     self.parent.contributors = ["Jonathan M. Huie"]  
-    self.parent.helpText = """This module uses lever mechanics to calculate tooth stress from segmented teeth and jaws.
-    For more information please see the <a href="https://github.com/jmhuie/Slicer-SegmentGeometry">online documentation</a>."""
-    self.parent.acknowledgementText = """This module was developed by Jonathan M. Huie. JMH was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
+    self.parent.helpText = """This module uses lever mechanics to calculate tooth stress from segmented teeth and jaws. For more information please see the <a href="https://github.com/jmhuie/SlicerBiomech">online documentation</a>."""
+    self.parent.acknowledgementText = """This module was developed by Jonathan M. Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
 
 
     # Additional initialization step after application startup is complete
