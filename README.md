@@ -55,7 +55,7 @@ Make sure that you have the most recent version of SlicerBiomech by updating the
 
 Fantastic! We are always trying to improve the ease and utility of SlicerBiomech modules and would love to hear your suggestions. Please reach out to me through 3D Slicer Discourse page or via email.
 
-# Funding Acknowledgement
+## Funding Acknowledgement
 
 Jonathan M. Huie was funded by a NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship.
 
