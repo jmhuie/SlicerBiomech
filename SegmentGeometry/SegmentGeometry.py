@@ -2081,8 +2081,8 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 IminorArray_Summers.InsertNextValue(Iminor/((np.pi * (np.sqrt(CSA/np.pi))**4) / 4))
                 ZmajorArray_Summers.InsertNextValue(Zmajor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
                 ZminorArray_Summers.InsertNextValue(Zminor/((np.pi * (np.sqrt(CSA/np.pi))**3) / 4))
-                JzArray_Summers.InsertNextValue(Jz/((2*np.sqrt(CSA/np.pi))**4 * np.pi / 32))
-                JzArray_Summers.InsertNextValue(Jz/np.sqrt(CSA/np.pi))
+                JzArray_Summers.InsertNextValue(Jz/((np.pi * (np.sqrt(CSA/np.pi))**4) / 2))
+                ZpolArray_Summers.InsertNextValue(Zpol/((np.pi * (np.sqrt(CSA/np.pi))**3) / 16))
               
               # do size correction
               if DoubecheckBox == True:
@@ -2091,7 +2091,7 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
                 ZmajorArray_Doube.InsertNextValue(Zmajor**(1/3) / numSlices)
                 ZminorArray_Doube.InsertNextValue(Zminor**(1/3) / numSlices)
                 JzArray_Doube.InsertNextValue(Jz**(1/4) / numSlices)
-                ZpolArray_Doube.InsertNextValue(Zpol**(1/4) / numSlices)
+                ZpolArray_Doube.InsertNextValue(Zpol**(1/3) / numSlices)
            
               # use custom neutral axis  
               if OrientationcheckBox == True: 
