@@ -7,7 +7,7 @@ This is the repository for the SlicerBiomech extension for <a href="https://slic
 
 SlicerBiomech enables the collection and modeling of biomechanical data from 3D specimen data, within the 3D Slicer application. 
 
-**Notice:** The SegmentGeometry extension and module were folded into SlicerBiomech extension. Install SlicerBiomech to obtain the SegmentGeometry module.
+**Notice:** The SegmentGeometry extension and module were folded into the SlicerBiomech extension. Install SlicerBiomech to obtain the SegmentGeometry module.
 
 # Installation
 
@@ -19,7 +19,7 @@ Future updates to SlicerBiomech can also be obtained through the Extensions Mana
 
 # Module Descriptions
 
-* [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer.
+* [**SegmentGeometry:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/SegmentGeometry) Iterates slice-by-slice through a segment to calculate the second moment of area and other cross-sectional properties. Results are exported to a table and plotted for quick visualizations. Inputs are a segmentation node and volume node, but the module can be used to analyze 3D models imported from outside 3D Slicer. Formerly included in the SegmentGeometry extension.
 * [**Dental Dynamics:**](https://github.com/jmhuie/SlicerBiomech/tree/main/Docs/DentalDynamics) Uses simple lever mechanics to automate tooth stress calculations for modeling tooth function. Results can be exported and analyzed with the functional homodonty framework.
 
 # SlicerBiomech Tutorials
