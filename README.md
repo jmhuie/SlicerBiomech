@@ -7,10 +7,11 @@ This is the repository for the SlicerBiomech extension for <a href="https://slic
 
 SlicerBiomech enables the collection and modeling of biomechanical data from 3D specimen data, within the 3D Slicer application. 
 
+**Notice:** The SegmentGeometry extension and module were folded into SlicerBiomech extension. Install SlicerBiomech to obtain the SegmentGeometry module.
 
 # Installation
 
-The official method of obtaining SlicerBiomech is through 3D Slicer's built-in Extensions Manager. To obtain SlicerBiomech, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (currently r31382, 5.2.2). 
+The official method of obtaining SlicerBiomech is through 3D Slicer's built-in Extensions Manager. To obtain SlicerBiomech, first install the most recent stable release of <a href="https://download.slicer.org/" target ="_blank">3D Slicer</a> (currently r31938, 5.4). 
 Use the 3D Slicer Extensions Manager module to search for SlicerBiomech and install the extension. After restarting 3D Slicer, SlicerBiomech modules will be available to use in the application. 
 
 Future updates to SlicerBiomech can also be obtained through the Extensions Manager module. To make sure you have the latest version, use the "Check for Updates" button and restart the application.
