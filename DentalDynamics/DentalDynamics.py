@@ -474,6 +474,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     """
 
     import numpy as np
+    import math
     import time
 
     start = time.time()
@@ -840,10 +841,11 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
      InLever = leverLine.GetMeasurement('length').GetValue()
      MA = InLever/OutLever
      MechAdvArray.InsertNextValue(MA)
-     FToothArray.InsertNextValue(force * np.sin(angle) * MA)
+     angle_rad = math.radians(angle)
+     FToothArray.InsertNextValue(force * math.sin(angle_rad) * MA)
      
      # calculate tooth stress
-     StressArray.InsertNextValue((force * np.sin(angle) * MA)/ (Area * 1e-6))
+     StressArray.InsertNextValue((force * math.sin(angle_rad) * MA)/ (Area * 1e-6))
 
     
     if species != "Enter species name" and species != "":
