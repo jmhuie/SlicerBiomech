@@ -370,7 +370,7 @@
          <string>Switch out-lever and tooth position lines:</string>
         </property>
         <property name="collapsed">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_4">
          <item row="1" column="0" colspan="2">

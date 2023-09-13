@@ -244,7 +244,16 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Create new reference point list" button.
     """
-    pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Point List")
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
+    pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Point List_" + species + "_" + side + "_" + jawID)
     pointListNode.AddControlPoint([0,0,0],"Jaw Joint")
     pointListNode.AddControlPoint([0,0,0],"Tip of Jaw")
     pointListNode.AddControlPoint([0,0,0],"Muscle Insertion Site")
@@ -261,19 +270,28 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Flip" button.
     """
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
-    outvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Out Levers"))
-    posvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Tooth Positions"))
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers"), 0)
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions"), 0)
+    outvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID))
+    posvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID))
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID), 0)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID), 0)
     
     
-    OutItemID = shNode.GetItemByName("Out Levers")
+    OutItemID = shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID)
     Outchildren = vtk.vtkIdList()
     shNode.GetItemChildren(OutItemID, Outchildren)
-    PosItemID = shNode.GetItemByName("Tooth Positions")
+    PosItemID = shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID)
     Poschildren = vtk.vtkIdList()
     shNode.GetItemChildren(PosItemID, Poschildren)
 
@@ -294,25 +312,34 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers"), outvis)
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions"), posvis)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID), outvis)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID), posvis)
 
   def onFlipSomeResults(self):
     """
     Run processing when user clicks "Flip" button.
     """
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
-    outvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Out Levers"))
-    posvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Tooth Positions"))
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers"), 0)
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions"), 0)
+    outvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID))
+    posvis = folderPlugin.getDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID))
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID), 0)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID), 0)
     
     segmentation = self.ui.SegmentSelectorWidget.currentNode()
     segments = self.ui.SegmentSelectorWidget.selectedSegmentIDs()
-    OutItemID = shNode.GetItemByName("Out Levers")
-    PosItemID = shNode.GetItemByName("Tooth Positions")
+    OutItemID = shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID)
+    PosItemID = shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID)
     Outchildren = []
     Poschildren = []
 
@@ -337,15 +364,25 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers"), outvis)
-    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions"), posvis)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID), outvis)
+    folderPlugin.setDisplayVisibility(shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID), posvis)
 
   def onOutleverVis(self):
     """
     Run processing when user clicks "Outlever Vis" button.
-    """    
+    """  
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
+    shNode = slicer.mrmlScene.GetSubjectHierarchyNode()  
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    folderItemID = shNode.GetItemByName("Out Levers")
+    folderItemID = shNode.GetItemByName("Out Levers_" + species + "_" + side + "_" + jawID)
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
 
@@ -359,8 +396,17 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Outlever Vis" button.
     """
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    folderItemID = shNode.GetItemByName("Tooth Positions")
+    folderItemID = shNode.GetItemByName("Tooth Positions_" + species + "_" + side + "_" + jawID)
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
 
@@ -374,8 +420,17 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Reset" button.
     """
+    species = "NA"
+    if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+      species = self.ui.SpecieslineEdit.text
+    jawID = "Lower Jaw"
+    if self.ui.UpperradioButton.checked == True:
+      jawID = "Upper Jaw"
+    side = "Left"
+    if self.ui.RightradioButton.checked == True:
+      side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    shFolderItemId = shNode.GetItemByName("Dental Dynamics Misc")
+    shFolderItemId = shNode.GetItemByName("Dental Dynamics_"+ species + "_" + side + "_" + jawID)
     shNode.RemoveItem(shFolderItemId)
     slicer.mrmlScene.RemoveNode(self.ui.tableSelector.currentNode())
     layoutManager = slicer.app.layoutManager()
@@ -396,9 +451,18 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run processing when user clicks "Apply" button.
     """
     try:
+      species = "NA"
+      if self.ui.SpecieslineEdit.text != "Enter species name" and self.ui.SpecieslineEdit.text != "":
+        species = self.ui.SpecieslineEdit.text
+      jawID = "Lower Jaw"
+      if self.ui.UpperradioButton.checked == True:
+        jawID = "Upper Jaw"
+      side = "Left"
+      if self.ui.RightradioButton.checked == True:
+        side = "Right"
       # Create nodes for results      
       tableNode = self.ui.tableSelector.currentNode()
-      expTable = "Dental Dynamics Table"
+      expTable = "Dental Dynamics Table_"+ species + "_" + side + "_" + jawID
       if not tableNode:
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", expTable)
         self.ui.tableSelector.setCurrentNode(tableNode)
@@ -543,15 +607,27 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     StressArray = vtk.vtkFloatArray()
     StressArray.SetName("Stress (N/m^2)")
     
-    # create misc folder
+    # create misc folder  
+    if species == "Enter species name" or species == "": 
+      species = "NA" 
+    jawID = "NA"
+    if LowerradioButton == True:
+      jawID = "Lower Jaw"
+    if UpperradioButton == True:
+      jawID = "Upper Jaw"
+    side = "NA"
+    if LeftradioButton == True:
+      side = "Left"
+    if RightradioButton == True:
+      side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    newFolder = shNode.GetItemByName("Dental Dynamics Misc")
-    outFolder = shNode.GetItemByName("Out Levers")
-    posFolder = shNode.GetItemByName("Tooth Positions")
+    newFolder = shNode.GetItemByName("Dental Dynamics_"+ species + "_" + side + "_" + jawID)
+    outFolder = shNode.GetItemByName("Out Levers_"+ species + "_" + side + "_" + jawID)
+    posFolder = shNode.GetItemByName("Tooth Positions_"+ species + "_" + side + "_" + jawID)
     if newFolder == 0:
-      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Dental Dynamics Misc")      
-      outFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Out Levers")      
-      posFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Positions")
+      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Dental Dynamics_"+ species + "_" + side + "_" + jawID)      
+      outFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Out Levers_"+ species + "_" + side + "_" + jawID)      
+      posFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Positions_"+ species + "_" + side + "_" + jawID)
       pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
       folderPlugin = pluginHandler.pluginByName("Folder")
       folderPlugin.setDisplayVisibility(posFolder, 0)
@@ -587,9 +663,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
 	# draw line representing jaw length
     jawtipRAS = [0,]*3
     pointNode.GetNthControlPointPosition(1,jawtipRAS)
-    lengthLine = slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "JawLength")
+    lengthLine = slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "JawLength_"+ species + "_" + side + "_" + jawID)
     if lengthLine == None:
-      lengthLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "JawLength")
+      lengthLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "JawLength_"+ species + "_" + side + "_" + jawID)
       lengthLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
       lengthLine.AddControlPoint(jointRAS)
       lengthLine.AddControlPoint(jawtipRAS)
@@ -603,9 +679,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
 	# draw line representing in-lever
     inleverRAS = [0,]*3
     pointNode.GetNthControlPointPosition(2,inleverRAS)
-    leverLine = slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "InLever")
+    leverLine = slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "InLever_"+ species + "_" + side + "_" + jawID)
     if leverLine == None:
-      leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever")
+      leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever_"+ species + "_" + side + "_" + jawID)
       leverLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
       leverLine.AddControlPoint(jointRAS)
       leverLine.AddControlPoint(inleverRAS)
@@ -619,7 +695,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     segmentList = stats["SegmentIDs"]
     if skipBox == True:
       segmentList = stats["SegmentIDs"][1:len(stats["SegmentIDs"])]
-      slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "InLever")
+      slicer.util.getFirstNodeByClassByName("vtkMRMLMarkupsLineNode", "InLever_"+ species + "_" + side + "_" + jawID)
       firstsegmentName = segmentationNode.GetSegmentation().GetSegment(stats["SegmentIDs"][0]).GetName()
       ToothPoslineNode = shNode.GetItemDataNode(shNode.GetItemChildWithName(posFolder, firstsegmentName))
       slicer.mrmlScene.RemoveNode(ToothPoslineNode)
@@ -627,25 +703,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       slicer.mrmlScene.RemoveNode(ToothOutlineNode)
     for segmentId in segmentList:
      
-     if species != "Enter species name" and species != "":
-       SpeciesArray.InsertNextValue(species)  
-     if species == "Enter species name" or species == "": 
-       species = "NA" 
-       SpeciesArray.InsertNextValue(species)  
-     jawID = "NA"
-     if LowerradioButton == True:
-       jawID = "Lower Jaw"
-     if UpperradioButton == True:
-       jawID = "Upper Jaw"
-     if jawID != "":
-       JawIDArray.InsertNextValue(jawID)
-     side = "NA"
-     if LeftradioButton == True:
-       side = "Left"
-     if RightradioButton == True:
-       side = "Right"
-     if side != "":
-       SideArray.InsertNextValue(side)
+     SpeciesArray.InsertNextValue(species)  
+     JawIDArray.InsertNextValue(jawID)
+     SideArray.InsertNextValue(side)
      
      segment = segmentationNode.GetSegmentation().GetSegment(segmentId)
      SegmentNameArray.InsertNextValue(segment.GetName())
