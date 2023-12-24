@@ -171,47 +171,36 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="segmentationSelector">
-        <property name="toolTip">
-         <string>Select a segmentation node that contains the teeth. Each tooth should get its own segment layer.</string>
-        </property>
-        <property name="nodeTypes">
-         <stringlist>
-          <string>vtkMRMLSegmentationNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes">
-         <bool>false</bool>
-        </property>
+       <widget class="qMRMLSegmentSelectorWidget" name="SegmentSelectorWidget">
         <property name="noneEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="addEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="removeEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="editEnabled">
          <bool>true</bool>
+        </property>
+        <property name="segmentationNodeSelectorVisible">
+         <bool>true</bool>
+        </property>
+        <property name="multiSelection">
+         <bool>true</bool>
+        </property>
+        <property name="horizontalLayout">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="label_9">
         <property name="text">
          <string>Set Reference Points:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QPushButton" name="TemplatepushButton">
         <property name="text">
          <string>Create new reference point list</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="qSlicerSimpleMarkupsWidget" name="SimpleMarkupsWidget">
         <property name="enabled">
          <bool>true</bool>
@@ -227,6 +216,9 @@
           <width>0</width>
           <height>125</height>
          </size>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
         </property>
         <property name="enterPlaceModeOnNodeChange">
          <bool>false</bool>
@@ -247,14 +239,14 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Muscle Input Force:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="qMRMLSliderWidget" name="ForceInputSlider">
         <property name="toolTip">
          <string>Select the input force (N) to model.</string>
@@ -270,14 +262,14 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Muscle Insertion Angle:</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <widget class="qMRMLSliderWidget" name="AngleInputSlider">
         <property name="minimum">
          <double>0.000001000000000</double>
@@ -290,16 +282,6 @@
         </property>
         <property name="quantity">
          <string notr="true"/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="SkipSegCheckBox">
-        <property name="toolTip">
-         <string>Skip the first visible segment layer when performing calculations</string>
-        </property>
-        <property name="text">
-         <string>Skip first segment</string>
         </property>
        </widget>
       </item>
@@ -361,7 +343,7 @@
       <string>Advanced</string>
      </property>
      <property name="collapsed">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="6" column="0" colspan="2">
@@ -394,7 +376,7 @@
             <item row="0" column="1">
              <widget class="QPushButton" name="FlipSomeButton">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="text">
                <string>Switch Selected Lines</string>
@@ -402,9 +384,9 @@
              </widget>
             </item>
             <item row="0" column="0">
-             <widget class="qMRMLSegmentSelectorWidget" name="SegmentSelectorWidget">
+             <widget class="qMRMLSegmentSelectorWidget" name="FlipSegmentSelectorWidget">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -435,7 +417,7 @@
          <item row="0" column="0" colspan="2">
           <widget class="QPushButton" name="FlipButton">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Switch All Lines</string>
@@ -447,6 +429,9 @@
       </item>
       <item row="5" column="0" colspan="2">
        <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>Toggle visibility of out-lever and tooth position lines:</string>
         </property>
@@ -457,20 +442,20 @@
          <item row="0" column="1">
           <widget class="QPushButton" name="OutVisButton">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
-            <string>Show/Hide Out-lever Lines</string>
+            <string>Click to Show/Hide Out-lever Lines</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
           <widget class="QPushButton" name="PosVisButton">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
-            <string>Show/Hide Tooth Positon Lines</string>
+            <string>Click to Show/Hide Tooth Positon Lines</string>
            </property>
           </widget>
          </item>
@@ -628,16 +613,16 @@
   <connection>
    <sender>DentalDynamics</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>segmentationSelector</receiver>
+   <receiver>FlipSegmentSelectorWidget</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>82</x>
-     <y>135</y>
+     <x>249</x>
+     <y>309</y>
     </hint>
     <hint type="destinationlabel">
-     <x>245</x>
-     <y>54</y>
+     <x>249</x>
+     <y>474</y>
     </hint>
    </hints>
   </connection>
@@ -649,11 +634,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>249</x>
-     <y>309</y>
+     <y>403</y>
     </hint>
     <hint type="destinationlabel">
-     <x>249</x>
-     <y>474</y>
+     <x>322</x>
+     <y>181</y>
     </hint>
    </hints>
   </connection>
