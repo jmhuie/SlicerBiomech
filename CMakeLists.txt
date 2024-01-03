@@ -21,6 +21,7 @@ include(${Slicer_USE_FILE})
 # Extension modules
 add_subdirectory(SegmentGeometry)
 add_subdirectory(DentalDynamics)
+add_subdirectory(FractalDimension)
 
 
 ## NEXT_MODULE
