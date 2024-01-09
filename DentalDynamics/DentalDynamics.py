@@ -17,19 +17,110 @@ class DentalDynamics(ScriptedLoadableModule):
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
     self.parent.title = "Dental Dynamics"  
-    self.parent.categories = ["Quantification"] 
+    self.parent.categories = ["SlicerBiomech"] 
     self.parent.dependencies = []  # TODO: add here list of module names that this module requires
     self.parent.contributors = ["Jonathan M. Huie"]  
     self.parent.helpText = """This module uses lever mechanics to calculate tooth stress from segmented teeth and jaws. For more information please see the <a href="https://github.com/jmhuie/SlicerBiomech">online documentation</a>."""
     self.parent.acknowledgementText = """This module was developed by Jonathan M. Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914)."""
 
-
     # Additional initialization step after application startup is complete
-    #slicer.app.connect("startupCompleted()", registerSampleData)
+    slicer.app.connect("startupCompleted()", addlayoutDescription)
+    slicer.app.connect("startupCompleted()", registerSampleData)
+    
+        
+#
+# Add New Layout
+#
 
+def addlayoutDescription():
+    """Add new layouts"""
+    
+    customLayout = """
+      <layout type=\"vertical\" split=\"true\" >
+       <item splitSize=\"600\">
+         <layout type=\"horizontal\">
+           <item>
+            <view class=\"vtkMRMLViewNode\" singletontag=\"1\">
+             <property name=\"viewlabel\" action=\"default\">1</property>
+            </view>
+           </item>
+         </layout>
+       </item>
+       <item splitSize=\"400\">
+        <layout type=\"horizontal\">
+         <item>
+          <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableViewerWindow_1\">"
+           <property name=\"viewlabel\" action=\"default\">T</property>"
+          </view>"
+         </item>"
+        </layout>
+       </item>
+      </layout>
+    """    
+    layoutManager = slicer.app.layoutManager()
+    layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(166, customLayout)
+    
 #
 # Register sample data sets in Sample Data module
 #
+
+def registerSampleData():
+    """Add data sets to Sample Data module."""
+    # It is always recommended to provide sample data for users to make it easy to try the module,
+    # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
+
+    import SampleData
+
+    iconsPath = os.path.join(os.path.dirname(__file__), "Resources/Icons")
+
+    # To ensure that the source code repository remains small (can be downloaded and installed quickly)
+    # it is recommended to store data sets that are larger than a few MB in a Github release.
+
+    # DentalDynamics1
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        # Category and sample name displayed in Sample Data module
+        category="SlicerBiomech",
+        sampleName="Skull",
+        # Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
+        # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
+        thumbnailFileName=os.path.join(iconsPath, "DentalDynamics1.png"),
+        # Download URL and target file name
+        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
+        fileNames="DentalDynamics_DemoSkull.nrrd",
+        # Checksum to ensure file integrity. Can be computed by this command:
+        #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
+        #checksums="SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
+        # This node name will be used when the data set is loaded
+        nodeNames="DentalDynamics_DemoSkull",
+    )
+
+    # DentalDynamics2
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        # Category and sample name displayed in Sample Data module
+        category="SlicerBiomech",
+        sampleName="JawSegmentation",
+        thumbnailFileName=os.path.join(iconsPath, "DentalDynamics2.png"),
+        # Download URL and target file name
+        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        fileNames="DentalDynamics_DemoSegmentation.nrrd",
+        #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        # This node name will be used when the data set is loaded
+        nodeNames="DentalDynamics_DemoSegmentation",
+    )
+    
+    # DentalDynamics3
+    SampleData.SampleDataLogic.registerCustomSampleDataSource(
+        # Category and sample name displayed in Sample Data module
+        category="SlicerBiomech",
+        sampleName="JawPoints",
+        thumbnailFileName=os.path.join(iconsPath, "DentalDynamics3.png"),
+        # Download URL and target file name
+        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        fileNames="DentalDynamics_DemoPoints.mrk.json",
+        #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
+        # This node name will be used when the data set is loaded
+        nodeNames="DentalDynamics_DemoPoints",
+    )
 
 
 #
@@ -73,7 +164,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.logic = DentalDynamicsLogic()
     
     self.ui.SimpleMarkupsWidget.markupsSelectorComboBox().addEnabled = False
-    self.ui.SegmentSelectorWidget.setCurrentNodeID('')
+    #self.ui.SegmentSelectorWidget.setCurrentNodeID('')
         
     # Connections
 
@@ -83,16 +174,21 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
+    self.ui.SpecieslineEdit.connect('textEdited(QString)', self.updateParameterNodeFromGUI)
+    self.ui.LowerradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+    self.ui.UpperradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+    self.ui.RightradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+    self.ui.LeftradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
     self.ui.SegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.SegmentSelectorWidget.connect("segmentSelectionChanged(QStringList)", self.updateParameterNodeFromGUI)
     self.ui.SegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateSelectedSegments)
     self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.updateParameterNodeFromGUI)
-    self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.updateGUIFromParameterNode)
     self.ui.ForceInputSlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.AngleInputSlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.tableSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    self.ui.SpecieslineEdit.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
+    #self.ui.OutVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
+    #self.ui.PosVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
     self.ui.FlipSegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    #self.ui.SkipSegCheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
 
     # Buttons
     self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
@@ -102,13 +198,18 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     #self.ui.FlipButton.connect('clicked(bool)', self.onApplyButton)
     self.ui.FlipSomeButton.connect('clicked(bool)', self.onFlipSomeResults)
     #self.ui.FlipSomeButton.connect('clicked(bool)', self.onApplyButton)
-    self.ui.PosVisButton.connect('clicked(bool)', self.onPositionVis)
     self.ui.OutVisButton.connect('clicked(bool)', self.onOutleverVis)
-
+    self.ui.PosVisButton.connect('clicked(bool)', self.onPositionVis)
 
 
     # Make sure parameter node is initialized (needed for module reload)
     self.initializeParameterNode()
+    
+    if self._parameterNode.GetParameter("OutLevers") == "True":
+      self.onOutleverVis()
+    if self._parameterNode.GetParameter("ToothPos") == "True":
+      self.onPositionVis()
+    
 
   def cleanup(self):
     """
@@ -155,11 +256,26 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.setParameterNode(self.logic.getParameterNode())
 
     # Select default input nodes if nothing is selected yet to save a few clicks for the user
-    #if not self._parameterNode.GetNodeReference("InputVolume"):
-    #  firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
-    #  if firstVolumeNode:
-    #    self._parameterNode.SetNodeReferenceID("InputVolume", firstVolumeNode.GetID())
-
+    #if not self._parameterNode.GetNodeReference("Segmentation"):
+    #  firstSegmentationNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLSegmentationNode")
+      #if firstSegmentationNode:
+        #self._parameterNode.SetNodeReferenceID("Segmentation", firstSegmentationNode.GetID())
+        #self._parameterNode.SetParameter("Segments", "()")
+        
+    #if not self._parameterNode.GetNodeReference("JawPoints"):
+    #  jawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+    #  if jawPoints:
+    #    self._parameterNode.SetNodeReferenceID("JawPoints", jawPoints.GetID())
+    
+    if self._parameterNode.GetParameter("SpeciesName") == '':
+      self._parameterNode.SetParameter("SpeciesName", "Enter species name")
+    if not self._parameterNode.GetParameter("OutLevers"):
+      self._parameterNode.SetParameter("OutLevers", "False")
+    if not self._parameterNode.GetParameter("ToothPos"):
+      self._parameterNode.SetParameter("ToothPos", "False")
+    self._parameterNode.SetParameter("FlipSegments", "()")
+      
+              
   def setParameterNode(self, inputParameterNode):
     """
     Set and observe parameter node.
@@ -194,25 +310,28 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._updatingGUIFromParameterNode = True
 
     # Update node selectors and sliders
-    
-    wasBlocked = self.ui.SegmentSelectorWidget.blockSignals(True)
+    self.ui.SpecieslineEdit.text = self._parameterNode.GetParameter("SpeciesName")
+    self.ui.LowerradioButton.checked = (self._parameterNode.GetParameter("LowerJaw") == "True")
+    self.ui.UpperradioButton.checked = (self._parameterNode.GetParameter("UpperJaw") == "True")
+    self.ui.LeftradioButton.checked = (self._parameterNode.GetParameter("LeftJaw") == "True")
+    self.ui.RightradioButton.checked = (self._parameterNode.GetParameter("RightJaw") == "True")
     self.ui.SegmentSelectorWidget.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.SegmentSelectorWidget.blockSignals(wasBlocked)
-    
-
-    wasBlocked = self.ui.FlipSegmentSelectorWidget.blockSignals(True)
+    if self._parameterNode.GetNodeReference("Segmentation") is not None:
+      self.ui.SegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("Segments")))
+    self.ui.SimpleMarkupsWidget.setCurrentNode(self._parameterNode.GetNodeReference("JawPoints"))
+    self.ui.ForceInputSlider.value = float(self._parameterNode.GetParameter("Force"))
+    if self._parameterNode.GetParameter("Angle") == '':
+      self.ui.AngleInputSlider.value = float(90.0)
+    else:
+      self.ui.AngleInputSlider.value = float(self._parameterNode.GetParameter("Angle"))
     self.ui.FlipSegmentSelectorWidget.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.FlipSegmentSelectorWidget.blockSignals(wasBlocked)
-
-    #self.ui.SimpleMarkupsWidget.setCurrentNode(slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReference("JawPoints")))
-    
-    wasBlocked = self.ui.tableSelector.blockSignals(True)
+    if self._parameterNode.GetNodeReference("Segmentation") is not None:
+      self.ui.FlipSegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("FlipSegments")))
     self.ui.tableSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsTable"))
-    self.ui.tableSelector.blockSignals(wasBlocked)
 
     # Update buttons states and tooltips
-    if self._parameterNode.GetNodeReference("Segmentation") and self.ui.SimpleMarkupsWidget.currentNode() is not None:
-      self.ui.applyButton.toolTip = "Compute tooth stress"
+    if self._parameterNode.GetNodeReference("Segmentation") and self._parameterNode.GetNodeReference("JawPoints") is not None:
+      self.ui.applyButton.toolTip = "Compute calculations"
       self.ui.applyButton.enabled = True
     else:
       self.ui.applyButton.toolTip = "Select input and output parameters"
@@ -236,14 +355,23 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       return
 
     wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
+    
+    self._parameterNode.SetParameter("SpeciesName", self.ui.SpecieslineEdit.text)
+    self._parameterNode.SetParameter("LowerJaw", str(self.ui.LowerradioButton.checked))
+    self._parameterNode.SetParameter("UpperJaw", str(self.ui.UpperradioButton.checked))
+    self._parameterNode.SetParameter("LeftJaw", str(self.ui.LeftradioButton.checked))
+    self._parameterNode.SetParameter("RightJaw", str(self.ui.RightradioButton.checked))
     self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.SegmentSelectorWidget.currentNodeID())
-    #self._parameterNode.SetNodeReferenceID("JawPoints", self.ui.SimpleMarkupsWidget.currentNode().GetID())
+    self._parameterNode.SetParameter("Segments", str(self.ui.SegmentSelectorWidget.selectedSegmentIDs()))
+    if self.ui.SimpleMarkupsWidget.currentNode() != None: 
+      self._parameterNode.SetNodeReferenceID("JawPoints", self.ui.SimpleMarkupsWidget.currentNode().GetID())
+    else: 
+      self._parameterNode.SetNodeReferenceID("JawPoints", None)
     self._parameterNode.SetParameter("Force", str(self.ui.ForceInputSlider.value))
     self._parameterNode.SetParameter("Angle", str(self.ui.AngleInputSlider.value))
     self._parameterNode.SetNodeReferenceID("ResultsTable", self.ui.tableSelector.currentNodeID)
-    
-
     self._parameterNode.EndModify(wasModified)
+    self._parameterNode.SetParameter("FlipSegments", str(self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs()))
     
   def updateSelectedSegments(self):
     """
@@ -356,7 +484,14 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             ToothOutlineNode.GetDisplayNode().SetVisibility(0)
           else:
             ToothOutlineNode.GetDisplayNode().SetVisibility(1)
-
+      toothoutRAS = [0,]*3
+      ToothOutPoints.GetNthControlPointPosition(0,toothoutRAS)
+      segname = ToothOutPoints.GetNthControlPointLabel(0)
+      ToothOutlineNode = slicer.mrmlScene.GetFirstNodeByName(segname + " Out Lever")
+      if ToothOutlineNode.GetDisplayNode().GetVisibility() == 1:
+        self._parameterNode.SetParameter("OutLevers","True")
+      else:
+        self._parameterNode.SetParameter("OutLevers","False")
 
   def onPositionVis(self):
     """
@@ -442,7 +577,16 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           if ToothPoslineNode.GetDisplayNode().GetVisibility() == 1:
             ToothPoslineNode.GetDisplayNode().SetVisibility(0)
           else:
-            ToothPoslineNode.GetDisplayNode().SetVisibility(1)  
+            ToothPoslineNode.GetDisplayNode().SetVisibility(1)
+      toothposRAS = [0,]*3
+      ToothPosPoints.GetNthControlPointPosition(0,toothposRAS)
+      segname = ToothPosPoints.GetNthControlPointLabel(0)
+      ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(segname + " Position")
+      if ToothPoslineNode.GetDisplayNode().GetVisibility() == 1:
+        self._parameterNode.SetParameter("ToothPos","True")
+      else:
+        self._parameterNode.SetParameter("ToothPos","False")
+
 
   def onFlipResults(self):
     """
@@ -496,9 +640,6 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if shFolderItemId != 0:
       shNode.RemoveItem(shFolderItemId)
     slicer.mrmlScene.RemoveNode(self.ui.tableSelector.currentNode())
-    layoutManager = slicer.app.layoutManager()
-
-    tableWidget = layoutManager.tableWidget(0)
 
     outFolder = shNode.GetItemByName("Out Levers")
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
@@ -606,14 +747,17 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       postoothMarkupsNodeObserver = ToothPosPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, postoothMarkupChanged)
       ToothPosPoints.RemoveObserver(postoothMarkupsNodeObserver)
     
-   # self.ui.FlipButton.enabled = False
+    
+    self._parameterNode.SetParameter("OutLevers", "False")
+    self._parameterNode.SetParameter("ToothPos", "False")
+    self.ui.FlipButton.enabled = False
     self.ui.FlipSomeButton.enabled = False
     self.ui.FlipSomeButton.enabled = False
     self.ui.FlipSegmentSelectorWidget.enabled = False
     #self.ui.ResetpushButton.enabled = False
     
-    layoutManager.setLayout(4)
-    
+    layoutManager = slicer.app.layoutManager()
+    layoutManager.setLayout(4)          
 
   def onApplyButton(self):
     """
@@ -647,7 +791,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       if len(self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs()) != 0:
         self.ui.FlipSegmentSelectorWidget.multiSelection = False
         self.ui.FlipSegmentSelectorWidget.multiSelection = True
- 
+         
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
       import traceback
@@ -1145,47 +1289,21 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     tableNode.SetColumnDescription(StressArray.GetName(), "Tooth stress (tooth force / surface area)")
 
     shNode.RemoveItem(exportFolderItemId)
-
-    customLayout = """
-      <layout type=\"vertical\" split=\"true\" >
-       <item splitSize=\"600\">
-        <item>
-         <view class=\"vtkMRMLViewNode\" singletontag=\"ViewerWindow_1\">
-          <property name=\"viewlabel\" action=\"default\">1</property>
-         </view>
-        </item> 
-       </item>
-       <item splitSize=\"400\">
-        <item>
-         <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableViewerWindow_1\">"
-          <property name=\"viewlabel\" action=\"default\">T</property>"
-         </view>"
-        </item>"
-       </item>
-      </layout>
-    """
-    customLayoutId=999
-
-    layoutManager = slicer.app.layoutManager()
-    layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(customLayoutId, customLayout)
-
-    # Switch to the new custom layout
-    layoutManager.setLayout(customLayoutId)
-    tableWidget = layoutManager.tableWidget(0)
-    tableWidget.tableView().setMRMLTableNode(tableNode)    
-
-    # Change layout to include plot and table      
-#    slicer.app.layoutManager().setLayout(customLayoutId)
-#    slicer.app.applicationLogic().GetSelectionNode().SetReferenceActiveTableID(tableNode.GetID())
-#    slicer.app.applicationLogic().PropagateTableSelection()
+    
 
     logging.info('Processing completed')
     end = time.time()
     TotalTime = np.round(end - start,2)
     print("Total time elapsed:", TotalTime, "seconds")
 
-    
+    # use custom layout
+    customLayoutId=166
+    layoutManager = slicer.app.layoutManager()
 
+    # Change layout to include plot and table      
+    slicer.app.layoutManager().setLayout(customLayoutId)
+    slicer.app.applicationLogic().GetSelectionNode().SetReferenceActiveTableID(tableNode.GetID())
+    slicer.app.applicationLogic().PropagateTableSelection()
 #
 # DentalDynamicsTest
 #
