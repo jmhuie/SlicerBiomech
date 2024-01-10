@@ -80,46 +80,49 @@ def registerSampleData():
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="Skull",
+        sampleName="Dental Dynamics Demo Skull",
         # Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
         # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics1.png"),
         # Download URL and target file name
-        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
-        fileNames="DentalDynamics_DemoSkull.nrrd",
+        uris="https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/USNM279384_Aneides_lugubris_skull.nrrd",
+        fileNames="USNM279384_Aneides_lugubris_skull.nrrd",
         # Checksum to ensure file integrity. Can be computed by this command:
         #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
         #checksums="SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_DemoSkull",
+        nodeNames="DentalDynamics_Skull",
+        loadFileType='VolumeFile',
     )
 
     # DentalDynamics2
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="JawSegmentation",
+        sampleName="Dental Dynamics Demo Jaw Segment",
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics2.png"),
         # Download URL and target file name
-        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
-        fileNames="DentalDynamics_DemoSegmentation.nrrd",
+        uris="https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/USNM279384_Aneides_lugubris_left_jaw.seg.nrrd",
+        fileNames="USNM279384_Aneides_lugubris_left_jaw.seg.nrrd",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_DemoSegmentation",
+        nodeNames="DentalDynamics_JawSegments",
+        loadFileType='SegmentationFile',
     )
     
     # DentalDynamics3
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="JawPoints",
+        sampleName="Dental Dynamics Demo Jaw Points",
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics3.png"),
         # Download URL and target file name
-        uris="https://github.com/Slicer/SlicerTestingData/releases/download/SHA256/1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
-        fileNames="DentalDynamics_DemoPoints.mrk.json",
+        uris="https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Dental.Dynamics.Jaw.Points.mrk.json",
+        fileNames="Dental.Dynamics.Jaw.Points.mrk.json",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_DemoPoints",
+        nodeNames="DentalDynamics_JawPoints",
+        loadFileType='MarkupsFile',
     )
 
 

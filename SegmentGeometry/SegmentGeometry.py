@@ -47,8 +47,8 @@ def registerSampleData():
     # load demo SegmentGeometry data
     
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        category="SegmentGeometry",
-        sampleName='DemoForelimb',
+        category="SlicerBiomech",
+        sampleName='SegmentGeometry Demo Forelimb',
         uris='https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs.nrrd',
         fileNames='DemoForelimb.nrrd',
         nodeNames='DemoForelimb',
@@ -56,8 +56,8 @@ def registerSampleData():
         loadFileType='VolumeFile',
         )
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
-        category="SegmentGeometry",
-        sampleName='DemoSegment',
+        category="SlicerBiomech",
+        sampleName='SegmentGeometry Demo Segment',
         uris='https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_Segmentation.seg.nrrd',
         fileNames='DemoSegment.seg.nrrd',
         nodeNames='DemoSegment',
