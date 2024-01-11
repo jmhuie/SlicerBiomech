@@ -26,8 +26,7 @@ class DentalDynamics(ScriptedLoadableModule):
     # Additional initialization step after application startup is complete
     slicer.app.connect("startupCompleted()", addlayoutDescription)
     slicer.app.connect("startupCompleted()", registerSampleData)
-    
-        
+           
 #
 # Add New Layout
 #
@@ -80,7 +79,7 @@ def registerSampleData():
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="Dental Dynamics Demo Skull",
+        sampleName="Demo Skull",
         # Thumbnail should have size of approximately 260x280 pixels and stored in Resources/Icons folder.
         # It can be created by Screen Capture module, "Capture all views" option enabled, "Number of images" set to "Single".
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics1.png"),
@@ -91,7 +90,7 @@ def registerSampleData():
         #  import hashlib; print(hashlib.sha256(open(filename, "rb").read()).hexdigest())
         #checksums="SHA256:998cb522173839c78657f4bc0ea907cea09fd04e44601f17c82ea27927937b95",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_Skull",
+        nodeNames="Dental Dynamics Demo Skull",
         loadFileType='VolumeFile',
     )
 
@@ -99,14 +98,14 @@ def registerSampleData():
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="Dental Dynamics Demo Jaw Segment",
+        sampleName="Demo Segment",
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics2.png"),
         # Download URL and target file name
         uris="https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/USNM279384_Aneides_lugubris_left_jaw.seg.nrrd",
         fileNames="USNM279384_Aneides_lugubris_left_jaw.seg.nrrd",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_JawSegments",
+        nodeNames="Dental Dynamics Jaw Segment",
         loadFileType='SegmentationFile',
     )
     
@@ -114,14 +113,14 @@ def registerSampleData():
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         # Category and sample name displayed in Sample Data module
         category="SlicerBiomech",
-        sampleName="Dental Dynamics Demo Jaw Points",
+        sampleName="Demo Jaw Points",
         thumbnailFileName=os.path.join(iconsPath, "DentalDynamics3.png"),
         # Download URL and target file name
         uris="https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Dental.Dynamics.Jaw.Points.mrk.json",
         fileNames="Dental.Dynamics.Jaw.Points.mrk.json",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="DentalDynamics_JawPoints",
+        nodeNames="Dental Dynamics Jaw Points",
         loadFileType='MarkupsFile',
     )
 
@@ -186,8 +185,16 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SegmentSelectorWidget.connect("segmentSelectionChanged(QStringList)", self.updateParameterNodeFromGUI)
     self.ui.SegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateSelectedSegments)
     self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.updateParameterNodeFromGUI)
-    self.ui.ForceInputSlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
-    self.ui.AngleInputSlider.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.onMarkupNodeChanged)
+    self.ui.MusclecheckBox1.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.ForceInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.AngleInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.MusclecheckBox2.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.ForceInputBox2.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.AngleInputBox2.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.MusclecheckBox3.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.ForceInputBox3.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
+    self.ui.AngleInputBox3.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.tableSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     #self.ui.OutVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
     #self.ui.PosVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
@@ -198,9 +205,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.ResetpushButton.connect('clicked(bool)', self.onResetButton)
     self.ui.TemplatepushButton.connect('clicked(bool)', self.onTemplate)
     self.ui.FlipButton.connect('clicked(bool)', self.onFlipResults)
-    #self.ui.FlipButton.connect('clicked(bool)', self.onApplyButton)
     self.ui.FlipSomeButton.connect('clicked(bool)', self.onFlipSomeResults)
-    #self.ui.FlipSomeButton.connect('clicked(bool)', self.onApplyButton)
     self.ui.OutVisButton.connect('clicked(bool)', self.onOutleverVis)
     self.ui.PosVisButton.connect('clicked(bool)', self.onPositionVis)
 
@@ -212,6 +217,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.onOutleverVis()
     if self._parameterNode.GetParameter("ToothPos") == "True":
       self.onPositionVis()
+    if not self._parameterNode.GetNodeReference("JawPoints"):  
+      self.onTemplate()  
     
 
   def cleanup(self):
@@ -258,27 +265,19 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     self.setParameterNode(self.logic.getParameterNode())
 
-    # Select default input nodes if nothing is selected yet to save a few clicks for the user
-    #if not self._parameterNode.GetNodeReference("Segmentation"):
-    #  firstSegmentationNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLSegmentationNode")
-      #if firstSegmentationNode:
-        #self._parameterNode.SetNodeReferenceID("Segmentation", firstSegmentationNode.GetID())
-        #self._parameterNode.SetParameter("Segments", "()")
+    # Select default input nodes if nothing is selected yet to save a few clicks for the user 
+    if not self._parameterNode.GetNodeReference("Segmentation"):
+      firstSegmentationNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLSegmentationNode")
+      if firstSegmentationNode:
+        self._parameterNode.SetNodeReferenceID("Segmentation", firstSegmentationNode.GetID())
+        Allsegments = self.ui.SegmentSelectorWidget.segmentIDs()
+        self.ui.SegmentSelectorWidget.setSelectedSegmentIDs(Allsegments)
         
-    #if not self._parameterNode.GetNodeReference("JawPoints"):
-    #  jawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
-    #  if jawPoints:
-    #    self._parameterNode.SetNodeReferenceID("JawPoints", jawPoints.GetID())
-    
-    if self._parameterNode.GetParameter("SpeciesName") == '':
-      self._parameterNode.SetParameter("SpeciesName", "Enter species name")
-    if not self._parameterNode.GetParameter("OutLevers"):
-      self._parameterNode.SetParameter("OutLevers", "False")
-    if not self._parameterNode.GetParameter("ToothPos"):
-      self._parameterNode.SetParameter("ToothPos", "False")
-    self._parameterNode.SetParameter("FlipSegments", "()")
+    if not self._parameterNode.GetNodeReference("JawPoints"):
+      jawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+      if jawPoints:
+        self._parameterNode.SetNodeReferenceID("JawPoints", jawPoints.GetID())  
       
-              
   def setParameterNode(self, inputParameterNode):
     """
     Set and observe parameter node.
@@ -299,7 +298,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     # Initial GUI update
     self.updateGUIFromParameterNode()
-
+      
   def updateGUIFromParameterNode(self, caller=None, event=None):
     """
     This method is called whenever parameter node is changed.
@@ -322,11 +321,15 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if self._parameterNode.GetNodeReference("Segmentation") is not None:
       self.ui.SegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("Segments")))
     self.ui.SimpleMarkupsWidget.setCurrentNode(self._parameterNode.GetNodeReference("JawPoints"))
-    self.ui.ForceInputSlider.value = float(self._parameterNode.GetParameter("Force"))
-    if self._parameterNode.GetParameter("Angle") == '':
-      self.ui.AngleInputSlider.value = float(90.0)
-    else:
-      self.ui.AngleInputSlider.value = float(self._parameterNode.GetParameter("Angle"))
+    self.ui.MusclecheckBox1.checked = (self._parameterNode.GetParameter("Muscle") == "True")
+    self.ui.ForceInputBox1.value = float(self._parameterNode.GetParameter("Force"))
+    self.ui.AngleInputBox1.value = float(self._parameterNode.GetParameter("Angle"))
+    self.ui.MusclecheckBox2.checked = (self._parameterNode.GetParameter("Muscle2") == "True")
+    self.ui.ForceInputBox2.value = float(self._parameterNode.GetParameter("Force2"))
+    self.ui.AngleInputBox2.value = float(self._parameterNode.GetParameter("Angle2"))  
+    self.ui.MusclecheckBox3.checked = (self._parameterNode.GetParameter("Muscle3") == "True")
+    self.ui.ForceInputBox3.value = float(self._parameterNode.GetParameter("Force3"))
+    self.ui.AngleInputBox3.value = float(self._parameterNode.GetParameter("Angle3"))    
     self.ui.FlipSegmentSelectorWidget.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
     if self._parameterNode.GetNodeReference("Segmentation") is not None:
       self.ui.FlipSegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("FlipSegments")))
@@ -344,7 +347,47 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
       self.ui.tableSelector.toolTip = "Select output table"
+
+    if self.ui.SimpleMarkupsWidget.currentNode() != None:   
+      if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(2) != (0, 0, 0):
+        self.ui.MusclecheckBox1.enabled = True
+      else: 
+        self.ui.MusclecheckBox1.enabled = False
+      if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(3) != (0, 0, 0):
+        self.ui.MusclecheckBox2.enabled = True
+      else: 
+        self.ui.MusclecheckBox2.enabled = False    
+      if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(4) != (0, 0, 0):
+        self.ui.MusclecheckBox3.enabled = True
+      else: 
+        self.ui.MusclecheckBox3.enabled = False  
+    else:
+      self.ui.MusclecheckBox1.enabled = False
+      self.ui.MusclecheckBox2.enabled = False 
+      self.ui.MusclecheckBox3.enabled = False 
+    
+    if self._parameterNode.GetParameter("Muscle") == "True" and self.ui.MusclecheckBox1.enabled == True:
+      self.ui.ForceInputBox1.enabled = True
+      self.ui.AngleInputBox1.enabled = True
+    else:
+      self.ui.ForceInputBox1.enabled = False
+      self.ui.AngleInputBox1.enabled = False       
+        
+    if self._parameterNode.GetParameter("Muscle2") == "True" and self.ui.MusclecheckBox2.enabled == True:
+      self.ui.ForceInputBox2.enabled = True
+      self.ui.AngleInputBox2.enabled = True
+    else:
+      self.ui.ForceInputBox2.enabled = False
+      self.ui.AngleInputBox2.enabled = False
+
+    if self._parameterNode.GetParameter("Muscle3") == "True" and self.ui.MusclecheckBox3.enabled == True:
+      self.ui.ForceInputBox3.enabled = True
+      self.ui.AngleInputBox3.enabled = True
+    else:
+      self.ui.ForceInputBox3.enabled = False
+      self.ui.AngleInputBox3.enabled = False
       
+            
     # All the GUI updates are done
     self._updatingGUIFromParameterNode = False
 
@@ -370,12 +413,20 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self._parameterNode.SetNodeReferenceID("JawPoints", self.ui.SimpleMarkupsWidget.currentNode().GetID())
     else: 
       self._parameterNode.SetNodeReferenceID("JawPoints", None)
-    self._parameterNode.SetParameter("Force", str(self.ui.ForceInputSlider.value))
-    self._parameterNode.SetParameter("Angle", str(self.ui.AngleInputSlider.value))
-    self._parameterNode.SetNodeReferenceID("ResultsTable", self.ui.tableSelector.currentNodeID)
-    self._parameterNode.EndModify(wasModified)
+    self._parameterNode.SetParameter("Muscle", str(self.ui.MusclecheckBox1.checked))      
+    self._parameterNode.SetParameter("Force", str(self.ui.ForceInputBox1.value))
+    self._parameterNode.SetParameter("Angle", str(self.ui.AngleInputBox1.value))
+    self._parameterNode.SetParameter("Muscle2", str(self.ui.MusclecheckBox2.checked))      
+    self._parameterNode.SetParameter("Force2", str(self.ui.ForceInputBox2.value))
+    self._parameterNode.SetParameter("Angle2", str(self.ui.AngleInputBox2.value))  
+    self._parameterNode.SetParameter("Muscle3", str(self.ui.MusclecheckBox3.checked))      
+    self._parameterNode.SetParameter("Force3", str(self.ui.ForceInputBox3.value))
+    self._parameterNode.SetParameter("Angle3", str(self.ui.AngleInputBox3.value))    
     self._parameterNode.SetParameter("FlipSegments", str(self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs()))
-    
+    self._parameterNode.SetNodeReferenceID("ResultsTable", self.ui.tableSelector.currentNodeID)
+
+    self._parameterNode.EndModify(wasModified)
+
   def updateSelectedSegments(self):
     """
     Automatically select all segments when changing the segmentation node
@@ -393,16 +444,31 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     pointListNode.GetDisplayNode().SetGlyphScale(4)
     pointListNode.AddControlPoint([0,0,0],"Jaw Joint")
     pointListNode.AddControlPoint([0,0,0],"Tip of Jaw")
-    pointListNode.AddControlPoint([0,0,0],"Muscle Insertion Site")
+    pointListNode.AddControlPoint([0,0,0],"Closing Muscle 1 Insertion")
+    pointListNode.AddControlPoint([0,0,0],"Closing Muscle 2 Insertion")
+    pointListNode.AddControlPoint([0,0,0],"Closing Muscle 3 Insertion")
     pointListNode.UnsetNthControlPointPosition(0)
     pointListNode.UnsetNthControlPointPosition(1)
     pointListNode.UnsetNthControlPointPosition(2)
+    pointListNode.UnsetNthControlPointPosition(3)  
+    pointListNode.UnsetNthControlPointPosition(4)      
     pointListNode.GetDisplayNode().SetPropertiesLabelVisibility(True)
     pointListNode.GetDisplayNode().SetTextScale(3)
-    slicer.modules.segmentgeometry.widgetRepresentation()
-    slicer.modules.DentalDynamicsWidget.ui.SimpleMarkupsWidget.setCurrentNode(pointListNode)
-    slicer.modules.DentalDynamicsWidget.ui.ActionFixedNumberOfControlPoints.trigger()
-    
+    self.ui.SimpleMarkupsWidget.setCurrentNode(pointListNode)
+    self.ui.ActionFixedNumberOfControlPoints.trigger()
+  
+  def onMarkupNodeChanged(self):
+    """
+    Run processing when user changes the point list.
+    """    
+    pointListNode = self.ui.SimpleMarkupsWidget.currentNode()
+    def watchTemplate(unusedArg1 = None, unusedArg2 = None):
+      self.updateGUIFromParameterNode()
+    if pointListNode is not None:
+      TemplateObserver = pointListNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, watchTemplate)
+      pointListNode.RemoveObserver(TemplateObserver)
+    if pointListNode is not None:  
+      TemplateObserver = pointListNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, watchTemplate)
 
   def onOutleverVis(self):
     """
@@ -414,9 +480,10 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     folderPlugin = pluginHandler.pluginByName("Folder")
     
     def outjointMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
-      #if self.ui.SimpleMarkupsWidget.currentNode() != None:
-        JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+      #if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
+      if self.ui.SimpleMarkupsWidget.currentNode() != None:
+        #JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+        JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
@@ -459,9 +526,10 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
     if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Out Lever Points") != None:
       ToothOutPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Out Lever Points")
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
-      #if self.ui.SimpleMarkupsWidget.currentNode() != None:
-        JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+      #if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
+      if self.ui.SimpleMarkupsWidget.currentNode() != None:
+        #JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+        JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         posjointMarkupsNodeObserver = JawPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, outjointMarkupChanged)
@@ -506,9 +574,10 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     folderPlugin = pluginHandler.pluginByName("Folder")
     
     def posjointMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
-      #if self.ui.SimpleMarkupsWidget.currentNode() != None:
-        JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+      #if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
+      if self.ui.SimpleMarkupsWidget.currentNode() != None:
+        #JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+        JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
@@ -551,9 +620,10 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         
     if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Position Points") != None:
       ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Position Points")
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
-      #if self.ui.SimpleMarkupsWidget.currentNode() != None:
-        JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+      #if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") != None:
+      if self.ui.SimpleMarkupsWidget.currentNode() != None:
+        #JawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
+        JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         posjointMarkupsNodeObserver = JawPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, posjointMarkupChanged)
@@ -753,11 +823,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     
     self._parameterNode.SetParameter("OutLevers", "False")
     self._parameterNode.SetParameter("ToothPos", "False")
-    self.ui.FlipButton.enabled = False
-    self.ui.FlipSomeButton.enabled = False
-    self.ui.FlipSomeButton.enabled = False
-    self.ui.FlipSegmentSelectorWidget.enabled = False
-    #self.ui.ResetpushButton.enabled = False
+
     
     layoutManager = slicer.app.layoutManager()
     layoutManager.setLayout(4)          
@@ -781,19 +847,22 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.tableSelector.setCurrentNode(tableNode)
 
       # Compute output
-      self.logic.run(self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.selectedSegmentIDs(), self.ui.SimpleMarkupsWidget.currentNode(), 
-      self.ui.ForceInputSlider.value, self.ui.AngleInputSlider.value, tableNode, self.ui.SpecieslineEdit.text, self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
-      self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked)
-      
-
-      self.ui.FlipButton.enabled = True
-      self.ui.FlipSomeButton.enabled = True
-      self.ui.FlipSegmentSelectorWidget.enabled = True
-      self.ui.ResetpushButton.enabled = True  
+      self.logic.run(self.ui.SpecieslineEdit.text, 
+      self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
+      self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,
+      self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.selectedSegmentIDs(), 
+      self.ui.SimpleMarkupsWidget.currentNode(), 
+      self.ui.MusclecheckBox1.checked, self.ui.ForceInputBox1.value, self.ui.AngleInputBox1.value, 
+      self.ui.MusclecheckBox2.checked, self.ui.ForceInputBox2.value, self.ui.AngleInputBox2.value, 
+      self.ui.MusclecheckBox3.checked, self.ui.ForceInputBox3.value, self.ui.AngleInputBox3.value,       
+      tableNode)
             
       if len(self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs()) != 0:
         self.ui.FlipSegmentSelectorWidget.multiSelection = False
         self.ui.FlipSegmentSelectorWidget.multiSelection = True
+        
+      if self._parameterNode.GetParameter("OutLevers") == "False":
+        self.onOutleverVis()
          
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -823,11 +892,38 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     """
     Initialize parameter node with default settings.
     """
+    if not parameterNode.GetParameter("SpeciesName"):
+      parameterNode.SetParameter("SpeciesName", "Enter species name")    
+    if not parameterNode.GetParameter("Segments"):
+      parameterNode.SetParameter("Segments", "()")   
+    if not parameterNode.GetParameter("Muscle"):
+     parameterNode.SetParameter("Muscle", "True")    
     if not parameterNode.GetParameter("Force"):
      parameterNode.SetParameter("Force", "1.0")
+    if not parameterNode.GetParameter("Angle"):
+     parameterNode.SetParameter("Angle", "90.0")
+    if not parameterNode.GetParameter("Muscle2"):
+     parameterNode.SetParameter("Muscle2", "False")    
+    if not parameterNode.GetParameter("Force2"):
+     parameterNode.SetParameter("Force2", "1.0")
+    if not parameterNode.GetParameter("Angle2"):
+     parameterNode.SetParameter("Angle2", "90.0")
+    if not parameterNode.GetParameter("Muscle3"):
+     parameterNode.SetParameter("Muscle3", "False")     
+    if not parameterNode.GetParameter("Force3"):
+     parameterNode.SetParameter("Force3", "1.0")
+    if not parameterNode.GetParameter("Angle3"):
+     parameterNode.SetParameter("Angle3", "90.0")
+    if not parameterNode.GetParameter("FlipSegments"):
+      parameterNode.SetParameter("FlipSegments", "()") 
+    if not parameterNode.GetParameter("OutLevers"):
+      parameterNode.SetParameter("OutLevers", "False")
+    if not parameterNode.GetParameter("ToothPos"):
+      parameterNode.SetParameter("ToothPos", "False")
 
-
-  def run(self, segmentationNode, segmentList, pointNode, force, angle, tableNode, species, LowerradioButton, UpperradioButton, LeftradioButton, RightradioButton):
+            
+  def run(self, species, LowerradioButton, UpperradioButton, LeftradioButton, RightradioButton,
+  segmentationNode, segmentList, pointNode, MusclecheckBox1, force1, angle1, MusclecheckBox2, force2, angle2, MusclecheckBox3, force3, angle3, tableNode):
     """
     Run the processing algorithm.
     Can be used without GUI widget.
@@ -985,17 +1081,47 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     lengthLine.AddControlPoint(jawtipRAS)
     JawLength = lengthLine.GetMeasurement('length').GetValue()
     slicer.mrmlScene.RemoveNode(lengthLine)
+    
+    # measure in-lever
+    if MusclecheckBox1 == False and MusclecheckBox2 == False and MusclecheckBox3 == False:
+      raise ValueError("No input muscles selected")
+    if MusclecheckBox1 == True:
+      inleverRAS = [0,]*3
+      pointNode.GetNthControlPointPosition(2,inleverRAS)
+      if inleverRAS == [0, 0, 0]:
+        raise ValueError("Muscle 1 Insertion not defined")
+      leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever1")
+      leverLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
+      leverLine.AddControlPoint(jointRAS)
+      leverLine.AddControlPoint(inleverRAS)
+      InLever1 = leverLine.GetMeasurement('length').GetValue()
+      slicer.mrmlScene.RemoveNode(leverLine)
 
-	# measure in-lever
-    inleverRAS = [0,]*3
-    pointNode.GetNthControlPointPosition(2,inleverRAS)
-    leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever")
-    leverLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
-    leverLine.AddControlPoint(jointRAS)
-    leverLine.AddControlPoint(inleverRAS)
-    InLever = leverLine.GetMeasurement('length').GetValue()
-    slicer.mrmlScene.RemoveNode(leverLine)
-
+    if MusclecheckBox2 == True:
+      inleverRAS = [0,]*3
+      pointNode.GetNthControlPointPosition(3,inleverRAS)
+      if inleverRAS == [0, 0, 0]:
+        raise ValueError("Muscle 2 Insertion not defined")
+      leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever2")
+      leverLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
+      leverLine.AddControlPoint(jointRAS)
+      leverLine.AddControlPoint(inleverRAS)
+      InLever2 = leverLine.GetMeasurement('length').GetValue()
+      slicer.mrmlScene.RemoveNode(leverLine) 
+      
+    if MusclecheckBox3 == True:
+      inleverRAS = [0,]*3
+      pointNode.GetNthControlPointPosition(4,inleverRAS)
+      if inleverRAS == [0, 0, 0]:
+        raise ValueError("Muscle 3 Insertion not defined")
+      leverLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", "InLever3")
+      leverLine.GetDisplayNode().SetPropertiesLabelVisibility(False)
+      leverLine.AddControlPoint(jointRAS)
+      leverLine.AddControlPoint(inleverRAS)
+      InLever3 = leverLine.GetMeasurement('length').GetValue()
+      slicer.mrmlScene.RemoveNode(leverLine) 
+      
+      
     # remove any control points that should no longer be included
     segmentNames = [segmentationNode.GetSegmentation().GetSegment(segmentList[0]).GetName()]
     for i in range(1,len(segmentList)):
@@ -1044,8 +1170,8 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
      
      segment = segmentationNode.GetSegmentation().GetSegment(segmentId)
      SegmentNameArray.InsertNextValue(segment.GetName())
-     InputForceArray.InsertNextValue(force)
-     InputAngleArray.InsertNextValue(angle)
+     InputForceArray.InsertNextValue(force1)
+     InputAngleArray.InsertNextValue(angle1)
      
      JawLengthArray.InsertNextValue(JawLength)
      
@@ -1223,13 +1349,28 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
 
      
      # calculate mechanical advantage and F-Tooth
-     MA = InLever/OutLever
-     MechAdvArray.InsertNextValue(MA)
-     angle_rad = math.radians(angle)
-     FToothArray.InsertNextValue(force * math.sin(angle_rad) * MA)
+     ftooth_total = 0
+     if MusclecheckBox1 == True:
+       MA1 = InLever1/OutLever
+       ftooth_1 = force1 * math.sin(math.radians(angle1)) * MA1
+       ftooth_total = ftooth_total + ftooth_1
+       MechAdvArray.InsertNextValue(MA1)
+     if MusclecheckBox2 == True:
+       MA2 = InLever2/OutLever
+       ftooth_2 = force2 * math.sin(math.radians(angle2)) * MA2
+       ftooth_total = ftooth_total + ftooth_2
+       #MechAdvArray.InsertNextValue(MA2)
+     if MusclecheckBox3 == True:
+       MA3 = InLever3/OutLever
+       ftooth_3 = force3 * math.sin(math.radians(angle3)) * MA3
+       ftooth_total = ftooth_total + ftooth_3
+       #MechAdvArray.InsertNextValue(MA3)
+
+     FToothArray.InsertNextValue(ftooth_total)
      
      # calculate tooth stress
-     StressArray.InsertNextValue((force * math.sin(angle_rad) * MA)/ (Area * 1e-6))
+     stress = ftooth_total/(Area * 1e-6)
+     StressArray.InsertNextValue(stress)
 
     
     if species != "Enter species name" and species != "":
