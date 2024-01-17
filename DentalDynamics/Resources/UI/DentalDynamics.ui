@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>826</height>
+    <height>1025</height>
    </rect>
   </property>
   <layout class="QVBoxLayout">
@@ -26,17 +26,17 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_4">
         <property name="toolTip">
-         <string>Enter name of the species that the teeth belongs to.</string>
+         <string>Enter name of the specimen that the teeth belongs to.</string>
         </property>
         <property name="text">
-         <string>Species:</string>
+         <string>Specimen:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QLineEdit" name="SpecieslineEdit">
         <property name="toolTip">
-         <string>Enter name of the species that the teeth belongs to.</string>
+         <string>Enter name of the specimen that the teeth belongs to.</string>
         </property>
        </widget>
       </item>
@@ -183,7 +183,55 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="1" column="1">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="NonepushButton">
+          <property name="text">
+           <string>Select None</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="AllpushButton">
+          <property name="text">
+           <string>Select All</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QCheckBox" name="FlipcheckBox">
+          <property name="text">
+           <string>Flip Calculations</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Set Reference Points:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
        <widget class="qSlicerSimpleMarkupsWidget" name="SimpleMarkupsWidget">
         <property name="enabled">
          <bool>true</bool>
@@ -206,6 +254,9 @@
         <property name="enterPlaceModeOnNodeChange">
          <bool>false</bool>
         </property>
+        <property name="optionsVisible">
+         <bool>true</bool>
+        </property>
         <property name="nodeColor">
          <color>
           <red>225</red>
@@ -222,27 +273,7 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
-       <spacer name="verticalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>Set Reference Points:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="QPushButton" name="TemplatepushButton">
         <property name="text">
          <string>Create new reference point list</string>
@@ -258,57 +289,68 @@
       <string>Muscle Parameters</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Parameter Type:         </string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
+       <widget class="QFrame" name="frame_4">
+        <layout class="QGridLayout" name="gridLayout_8">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="SimradioButton">
+           <property name="text">
+            <string>Use Simulated Values</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QRadioButton" name="EmpradioButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Use Empirical Values</string>
+           </property>
+           <property name="autoExclusive">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_6">
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Insertion Angle (°)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="ctkDoubleSpinBox" name="ForceInputBox2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="ctkDoubleSpinBox" name="ForceInputBox1">
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox3">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QCheckBox" name="MusclecheckBox2">
           <property name="enabled">
@@ -328,8 +370,118 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="3" column="0">
+         <widget class="QCheckBox" name="MusclecheckBox3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>Closing Muscle 3:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Input Force (N)</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="margin">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Insertion Angle (°)</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
          <widget class="ctkDoubleSpinBox" name="ForceInputBox3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="ctkDoubleSpinBox" name="ForceInputBox1">
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="4">
+         <widget class="ctkDoubleSpinBox" name="AngleInputBox3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="ctkDoubleSpinBox" name="AngleInputBox2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="ctkDoubleSpinBox" name="AngleInputBox1">
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="ctkDoubleSpinBox" name="ForceInputBox2">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -369,66 +521,24 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="label_3">
+        <item row="0" column="5">
+         <widget class="QLabel" name="label_10">
           <property name="text">
-           <string>Input Force (N)</string>
+           <string>Volume (cm3)</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <property name="margin">
-           <number>-1</number>
-          </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
+        <item row="1" column="5">
+         <widget class="ctkDoubleSpinBox" name="VolumeInputBox1"/>
         </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="MusclecheckBox3">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Closing Muscle 3:</string>
-          </property>
-         </widget>
+        <item row="2" column="5">
+         <widget class="ctkDoubleSpinBox" name="VolumeInputBox2"/>
         </item>
-        <item row="1" column="2">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox1">
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
+        <item row="3" column="5">
+         <widget class="ctkDoubleSpinBox" name="VolumeInputBox3"/>
         </item>
        </layout>
       </item>
@@ -450,6 +560,9 @@
       </item>
       <item row="1" column="1">
        <widget class="qMRMLNodeComboBox" name="tableSelector">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="toolTip">
          <string>Pick the output to the algorithm.</string>
         </property>
@@ -493,108 +606,126 @@
       <bool>false</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Toggle visibility of the out-lever and tooth position lines:</string>
+      <item row="5" column="0" colspan="2">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Toggle visibility of out-lever and tooth position lines:</string>
         </property>
+        <property name="collapsed">
+         <bool>false</bool>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="2" column="0" colspan="2">
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="2" column="2">
+            <widget class="QPushButton" name="PosVisButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Show/Hide Position Lines</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="OutVisButton">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Show/Hide Out-lever Lines</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="LabelVisButton">
+             <property name="text">
+              <string>Show/Hide Tooth Labels</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </item>
       <item row="6" column="0" colspan="2">
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QPushButton" name="OutVisButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Show/Hide Out-lever Lines</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="PosVisButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Show/Hide Tooth Positon Lines</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="10" column="0">
-       <spacer name="verticalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Flip out-lever and position calculations for selected segments:</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>60</height>
-         </size>
+        <property name="collapsed">
+         <bool>false</bool>
         </property>
-       </spacer>
-      </item>
-      <item row="11" column="0" colspan="2">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Switch some or all of the out-lever &amp; position lines:</string>
-        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="0" column="0" colspan="2">
+          <widget class="QFrame" name="frame_3">
+           <layout class="QGridLayout" name="gridLayout_7">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="NoneFlipButton">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="text">
+               <string>Select None</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="qMRMLSegmentSelectorWidget" name="FlipSegmentSelectorWidget">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="noneEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="editEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="segmentationNodeSelectorVisible">
+               <bool>false</bool>
+              </property>
+              <property name="multiSelection">
+               <bool>true</bool>
+              </property>
+              <property name="horizontalLayout">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="AllFlipButton">
+              <property name="text">
+               <string>Select All</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </widget>
-      </item>
-      <item row="12" column="0" colspan="2">
-       <widget class="QPushButton" name="FlipButton">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Switch All Lines</string>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="0" colspan="2">
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="2" column="1">
-         <widget class="QPushButton" name="FlipSomeButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Switch Selected Lines</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="qMRMLSegmentSelectorWidget" name="FlipSegmentSelectorWidget">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="noneEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="editEnabled">
-           <bool>false</bool>
-          </property>
-          <property name="segmentationNodeSelectorVisible">
-           <bool>false</bool>
-          </property>
-          <property name="multiSelection">
-           <bool>true</bool>
-          </property>
-          <property name="horizontalLayout">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
      </layout>
     </widget>
@@ -667,6 +798,12 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ctkCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>ctkCollapsibleGroupBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ctkDoubleSpinBox</class>
    <extends>QWidget</extends>
    <header>ctkDoubleSpinBox.h</header>
@@ -721,6 +858,22 @@
   <connection>
    <sender>DentalDynamics</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>SegmentSelectorWidget</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>181</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DentalDynamics</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>FlipSegmentSelectorWidget</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
@@ -737,16 +890,16 @@
   <connection>
    <sender>DentalDynamics</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>SegmentSelectorWidget</receiver>
+   <receiver>tableSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>249</x>
-     <y>403</y>
+     <y>512</y>
     </hint>
     <hint type="destinationlabel">
-     <x>322</x>
-     <y>181</y>
+     <x>293</x>
+     <y>681</y>
     </hint>
    </hints>
   </connection>
