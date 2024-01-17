@@ -1616,7 +1616,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
      
      ptindex = ToothTipPoints.GetControlPointIndexByLabel(segment.GetName())
      toothtipRAS = [0,]*3
-     toothposRAS = ToothTipPoints.GetNthControlPointPosition(ptindex)  
+     toothtipRAS = ToothTipPoints.GetNthControlPointPosition(ptindex)  
      ptindex = ToothPosPoints.GetControlPointIndexByLabel(segment.GetName())
      toothposRAS = [0,]*3   
      toothposRAS = ToothPosPoints.GetNthControlPointPosition(ptindex) 
