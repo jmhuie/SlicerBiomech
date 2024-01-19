@@ -17,38 +17,93 @@ class SegmentGeometry(ScriptedLoadableModule):
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
     self.parent.title = "SegmentGeometry"
-    self.parent.categories = ["Quantification"]
+    self.parent.categories = ["SlicerBiomech"]
     self.parent.dependencies = []
-    self.parent.contributors = ["Jonathan Huie"]
+    self.parent.contributors = ["Jonathan M. Huie"]
     self.parent.helpText = """This module iterates slice-by-slice through a segment to compute second moment of area and other cross-sectional properties. For more information please see the <a href="https://github.com/jmhuie/SlicerBiomech">online documentation</a>."""
     self.parent.acknowledgementText = """This module was developed by Jonathan M. Huie, who was supported by an NSF Graduate Research Fellowship (DGE-1746914) and a George Washington University Harlan Research Fellowship."""
 
     # Additional initialization step after application startup is complete
+    slicer.app.connect("startupCompleted()", addlayoutDescription)
     slicer.app.connect("startupCompleted()", registerSampleData)
+
+#
+# Add New Layout
+#
+
+def addlayoutDescription():
+    """Add new layouts"""
+    
+    customLayout = """
+      <layout type=\"vertical\" split=\"true\" >
+       <item splitSize=\"500\">
+        <layout type=\"horizontal\">
+         <item>
+          <view class=\"vtkMRMLViewNode\" singletontag=\"1\">
+           <property name=\"viewlabel\" action=\"default\">1</property>
+          </view>
+         </item>
+         <item>
+          <view class=\"vtkMRMLPlotViewNode\" singletontag=\"PlotView1\">
+           <property name=\"viewlabel\" action=\"default\">P</property>
+          </view>
+         </item>
+        </layout>
+       </item>
+       <item splitSize=\"500\">
+        <layout type=\"horizontal\">
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Red\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">R</property>
+           <property name=\"viewcolor\" action=\"default\">#F34A33</property>
+          </view>
+         </item>   
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Yellow\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">Y</property>
+           <property name=\"viewcolor\" action=\"default\">#EDD54C</property>
+          </view>
+         </item>    
+         <item>
+          <view class=\"vtkMRMLSliceNode\" singletontag=\"Green\">
+           <property name=\"orientation\" action=\"default\">Axial</property>
+           <property name=\"viewlabel\" action=\"default\">G</property>
+           <property name=\"viewcolor\" action=\"default\">#6EB04B</property>
+          </view>
+         </item>  
+        </layout>
+       </item>
+       <item splitSize=\"500\">
+        <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableView1\">
+         <property name=\"viewlabel\" action=\"default\">T</property>
+        </view>
+       </item>
+      </layout>
+      """
+    layoutManager = slicer.app.layoutManager()
+    layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(666, customLayout)
 
 #
 # Register sample data sets in Sample Data module
 #
 
 def registerSampleData():
-    """
-    Add data sets to Sample Data module.
-    """
+    """Add data sets to Sample Data module."""
     # It is always recommended to provide sample data for users to make it easy to try the module,
     # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
 
     import SampleData
-    iconsPath = os.path.join(os.path.dirname(__file__), 'Resources/Icons')
+
+    iconsPath = os.path.join(os.path.dirname(__file__), "Resources/Icons")
 
     # To ensure that the source code repository remains small (can be downloaded and installed quickly)
     # it is recommended to store data sets that are larger than a few MB in a Github release.
 
-    
-    # load demo SegmentGeometry data
-    
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         category="SlicerBiomech",
-        sampleName='SegmentGeometry Demo Forelimb',
+        sampleName='Demo Humerus',
         uris='https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs.nrrd',
         fileNames='DemoForelimb.nrrd',
         nodeNames='DemoForelimb',
@@ -57,15 +112,13 @@ def registerSampleData():
         )
     SampleData.SampleDataLogic.registerCustomSampleDataSource(
         category="SlicerBiomech",
-        sampleName='SegmentGeometry Demo Segment',
+        sampleName='Demo Segment',
         uris='https://github.com/jmhuie/SlicerBiomech/releases/download/SampleData/Aneides_lugubris_mvz_249828_forelimbs_Segmentation.seg.nrrd',
         fileNames='DemoSegment.seg.nrrd',
         nodeNames='DemoSegment',
         thumbnailFileName=os.path.join(iconsPath, 'SegmentGeometryDemoSegment.png'),
         loadFileType='SegmentationFile',
         )
-
-#
 
 #
 # SegmentGeometryWidget
@@ -84,7 +137,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     VTKObservationMixin.__init__(self)  # needed for parameter node observation
     self.logic = None
     self._parameterNode = None
-    
+    self._updatingGUIFromParameterNode = False
+        
   def setup(self):
     """
     Called when the user opens the module the first time and the widget is initialized.
@@ -92,6 +146,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     ScriptedLoadableModuleWidget.setup(self)
 
     # Load widget from .ui file (created by Qt Designer)
+    # Additional widgets can be instantiated manually and added to self.layout.
     uiWidget = slicer.util.loadUI(self.resourcePath('UI/SegmentGeometry.ui'))
     self.layout.addWidget(uiWidget)
     self.ui = slicer.util.childWidgetVariables(uiWidget)
@@ -105,20 +160,19 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # This parameterNode stores all user choices in parameter values, node selections, etc.
     # so that when the scene is saved and reloaded, these settings are restored.
     self.logic = SegmentGeometryLogic()
-    self.ui.parameterNodeSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
-    self.setParameterNode(self.logic.getParameterNode())      
     
 
     # Connections
-    self.ui.parameterNodeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.setParameterNode)
-    self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
+    
+    # These connections ensure that we update parameter node when scene is closed
+    self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
+    self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
-    self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    self.ui.segmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onChangeAxis)
-    self.ui.regionSegmentSelector.connect("currentSegmentChanged(QString)", self.updateParameterNodeFromGUI)
-    self.ui.regionSegmentSelector.connect("currentSegmentChanged(QString)", self.onChangeAxis)
+    self.ui.SegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+    self.ui.SegmentSelectorWidget.connect("currentSegmentChanged(QString)", self.updateParameterNodeFromGUI)
+    self.ui.SegmentSelectorWidget.connect("currentSegmentChanged(QString)", self.onChangeAxis)
     self.ui.volumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.axisSelectorBox.connect("currentIndexChanged(int)", self.onChangeAxis)
@@ -131,20 +185,21 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.orientationspinBox.connect("valueChanged(double)", self.updateAxisLineAngle)
     self.ui.CompactnesscheckBox.connect('stateChanged(int)', self.updateParameterNodeFromGUI)
     self.ui.areaSegmentSelector.connect('currentSegmentChanged(QString)', self.updateParameterNodeFromGUI)
+    
+    # Buttons
+    self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
     self.ui.PrincipalButton.connect("clicked(bool)", self.onPrincipalAxes)
     self.ui.Interactive3DButton.connect("clicked(bool)", self.onInteractive3DBox)
     self.ui.RotatorSliders.connect("valueChanged(double)", self.initializeSliders)
     self.ui.RotationInitButton.connect("clicked(bool)", self.initializeSliders)
     self.ui.ShowAxisButton.connect("clicked(bool)", self.ShowAxis)
     self.ui.ResetButton.connect("clicked(bool)", self.ResetButton)
-
     
     # initialize the result label under the apply button
     self.ui.ResultsText.setStyleSheet("background: transparent; border: transparent")
 
-
-    # Initial GUI update
-    self.updateGUIFromParameterNode()
+    # Make sure parameter node is initialized (needed for module reload)
+    self.initializeParameterNode()
 
   def cleanup(self):
     """
@@ -152,29 +207,67 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     self.removeObservers()
 
+  def enter(self):
+    """
+    Called each time the user opens this module.
+    """
+    # Make sure parameter node exists and observed
+    self.initializeParameterNode()
+
+  def exit(self):
+    """
+    Called each time the user opens a different module.
+    """
+    # Do not react to parameter node changes (GUI wlil be updated when the user enters into the module)
+    self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
+
+  def onSceneStartClose(self, caller, event):
+    """
+    Called just before the scene is closed.
+    """
+    # Parameter node will be reset, do not use it anymore
+    self.setParameterNode(None)
+
+  def onSceneEndClose(self, caller, event):
+    """
+    Called just after the scene is closed.
+    """
+    # If this module is shown while the scene is closed then recreate a new parameter node immediately
+    if self.parent.isEntered:
+      self.initializeParameterNode()
+
+  def initializeParameterNode(self):
+    """
+    Ensure parameter node exists and observed.
+    """
+    # Parameter node stores all user choices in parameter values, node selections, etc.
+    # so that when the scene is saved and reloaded, these settings are restored.
+
+    self.setParameterNode(self.logic.getParameterNode())
+
+    # Select default input nodes if nothing is selected yet to save a few clicks for the user
+    #if not self._parameterNode.GetNodeReference("Segmentation"):
+    #  firstSegmentationNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLSegmentationNode")
+      #if firstSegmentationNode:
+        #self._parameterNode.SetNodeReferenceID("Segmentation", firstSegmentationNode.GetID())
+        
   def setParameterNode(self, inputParameterNode):
     """
-    Adds observers to the selected parameter node. Observation is needed because when the
-    parameter node is changed then the GUI must be updated immediately.
+    Set and observe parameter node.
+    Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
     """
 
-    # Set parameter node in the parameter node selector widget
-    wasBlocked = self.ui.parameterNodeSelector.blockSignals(True)
-    self.ui.parameterNodeSelector.setCurrentNode(inputParameterNode)
-    self.ui.parameterNodeSelector.blockSignals(wasBlocked)
-
-    if inputParameterNode == self._parameterNode:
-      # No change
-      return
+    if inputParameterNode:
+      self.logic.setDefaultParameters(inputParameterNode)
 
     # Unobserve previously selected parameter node and add an observer to the newly selected.
     # Changes of parameter node are observed so that whenever parameters are changed by a script or any other module
     # those are reflected immediately in the GUI.
-    if self._parameterNode is not None:
+    if self._parameterNode is not None and self.hasObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode):
       self.removeObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
-    if inputParameterNode is not None:
-      self.addObserver(inputParameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
     self._parameterNode = inputParameterNode
+    if self._parameterNode is not None:
+      self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
 
     # Initial GUI update
     self.updateGUIFromParameterNode()
@@ -185,47 +278,26 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     The module GUI is updated to show the current state of the parameter node.
     """
 
-    # Disable all sections if no parameter node is selected
-    self.ui.basicCollapsibleButton.enabled = self._parameterNode is not None
-    if self._parameterNode is None:
+    if self._parameterNode is None or self._updatingGUIFromParameterNode:
       return
 
-    # Update each widget from parameter node
-    # Need to temporarily block signals to prevent infinite recursion (MRML node update triggers
-    # GUI update, which triggers MRML node update, which triggers GUI update, ...)
-    
-    wasBlocked = self.ui.segmentationSelector.blockSignals(True)
-    self.ui.segmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.segmentationSelector.blockSignals(wasBlocked)
-    
-    wasBlocked = self.ui.regionSegmentSelector.blockSignals(True)
-    self.ui.regionSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
-    self.ui.regionSegmentSelector.blockSignals(wasBlocked)
+    # Make sure GUI changes do not call updateParameterNodeFromGUI (it could cause infinite loop)
+    self._updatingGUIFromParameterNode = True
 
-    wasBlocked = self.ui.volumeSelector.blockSignals(True)
+    # Update node selectors and sliders
+    self.ui.SegmentSelectorWidget.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
+    if self._parameterNode.GetNodeReference("Segmentation") is not None:
+      self.ui.SegmentSelectorWidget.setCurrentSegmentID(self._parameterNode.GetParameter("Segments"))
     self.ui.volumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("Volume"))
-    self.ui.volumeSelector.blockSignals(wasBlocked)
-    
-    #wasBlocked = self.ui.orientationspinBox.blockSignals(True)
-    #float(self.ui.orientationspinBox.value) = self._parameterNode.GetParameter("Angle")
-    #self.ui.orientationspinBox.blockSignals(wasBlocked)    
-    
-    wasBlocked = self.ui.tableSelector.blockSignals(True)
+    self.ui.axisSelectorBox.currentText = self._parameterNode.GetParameter("Axis")    
     self.ui.tableSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsTable"))
-    self.ui.tableSelector.blockSignals(wasBlocked)
-    
-    wasBlocked = self.ui.chartSelector.blockSignals(True)
     self.ui.chartSelector.setCurrentNode(self._parameterNode.GetNodeReference("ResultsChart"))
-    self.ui.chartSelector.blockSignals(wasBlocked)
-
-    wasBlocked = self.ui.areaSegmentSelector.blockSignals(True)
     self.ui.areaSegmentSelector.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
     self.ui.areaSegmentSelector.setCurrentSegmentID(self._parameterNode.GetNodeReference("AreaSegment"))
-    self.ui.areaSegmentSelector.blockSignals(wasBlocked)
 
 
     # Update buttons states and tooltips
-    if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.regionSegmentSelector.currentSegmentID == None and self._parameterNode.GetNodeReference("Volume"):
+    if self._parameterNode.GetNodeReference("Segmentation") and not self.ui.SegmentSelectorWidget.currentSegmentID == None and self._parameterNode.GetNodeReference("Volume"):
       self.ui.applyButton.toolTip = "Compute slice geometries"
       self.ui.applyButton.enabled = True
       self.ui.PrincipalButton.enabled = True
@@ -262,9 +334,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     
     if self._parameterNode.GetNodeReference("Segmentation"):
-      self.ui.regionSegmentSelector.toolTip = "Select segment"
+      self.ui.SegmentSelectorWidget.toolTip = "Select segment"
     else:
-      self.ui.regionSegmentSelector.toolTip = "Select input segmentation node"  
+      self.ui.SegmentSelectorWidget.toolTip = "Select input segmentation node"  
   
       
     if self._parameterNode.GetNodeReference("Volume"):
@@ -329,7 +401,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
       
     # other tooltips
-    self.ui.segmentationSelector.toolTip = "Select input segmentation node"
+    self.ui.SegmentSelectorWidget.toolTip = "Select input segmentation node"
     self.ui.axisSelectorBox.toolTip = "Select slice view to compute on. Should be perpendicular to the long axis"
     self.ui.resamplespinBox.toolTip = "Perform computations in percent increments along the length of the segment. Enter zero to compute values on every slice"
     self.ui.CSAcheckBox.toolTip = "Compute cross-sectional area"
@@ -346,7 +418,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.CentroidcheckBox.toolTip = "Compute the XY coordinates for the centroid of the section"
     self.ui.PerimcheckBox.toolTip = "Compute the perimeter of the section"
 
-
+    # All the GUI updates are done
+    self._updatingGUIFromParameterNode = False
+    
   def updateParameterNodeFromGUI(self, caller=None, event=None):
     """
     This method is called when the user makes any change in the GUI.
@@ -356,7 +430,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     if self._parameterNode is None:
       return
       
-    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.segmentationSelector.currentNodeID) 
+    self._parameterNode.SetNodeReferenceID("Segmentation", self.ui.SegmentSelectorWidget.currentNodeID())
+    self._parameterNode.SetParameter("Segments", self.ui.SegmentSelectorWidget.currentSegmentID())
     self._parameterNode.SetNodeReferenceID("Volume", self.ui.volumeSelector.currentNodeID)
     self._parameterNode.SetParameter("Axis", self.ui.axisSelectorBox.currentText)
     self._parameterNode.SetParameter("Resample", str(self.ui.resamplespinBox.value))
@@ -388,9 +463,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run processing when user clicks "Align Segment with Principal Axes" button.
     """
     
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
     volumeNode = self.ui.volumeSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
         
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
@@ -498,10 +573,10 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Interactive Rotate 3D View" button.
     """    
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
     volumeNode = self.ui.volumeSelector.currentNode()
     volumeNode.SetAndObserveTransformNodeID(None)
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
             
     segtransformNode = segmentationNode.GetTransformNodeID()
@@ -563,9 +638,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run processing when user clicks "Initialize Sliders".
     """  
     self.ui.RotatorSliders.enabled = True
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
     volumeNode = self.ui.volumeSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
     
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
@@ -663,8 +738,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Draws initial neutral axis line when user clicks the button.
     """  
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     volumeNode = self.ui.volumeSelector.currentNode()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
@@ -861,8 +936,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     import numpy as np
     import math
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
     
@@ -955,8 +1030,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Update the neutral axis to display on current slice.
     """    
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
     volumeNode = self.ui.volumeSelector.currentNode()
     spacing = volumeNode.GetSpacing() 
@@ -1017,7 +1092,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       
     try:
       # Create nodes for results
-      segment = self.ui.regionSegmentSelector.currentNode().GetSegmentation().GetSegment(self.ui.regionSegmentSelector.currentSegmentID())
+      segment = self.ui.SegmentSelectorWidget.currentNode().GetSegmentation().GetSegment(self.ui.SegmentSelectorWidget.currentSegmentID())
       segName = segment.GetName()
       
       tableNode = self.ui.tableSelector.currentNode()
@@ -1046,7 +1121,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.chartSelector.setCurrentNode(plotChartNode)  
 
      
-      self.logic.run(self.ui.regionSegmentSelector.currentNode(), self.ui.regionSegmentSelector.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
+      self.logic.run(self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.currentSegmentID(), self.ui.volumeSelector.currentNode(), 
                      self.ui.axisSelectorBox.currentText, 
                      self.ui.resamplespinBox.value, tableNode, plotChartNode, self.ui.LengthcheckBox.checked, self.ui.FeretcheckBox.checked,
                      self.ui.CSAcheckBox.checked, self.ui.IntensitycheckBox.checked, self.ui.SMAcheckBox_1.checked, self.ui.MODcheckBox_1.checked, self.ui.JzcheckBox.checked,
@@ -1062,8 +1137,8 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       traceback.print_exc()
       
 
-    segmentationNode = self.ui.regionSegmentSelector.currentNode()
-    segmentId = self.ui.regionSegmentSelector.currentSegmentID()
+    segmentationNode = self.ui.SegmentSelectorWidget.currentNode()
+    segmentId = self.ui.SegmentSelectorWidget.currentSegmentID()
     segName = segmentationNode.GetName()
     axis = self.ui.axisSelectorBox.currentText
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
@@ -1083,7 +1158,17 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
   Uses ScriptedLoadableModuleLogic base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
+  
+  def __init__(self):
+    """
+    Called when the logic class is instantiated. Can be used for initializing member variables.
+    """
+    ScriptedLoadableModuleLogic.__init__(self)
 
+  def setDefaultParameters(self, parameterNode):
+    """
+    Initialize parameter node with default settings.
+    """
 
   def run(self, segmentationNode, segmentNode, volumeNode, axis, interval, tableNode, plotChartNode, LengthcheckBox, FeretcheckBox, CSAcheckBox, IntensitycheckBox, SMAcheckBox_1,
   MODcheckBox_1, JzcheckBox, ZpolcheckBox, OrientationcheckBox, angle, ThetacheckBox, RcheckBox, DoubecheckBox, SummerscheckBox,
@@ -2458,61 +2543,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if trans != None:
         trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
         trans_new.SetMatrixTransformToParent(og_matrix) 
-      # Change layout to include plot and table      
-      customLayout = """
-      <layout type=\"vertical\" split=\"true\" >
-       <item splitSize=\"500\">
-        <layout type=\"horizontal\">
-         <item>
-          <view class=\"vtkMRMLViewNode\" singletontag=\"1\">
-           <property name=\"viewlabel\" action=\"default\">1</property>
-          </view>
-         </item>
-         <item>
-          <view class=\"vtkMRMLPlotViewNode\" singletontag=\"PlotView1\">
-           <property name=\"viewlabel\" action=\"default\">P</property>
-          </view>
-         </item>
-        </layout>
-       </item>
-       <item splitSize=\"500\">
-        <layout type=\"horizontal\">
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Red\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">R</property>
-           <property name=\"viewcolor\" action=\"default\">#F34A33</property>
-          </view>
-         </item>   
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Yellow\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">Y</property>
-           <property name=\"viewcolor\" action=\"default\">#EDD54C</property>
-          </view>
-         </item>    
-         <item>
-          <view class=\"vtkMRMLSliceNode\" singletontag=\"Green\">
-           <property name=\"orientation\" action=\"default\">Axial</property>
-           <property name=\"viewlabel\" action=\"default\">G</property>
-           <property name=\"viewcolor\" action=\"default\">#6EB04B</property>
-          </view>
-         </item>  
-        </layout>
-       </item>
-       <item splitSize=\"500\">
-        <view class=\"vtkMRMLTableViewNode\" singletontag=\"TableView1\">
-         <property name=\"viewlabel\" action=\"default\">T</property>
-        </view>
-       </item>
-      </layout>
-      """
       
+      # Change layout to include plot and table     
       customLayoutId=666
-
       layoutManager = slicer.app.layoutManager()
-      layoutManager.layoutLogic().GetLayoutNode().AddLayoutDescription(customLayoutId, customLayout)
-
       # Switch to the new custom layout
       layoutManager.setLayout(customLayoutId)
       plotWidget = layoutManager.plotWidget(0)

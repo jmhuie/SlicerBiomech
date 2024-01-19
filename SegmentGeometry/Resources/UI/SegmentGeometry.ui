@@ -17,37 +17,9 @@
    <bool>false</bool>
   </property>
   <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="parameterSetLabel">
+   <item row="0" column="0" colspan="2">
+    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton">
      <property name="text">
-      <string>Parameter set: </string>
-     </property>
-    </widget>
-   </item>   
-   <item row="0" column="1">
-    <widget class="qMRMLNodeComboBox" name="parameterNodeSelector" native="true">
-     <property name="toolTip">
-      <string>Pick node to store parameter set</string>
-     </property>
-     <property name="nodeTypes" stdset="0">
-      <stringlist>
-       <string>vtkMRMLScriptedModuleNode</string>
-      </stringlist>
-     </property>
-     <property name="showHidden" stdset="0">
-      <bool>true</bool>
-     </property>
-     <property name="baseName" stdset="0">
-      <string>SegmentGeometry</string>
-     </property>
-     <property name="renameEnabled" stdset="0">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton" native="true">
-     <property name="text" stdset="0">
       <string>Inputs</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
@@ -55,49 +27,6 @@
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Segmentation:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="segmentationSelector" native="true">
-        <property name="toolTip">
-         <string>Pick the output to the algorithm.</string>
-        </property>
-        <property name="nodeTypes" stdset="0">
-         <stringlist>
-          <string>vtkMRMLSegmentationNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="noneEnabled" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="addEnabled" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="removeEnabled" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="editEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="qMRMLSegmentSelectorWidget" name="regionSegmentSelector" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="horizontalLayout" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="segmentationNodeSelectorVisible" stdset="0">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -109,25 +38,25 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="qMRMLNodeComboBox" name="volumeSelector" native="true">
+       <widget class="qMRMLNodeComboBox" name="volumeSelector">
         <property name="toolTip">
          <string>Pick the input to the algorithm.</string>
         </property>
-        <property name="nodeTypes" stdset="0">
+        <property name="nodeTypes">
          <stringlist>
           <string>vtkMRMLScalarVolumeNode</string>
          </stringlist>
         </property>
-        <property name="showChildNodeTypes" stdset="0">
+        <property name="showChildNodeTypes">
          <bool>false</bool>
         </property>
-        <property name="noneEnabled" stdset="0">
+        <property name="noneEnabled">
          <bool>true</bool>
         </property>
-        <property name="addEnabled" stdset="0">
+        <property name="addEnabled">
          <bool>false</bool>
         </property>
-        <property name="removeEnabled" stdset="0">
+        <property name="removeEnabled">
          <bool>false</bool>
         </property>
        </widget>
@@ -218,284 +147,40 @@
         </layout>
        </widget>
       </item>
+      <item row="0" column="1">
+       <widget class="qMRMLSegmentSelectorWidget" name="SegmentSelectorWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="segmentationNodeSelectorVisible">
+         <bool>true</bool>
+        </property>
+        <property name="horizontalLayout">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
    <item row="6" column="0" colspan="2">
-    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_3" native="true">
-     <property name="text" stdset="0">
-      <string>Transform Tools</string>
-     </property>
-     <property name="collapsed" stdset="0">
-      <bool>false</bool>
-     </property>
-     <layout class="QFormLayout" name="formLayout_4">
-      <item row="9" column="0" colspan="2">
-       <widget class="QFrame" name="frame_3">
-        <layout class="QGridLayout" name="gridLayout_7">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>2</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <property name="verticalSpacing">
-          <number>0</number>
-         </property>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="PrincipalButton">
-           <property name="text">
-            <string>Align w/ Principal Axes</string>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="autoRepeat">
-            <bool>false</bool>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="Interactive3DButton">
-           <property name="text">
-            <string>Rotate in 3D View</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="autoRepeat">
-            <bool>false</bool>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QPushButton" name="RotationInitButton">
-           <property name="text">
-            <string>Initialize Sliders</string>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="autoRepeat">
-            <bool>false</bool>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QPushButton" name="ResetButton">
-           <property name="text">
-            <string> Reset </string>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="autoRepeat">
-            <bool>false</bool>
-           </property>
-           <property name="autoDefault">
-            <bool>false</bool>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>        </layout>
-       </widget>
-      </item>
-      <item row="11" column="0" colspan="2">
-       <widget class="qMRMLTransformSliders" name="RotatorSliders" native="true">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="Title" stdset="0">
-         <string>Rotate segment:</string>
-        </property>
-        <property name="minMaxVisible" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="8" column="0" colspan="2">
-    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_2" native="true">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="text" stdset="0">
-      <string>Outputs</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout_3">
-      <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="tableSelector" native="true">
-        <property name="toolTip">
-         <string>Pick the output to the algorithm.</string>
-        </property>
-        <property name="nodeTypes" stdset="0">
-         <stringlist>
-          <string>vtkMRMLTableNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="noneEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="addEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="removeEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="editEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="renameEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="noneDisplay" stdset="0">
-         <string>Create new table</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Results table:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Results chart:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="qMRMLNodeComboBox" name="chartSelector" native="true">
-        <property name="toolTip">
-         <string>Pick the input to the algorithm.</string>
-        </property>
-        <property name="nodeTypes" stdset="0">
-         <stringlist>
-          <string>vtkMRMLPlotChartNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="noneEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="addEnabled" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="removeEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="editEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="renameEnabled" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="noneDisplay" stdset="0">
-         <string>Create new chart</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QLabel" name="ResultsText"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="11" column="0">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="0">
-    <widget class="QWidget" name="widget" native="true"/>
-   </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_3" native="true">
-     <property name="text" stdset="0">
+    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_3">
+     <property name="text">
       <string>Computations</string>
      </property>
-     <property name="collapsed" stdset="0">
+     <property name="collapsed">
       <bool>false</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <item row="9" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_1" native="true">
-        <property name="title" stdset="0">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_1">
+        <property name="title">
          <string>Select computations:</string>
         </property>
-        <property name="collapsed" stdset="0">
+        <property name="collapsed">
          <bool>false</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_5">
@@ -626,7 +311,7 @@
                <bool>false</bool>
               </property>
              </widget>
-            </item>            
+            </item>
             <item row="3" column="2">
              <widget class="QCheckBox" name="IntensitycheckBox">
               <property name="text">
@@ -651,32 +336,32 @@
        </widget>
       </item>
       <item row="11" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_2" native="true">
-        <property name="title" stdset="0">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
+        <property name="title">
          <string>Compute with custom neutral axis:</string>
         </property>
-        <property name="collapsed" stdset="0">
+        <property name="collapsed">
          <bool>false</bool>
-        </property> 
+        </property>
         <layout class="QFormLayout" name="formLayout_4">
-        <item row="0" column="0" colspan="2">
-         <widget class="QFrame" name="frame_3">
-          <layout class="QGridLayout" name="gridLayout_7">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>2</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>0</number>
-           </property>            
+         <item row="0" column="0" colspan="2">
+          <widget class="QFrame" name="frame_3">
+           <layout class="QGridLayout" name="gridLayout_7">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
             <item row="0" column="0">
              <widget class="QCheckBox" name="OrientationcheckBox">
               <property name="text">
@@ -687,9 +372,9 @@
               </property>
               <property name="checked">
                <bool>false</bool>
-              </property>            
+              </property>
              </widget>
-            </item>            
+            </item>
             <item row="0" column="1">
              <widget class="qMRMLSpinBox" name="orientationspinBox">
               <property name="enabled">
@@ -699,15 +384,18 @@
                <number>4</number>
               </property>
               <property name="maximum">
-               <double>360.00000</double>
+               <double>360.000000000000000</double>
               </property>
               <property name="singleStep">
-               <double>1.00000</double>
+               <double>1.000000000000000</double>
               </property>
              </widget>
-            </item> 
+            </item>
             <item row="0" column="2">
              <widget class="QPushButton" name="ShowAxisButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Update Neutral Axis</string>
               </property>
@@ -729,17 +417,14 @@
               <property name="flat">
                <bool>false</bool>
               </property>
-              <property name="enabled">
-               <bool>false</bool>
-              </property>             
              </widget>
-            </item>           
+            </item>
            </layout>
           </widget>
-         </item>        
-        </layout>       
-       </widget> 
-      </item> 
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item row="14" column="0">
        <widget class="Line" name="line_3">
         <property name="orientation">
@@ -748,11 +433,11 @@
        </widget>
       </item>
       <item row="15" column="0" colspan="2">
-       <widget class="ctkCollapsibleGroupBox" name="groupBox_3" native="true">
-        <property name="title" stdset="0">
+       <widget class="ctkCollapsibleGroupBox" name="groupBox_3">
+        <property name="title">
          <string>Calculate unitless values:</string>
         </property>
-        <property name="collapsed" stdset="0">
+        <property name="collapsed">
          <bool>false</bool>
         </property>
         <layout class="QFormLayout" name="formLayout_7">
@@ -826,7 +511,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector" native="true">
+             <widget class="qMRMLSegmentSelectorWidget" name="areaSegmentSelector">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -836,27 +521,135 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="horizontalLayout" stdset="0">
+              <property name="segmentationNodeSelectorVisible">
                <bool>true</bool>
               </property>
-              <property name="selectNodeUponCreation" stdset="0">
+              <property name="horizontalLayout">
                <bool>false</bool>
               </property>
-              <property name="segmentationNodeSelectorVisible" stdset="0">
-               <bool>true</bool>
+              <property name="selectNodeUponCreation">
+               <bool>false</bool>
               </property>
              </widget>
-            </item>    
+            </item>
            </layout>
           </widget>
          </item>
-        </layout>               
+        </layout>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="16" column="0" colspan="2">
+   <item row="7" column="0" colspan="2">
+    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_2">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Outputs</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="1">
+       <widget class="qMRMLNodeComboBox" name="tableSelector">
+        <property name="toolTip">
+         <string>Pick the output to the algorithm.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLTableNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes">
+         <bool>false</bool>
+        </property>
+        <property name="noneEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="addEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="removeEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="noneDisplay">
+         <string>Create new table</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Results table:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Results chart:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="qMRMLNodeComboBox" name="chartSelector">
+        <property name="toolTip">
+         <string>Pick the input to the algorithm.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLPlotChartNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes">
+         <bool>false</bool>
+        </property>
+        <property name="noneEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="addEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="removeEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="noneDisplay">
+         <string>Create new chart</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="ResultsText"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QWidget" name="widget" native="true"/>
+   </item>
+   <item row="15" column="0" colspan="2">
     <widget class="QPushButton" name="applyButton">
      <property name="enabled">
       <bool>false</bool>
@@ -869,7 +662,7 @@
      </property>
     </widget>
    </item>
-   <item row="18" column="0">
+   <item row="17" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -882,20 +675,162 @@
      </property>
     </spacer>
    </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="ctkCollapsibleButton" name="basicCollapsibleButton_3">
+     <property name="text">
+      <string>Transform Tools</string>
+     </property>
+     <property name="collapsed">
+      <bool>false</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout_4">
+      <item row="9" column="0" colspan="2">
+       <widget class="QFrame" name="frame_3">
+        <layout class="QGridLayout" name="gridLayout_7">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>0</number>
+         </property>
+         <item row="2" column="0">
+          <widget class="QPushButton" name="PrincipalButton">
+           <property name="text">
+            <string>Align w/ Principal Axes</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="Interactive3DButton">
+           <property name="text">
+            <string>Rotate in 3D View</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="RotationInitButton">
+           <property name="text">
+            <string>Initialize Sliders</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="ResetButton">
+           <property name="text">
+            <string> Reset </string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <property name="autoRepeat">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="11" column="0" colspan="2">
+       <widget class="qMRMLTransformSliders" name="RotatorSliders">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="Title">
+         <string>Rotate segment:</string>
+        </property>
+        <property name="minMaxVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>qMRMLNodeComboBox</class>
-   <extends>QWidget</extends>
-   <header>qMRMLNodeComboBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLWidget</class>
-   <extends>QWidget</extends>
-   <header>qMRMLWidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>ctkCollapsibleButton</class>
    <extends>QWidget</extends>
@@ -904,26 +839,42 @@
   </customwidget>
   <customwidget>
    <class>ctkCollapsibleGroupBox</class>
-   <extends>QWidget</extends>
-   <header>ctkcollapsiblegroupbox.h</header>
+   <extends>QGroupBox</extends>
+   <header>ctkCollapsibleGroupBox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>qMRMLSpinBox</class>
-   <extends>qMRMLWidget</extends>
-   <header>qMRMLSpinBox.h</header>
-   <container>1</container>
-  </customwidget> 
+   <class>ctkDoubleSpinBox</class>
+   <extends>QWidget</extends>
+   <header>ctkDoubleSpinBox.h</header>
+  </customwidget>
   <customwidget>
-   <class>qMRMLSegmentSelectorWidget</class>
-   <extends>qMRMLWidget</extends>
-   <header>qMRMLSegmentSelectorWidget.h</header>
+   <class>qMRMLNodeComboBox</class>
+   <extends>QWidget</extends>
+   <header>qMRMLNodeComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSpinBox</class>
+   <extends>ctkDoubleSpinBox</extends>
+   <header>qMRMLSpinBox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>qMRMLTransformSliders</class>
    <extends>qMRMLWidget</extends>
    <header>qMRMLTransformSliders.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLWidget</class>
+   <extends>QWidget</extends>
+   <header>qMRMLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSegmentSelectorWidget</class>
+   <extends>qMRMLWidget</extends>
+   <header>qMRMLSegmentSelectorWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -942,22 +893,6 @@
     <hint type="destinationlabel">
      <x>208</x>
      <y>97</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>SegmentGeometry</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>parameterNodeSelector</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>28</x>
-     <y>267</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>112</x>
-     <y>27</y>
     </hint>
    </hints>
   </connection>
@@ -996,7 +931,7 @@
   <connection>
    <sender>SegmentGeometry</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>regionSegmentSelector</receiver>
+   <receiver>SegmentSelectorWidget</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1006,22 +941,6 @@
     <hint type="destinationlabel">
      <x>260</x>
      <y>71</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>SegmentGeometry</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>segmentationSelector</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>82</x>
-     <y>135</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>275</x>
-     <y>65</y>
     </hint>
    </hints>
   </connection>
