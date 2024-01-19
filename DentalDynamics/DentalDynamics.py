@@ -1144,6 +1144,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     posFolder = shNode.GetItemByName("Tooth Positions")
     if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") == None:
       ToothTipPoints = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Tooth Tip Points")
+      ToothTipPoints.GetDisplayNode().SetPointLabelsVisibility(False)
     else:
       ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") 
     if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") == None:
