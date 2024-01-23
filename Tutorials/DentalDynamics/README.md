@@ -1,6 +1,6 @@
 # DentalDynamics Tutorial
 
-This tutorial explains how to use `Dental Dynamics` to measure and calculate jaw and tooth mechanical traits. This is a SlicerBiomech specific function and in this example we are using the *Aneides lugubris* Model from the SlicerBiomech tab of the  `Sample Data`  module.
+This tutorial explains how to use `Dental Dynamics` to measure and calculate jaw and tooth mechanical traits. This is a SlicerBiomech specific function and in this example we are using the *Aneides lugubris* sample data set from the SlicerBiomech tab of the  `Sample Data`  module.
 
 Features of DentalDynamics:
 
