@@ -1,19 +1,20 @@
 # DentalDynamics Tutorial
 
-This tutorial explains how to use DentalDynamics to measure and calculate jaw and tooth mechanical traits. This is a SlicerBiomech specific function and in this example we are using the *Aneides lugubris* Model from the SlicerMorph tab of the  `Sample Data`  module.
+This tutorial explains how to use `Dental Dynamics` to measure and calculate jaw and tooth mechanical traits. This is a SlicerBiomech specific function and in this example we are using the *Aneides lugubris* sample data set from the SlicerBiomech tab of the  `Sample Data`  module.
 
-DentalDynamics is designed to:
+Features of DentalDynamics:
 
--  Calculate 9 jaw and tooth traits using a 3D Slicer segmentation with three user-defined anatomical landmarks (jaw joint, tip of the jaw, and the insertion site of the jaw closing muscle). 
-- These inputs  calculate jaw length, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress. 
-- Allowing the use to edit of specimen metadata, select the necessary input files and points, and adjust additional muscle parameters. 
+-  Designed to calculate several jaw and tooth traits using a 3D Slicer segmentation with user-defined anatomical landmarks (jaw joint, tip of the jaw, and the insertion and origin of up to three jaw closing muscles). 
+- These inputs calculate jaw length and muscle in-levers, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress.
+- Optional user-defined muscle parameters can be provided to calculate more biologically accurate estimates of bite force.
+- Equipped with an easy-to-use graphical user interface that allows the user to edit specimen metadata, select inputs and place landmarks, and adjust additional muscle parameters. 
 - Results can then be readily imported into other statistical software 
-- The module may also be run on imported 3D mesh files (.obj, .ply, .stl).
+- The module may also be run on imported 3D mesh files (.obj, .ply, .stl) by easily converting them into segmentation nodes.
 
 
 ## 
 
-1.  After segmenting your teeth and jaws, go to the  `DentalDynamics`  module. Chose the segmentation node you want to modify, identify the jaw and click   **Create new reference point list** .
+1.  After segmenting your teeth and jaws, go to the  `Dental Dynamics`  module. Chose the segmentation node you want to modify, identify the jaw and click   **Create new reference point list** .
 
 2.  Every side of a jaw should get its own segmentation node. For example, if you were to use the left and right sides of the lower jaw, they and their teeth should be separated into two different segmentation nodes. To copy or move segments between segmentation nodes, use the `Segementations`  module. You can also drag segments into different segmentation nodes in the `Data`  module.
 
