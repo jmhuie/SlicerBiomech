@@ -39,7 +39,7 @@ and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR0132
 """
 
         # Additional initialization step after application startup is complete
-        slicer.app.connect("startupCompleted()", registerSampleData)
+        #slicer.app.connect("startupCompleted()", registerSampleData)
 
 
 #
@@ -47,9 +47,9 @@ and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR0132
 #
 
 #def registerSampleData():
-    """
-    Add data sets to Sample Data module.
-    """
+    #"""
+    #Add data sets to Sample Data module.
+    #"""
     # It is always recommended to provide sample data for users to make it easy to try the module,
     # but if no sample data is available then this method (and associated startupCompeted signal connection) can be removed.
 

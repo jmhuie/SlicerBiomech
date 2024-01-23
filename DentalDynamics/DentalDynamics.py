@@ -192,20 +192,23 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SimradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
     self.ui.EmpradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
     self.ui.MusclecheckBox1.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.MusclecheckBox1b.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.ForceInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.AngleInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.VolumeInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.MusclecheckBox2.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.MusclecheckBox2b.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.ForceInputBox2.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.AngleInputBox2.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.VolumeInputBox2.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.MusclecheckBox3.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
+    self.ui.MusclecheckBox3b.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.ForceInputBox3.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.AngleInputBox3.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.VolumeInputBox3.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
     self.ui.tableSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-    #self.ui.OutVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
-    #self.ui.PosVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
+    self.ui.OutVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
+    self.ui.PosVisButton.connect('clicked(bool)', self.updateParameterNodeFromGUI)
     self.ui.FlipSegmentSelectorWidget.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
     self.ui.FlipSegmentSelectorWidget.connect("segmentSelectionChanged(QStringList)", self.updateParameterNodeFromGUI)
 
@@ -339,17 +342,26 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SimradioButton.checked = (self._parameterNode.GetParameter("Simulate") == "True")
     self.ui.EmpradioButton.checked = (self._parameterNode.GetParameter("Empirical") == "True")   
     self.ui.MusclecheckBox1.checked = (self._parameterNode.GetParameter("Muscle1") == "True")
+    self.ui.MusclecheckBox1b.checked = (self._parameterNode.GetParameter("Muscle1b") == "True")
     self.ui.ForceInputBox1.value = float(self._parameterNode.GetParameter("Force1"))
     self.ui.AngleInputBox1.value = float(self._parameterNode.GetParameter("Angle1"))
     self.ui.VolumeInputBox1.value = float(self._parameterNode.GetParameter("Volume1"))
+    self.ui.PenAngleInputBox1.value = float(self._parameterNode.GetParameter("PenAngle1")) 
+    self.ui.FmaxInputBox1.value = float(self._parameterNode.GetParameter("Fmax1")) 
     self.ui.MusclecheckBox2.checked = (self._parameterNode.GetParameter("Muscle2") == "True")
+    self.ui.MusclecheckBox2b.checked = (self._parameterNode.GetParameter("Muscle2b") == "True")
     self.ui.ForceInputBox2.value = float(self._parameterNode.GetParameter("Force2"))
     self.ui.AngleInputBox2.value = float(self._parameterNode.GetParameter("Angle2"))  
     self.ui.VolumeInputBox2.value = float(self._parameterNode.GetParameter("Volume2"))
+    self.ui.PenAngleInputBox2.value = float(self._parameterNode.GetParameter("PenAngle2")) 
+    self.ui.FmaxInputBox2.value = float(self._parameterNode.GetParameter("Fmax2")) 
     self.ui.MusclecheckBox3.checked = (self._parameterNode.GetParameter("Muscle3") == "True")
+    self.ui.MusclecheckBox3b.checked = (self._parameterNode.GetParameter("Muscle3b") == "True")
     self.ui.ForceInputBox3.value = float(self._parameterNode.GetParameter("Force3"))
     self.ui.AngleInputBox3.value = float(self._parameterNode.GetParameter("Angle3")) 
     self.ui.VolumeInputBox3.value = float(self._parameterNode.GetParameter("Volume3"))   
+    self.ui.PenAngleInputBox3.value = float(self._parameterNode.GetParameter("PenAngle3")) 
+    self.ui.FmaxInputBox3.value = float(self._parameterNode.GetParameter("Fmax3")) 
     self.ui.FlipSegmentSelectorWidget.setCurrentNode(self._parameterNode.GetNodeReference("Segmentation"))
     if self._parameterNode.GetNodeReference("Segmentation") is not None:
       self.ui.FlipSegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("FlipSegments")))
@@ -367,21 +379,43 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.tableSelector.toolTip = "Edit output table"
     else:
       self.ui.tableSelector.toolTip = "Select output table"
-
+    
+    # Update muscle parameter type
+    if self.ui.SimradioButton.checked == True:
+      self.ui.SimgroupBox.show()
+    else:
+      self.ui.SimgroupBox.hide() 
+    if self.ui.EmpradioButton.checked == True:
+      self.ui.EmpgroupBox.show()
+    else:  
+      self.ui.EmpgroupBox.hide()
+    
+    
+    # update muscle parameters if insertion and origin points are defined
     if self.ui.SimpleMarkupsWidget.currentNode() != None:   
+      # insertion
       if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(2) != (0, 0, 0) and self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPositionStatus(2) == 2:
+        self.ui.SimradioButton.enabled = True
         self.ui.MusclecheckBox1.enabled = True
+        self.ui.MusclecheckBox1b.enabled = True
       else: 
         self.ui.MusclecheckBox1.enabled = False
+        self.ui.MusclecheckBox1b.enabled = False
       if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(4) != (0, 0, 0) and self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPositionStatus(4) == 2:
+        self.ui.SimradioButton.enabled = True
         self.ui.MusclecheckBox2.enabled = True
+        self.ui.MusclecheckBox2b.enabled = True
       else: 
-        self.ui.MusclecheckBox2.enabled = False    
+        self.ui.MusclecheckBox2.enabled = False
+        self.ui.MusclecheckBox2b.enabled = False
       if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(6) != (0, 0, 0) and self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPositionStatus(6) == 2:
+        self.ui.SimradioButton.enabled = True
         self.ui.MusclecheckBox3.enabled = True
+        self.ui.MusclecheckBox3b.enabled = True
       else: 
-        self.ui.MusclecheckBox3.enabled = False 
-         
+        self.ui.MusclecheckBox3.enabled = False
+        self.ui.MusclecheckBox3b.enabled = False
+      #origin
       if self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPosition(3) != (0, 0, 0) and self.ui.SimpleMarkupsWidget.currentNode().GetNthControlPointPositionStatus(3) == 2:
         self.ui.EmpradioButton.enabled = True
         self.ui.EmpradioButton.checkable = True
@@ -398,7 +432,11 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.MusclecheckBox1.enabled = False
       self.ui.MusclecheckBox2.enabled = False 
       self.ui.MusclecheckBox3.enabled = False 
+      self.ui.SimradioButton.checked = True
+      self.ui.SimradioButton.enabled = False
+      self.ui.EmpradioButton.enabled = False
     
+    # update parameters based on which muscles are selected
     if self._parameterNode.GetParameter("Muscle1") == "True" and self.ui.MusclecheckBox1.enabled == True and self._parameterNode.GetParameter("Simulate") == "True":
       self.ui.ForceInputBox1.enabled = True
       self.ui.AngleInputBox1.enabled = True
@@ -420,20 +458,32 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.ForceInputBox3.enabled = False
       self.ui.AngleInputBox3.enabled = False
       
-    if self._parameterNode.GetParameter("Muscle1") == "True" and self.ui.MusclecheckBox1.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle1b") == "True" and self.ui.MusclecheckBox1b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
       self.ui.VolumeInputBox1.enabled = True
+      self.ui.PenAngleInputBox1.enabled = True     
+      self.ui.FmaxInputBox1.enabled = True     
     else:
-      self.ui.VolumeInputBox1.enabled = False
+      self.ui.VolumeInputBox1.enabled = False     
+      self.ui.PenAngleInputBox1.enabled = False     
+      self.ui.FmaxInputBox1.enabled = False     
         
-    if self._parameterNode.GetParameter("Muscle2") == "True" and self.ui.MusclecheckBox2.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle2b") == "True" and self.ui.MusclecheckBox2b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
       self.ui.VolumeInputBox2.enabled = True
+      self.ui.PenAngleInputBox2.enabled = True     
+      self.ui.FmaxInputBox2.enabled = True     
     else:
-      self.ui.VolumeInputBox2.enabled = False
+      self.ui.VolumeInputBox2.enabled = False     
+      self.ui.PenAngleInputBox2.enabled = False     
+      self.ui.FmaxInputBox2.enabled = False     
 
-    if self._parameterNode.GetParameter("Muscle3") == "True" and self.ui.MusclecheckBox3.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle3b") == "True" and self.ui.MusclecheckBox3b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
       self.ui.VolumeInputBox3.enabled = True
+      self.ui.PenAngleInputBox3.enabled = True     
+      self.ui.FmaxInputBox3.enabled = True     
     else:
       self.ui.VolumeInputBox3.enabled = False     
+      self.ui.PenAngleInputBox3.enabled = False     
+      self.ui.FmaxInputBox3.enabled = False     
       
     if self.ui.SimpleMarkupsWidget.currentNode() != None:   
       pointListNode = self.ui.SimpleMarkupsWidget.currentNode()
@@ -473,17 +523,26 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode.SetParameter("Simulate", str(self.ui.SimradioButton.checked))
     self._parameterNode.SetParameter("Empirical", str(self.ui.EmpradioButton.checked))
     self._parameterNode.SetParameter("Muscle1", str(self.ui.MusclecheckBox1.checked))      
+    self._parameterNode.SetParameter("Muscle1b", str(self.ui.MusclecheckBox1b.checked))      
     self._parameterNode.SetParameter("Force1", str(self.ui.ForceInputBox1.value))
     self._parameterNode.SetParameter("Angle1", str(self.ui.AngleInputBox1.value))
     self._parameterNode.SetParameter("Volume1", str(self.ui.VolumeInputBox1.value))
+    self._parameterNode.SetParameter("PenAngle1", str(self.ui.PenAngleInputBox1.value))   
+    self._parameterNode.SetParameter("Fmax1", str(self.ui.FmaxInputBox1.value))       
     self._parameterNode.SetParameter("Muscle2", str(self.ui.MusclecheckBox2.checked))      
+    self._parameterNode.SetParameter("Muscle2b", str(self.ui.MusclecheckBox2b.checked))      
     self._parameterNode.SetParameter("Force2", str(self.ui.ForceInputBox2.value))
     self._parameterNode.SetParameter("Angle2", str(self.ui.AngleInputBox2.value))  
     self._parameterNode.SetParameter("Volume2", str(self.ui.VolumeInputBox2.value))
+    self._parameterNode.SetParameter("PenAngle2", str(self.ui.PenAngleInputBox2.value))   
+    self._parameterNode.SetParameter("Fmax2", str(self.ui.FmaxInputBox2.value))   
     self._parameterNode.SetParameter("Muscle3", str(self.ui.MusclecheckBox3.checked))      
+    self._parameterNode.SetParameter("Muscle3b", str(self.ui.MusclecheckBox3b.checked))      
     self._parameterNode.SetParameter("Force3", str(self.ui.ForceInputBox3.value))
     self._parameterNode.SetParameter("Angle3", str(self.ui.AngleInputBox3.value)) 
     self._parameterNode.SetParameter("Volume3", str(self.ui.VolumeInputBox3.value))   
+    self._parameterNode.SetParameter("PenAngle3", str(self.ui.PenAngleInputBox3.value))   
+    self._parameterNode.SetParameter("Fmax3", str(self.ui.FmaxInputBox3.value))       
     self._parameterNode.SetParameter("FlipSegments", str(self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs()))
     self._parameterNode.SetNodeReferenceID("ResultsTable", self.ui.tableSelector.currentNodeID)
 
@@ -578,6 +637,14 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
       elif pointNode.GetDisplayNode().GetPointLabelsVisibility() == False:
         pointNode.GetDisplayNode().SetPointLabelsVisibility(1)
+
+    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
+      pointNode = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")
+      if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
+        pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
+      elif pointNode.GetDisplayNode().GetPointLabelsVisibility() == False:
+        pointNode.GetDisplayNode().SetPointLabelsVisibility(1)
+
 
   def onTipVis(self):
     """
@@ -904,21 +971,31 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.tableSelector.setCurrentNode(tableNode)
         
       # Compute output
-      self.logic.run(self.ui.SpecieslineEdit.text, 
-      self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
-      self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,
-      self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.selectedSegmentIDs(), self.ui.FlipcheckBox.checked,
-      self.ui.SimpleMarkupsWidget.currentNode(), self.ui.SimradioButton.checked,
-      self.ui.MusclecheckBox1.checked, self.ui.ForceInputBox1.value, self.ui.AngleInputBox1.value, self.ui.VolumeInputBox1.value, 
-      self.ui.MusclecheckBox2.checked, self.ui.ForceInputBox2.value, self.ui.AngleInputBox2.value, self.ui.VolumeInputBox2.value, 
-      self.ui.MusclecheckBox3.checked, self.ui.ForceInputBox3.value, self.ui.AngleInputBox3.value, self.ui.VolumeInputBox3.value,       
-      tableNode, self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs())
-            
+      if self._parameterNode.GetParameter("Simulate") == "True":
+        self.logic.run(self.ui.SpecieslineEdit.text, 
+        self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
+        self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,
+        self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.selectedSegmentIDs(), self.ui.FlipcheckBox.checked,
+        self.ui.SimpleMarkupsWidget.currentNode(), self.ui.SimradioButton.checked,
+        self.ui.MusclecheckBox1.checked, self.ui.ForceInputBox1.value, self.ui.AngleInputBox1.value, self.ui.VolumeInputBox1.value, self.ui.PenAngleInputBox1.value, self.ui.FmaxInputBox1.value, 
+        self.ui.MusclecheckBox2.checked, self.ui.ForceInputBox2.value, self.ui.AngleInputBox2.value, self.ui.VolumeInputBox2.value, self.ui.PenAngleInputBox2.value, self.ui.FmaxInputBox2.value, 
+        self.ui.MusclecheckBox3.checked, self.ui.ForceInputBox3.value, self.ui.AngleInputBox3.value, self.ui.VolumeInputBox3.value, self.ui.PenAngleInputBox3.value, self.ui.FmaxInputBox3.value,       
+        tableNode, self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs())
+      if self._parameterNode.GetParameter("Simulate") == "False":
+        self.logic.run(self.ui.SpecieslineEdit.text, 
+        self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
+        self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,
+        self.ui.SegmentSelectorWidget.currentNode(), self.ui.SegmentSelectorWidget.selectedSegmentIDs(), self.ui.FlipcheckBox.checked,
+        self.ui.SimpleMarkupsWidget.currentNode(), self.ui.SimradioButton.checked,
+        self.ui.MusclecheckBox1b.checked, self.ui.ForceInputBox1.value, self.ui.AngleInputBox1.value, self.ui.VolumeInputBox1.value, self.ui.PenAngleInputBox1.value, self.ui.FmaxInputBox1.value, 
+        self.ui.MusclecheckBox2b.checked, self.ui.ForceInputBox2.value, self.ui.AngleInputBox2.value, self.ui.VolumeInputBox2.value, self.ui.PenAngleInputBox2.value, self.ui.FmaxInputBox2.value, 
+        self.ui.MusclecheckBox3b.checked, self.ui.ForceInputBox3.value, self.ui.AngleInputBox3.value, self.ui.VolumeInputBox3.value, self.ui.PenAngleInputBox3.value, self.ui.FmaxInputBox3.value,       
+        tableNode, self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs())
       #if self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs() != "()":
       #  self.ui.FlipSegmentSelectorWidget.setSelectedSegmentIDs("()")
         
-      if self._parameterNode.GetParameter("ToothTips") == "False":
-        self.onTipVis()
+      #if self._parameterNode.GetParameter("ToothTips") == "False":
+      #  self.onTipVis()
          
     except Exception as e:
       slicer.util.errorDisplay("Failed to compute results: "+str(e))
@@ -956,28 +1033,46 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       parameterNode.SetParameter("Flip", "False")    
     if not parameterNode.GetParameter("Muscle1"):
      parameterNode.SetParameter("Muscle1", "True")    
+    if not parameterNode.GetParameter("Muscle1b"):
+     parameterNode.SetParameter("Muscle1b", "True")    
     if not parameterNode.GetParameter("Force1"):
      parameterNode.SetParameter("Force1", "1.0")
     if not parameterNode.GetParameter("Angle1"):
      parameterNode.SetParameter("Angle1", "90.0")
     if not parameterNode.GetParameter("Volume1"):
      parameterNode.SetParameter("Volume1", "1")    
+    if not parameterNode.GetParameter("PenAngle1"):
+     parameterNode.SetParameter("PenAngle1", "0.0")
+    if not parameterNode.GetParameter("Fmax1"):
+     parameterNode.SetParameter("Fmax1", "0.2")    
     if not parameterNode.GetParameter("Muscle2"):
      parameterNode.SetParameter("Muscle2", "False")    
+    if not parameterNode.GetParameter("Muscle2b"):
+     parameterNode.SetParameter("Muscle2b", "False")    
     if not parameterNode.GetParameter("Force2"):
      parameterNode.SetParameter("Force2", "1.0")
     if not parameterNode.GetParameter("Angle2"):
      parameterNode.SetParameter("Angle2", "90.0")
     if not parameterNode.GetParameter("Volume2"):
      parameterNode.SetParameter("Volume2", "1")  
+    if not parameterNode.GetParameter("PenAngle2"):
+     parameterNode.SetParameter("PenAngle2", "0.0")
+    if not parameterNode.GetParameter("Fmax2"):
+     parameterNode.SetParameter("Fmax2", "0.2")    
     if not parameterNode.GetParameter("Muscle3"):
-     parameterNode.SetParameter("Muscle3", "False")     
+     parameterNode.SetParameter("Muscle3", "False")   
+    if not parameterNode.GetParameter("Muscle3b"):
+     parameterNode.SetParameter("Muscle3b", "False")   
     if not parameterNode.GetParameter("Force3"):
      parameterNode.SetParameter("Force3", "1.0")
     if not parameterNode.GetParameter("Angle3"):
      parameterNode.SetParameter("Angle3", "90.0")
     if not parameterNode.GetParameter("Volume3"):
-     parameterNode.SetParameter("Volume3", "1")       
+     parameterNode.SetParameter("Volume3", "1")   
+    if not parameterNode.GetParameter("PenAngle3"):
+     parameterNode.SetParameter("PenAngle3", "0.0")
+    if not parameterNode.GetParameter("Fmax3"):
+     parameterNode.SetParameter("Fmax3", "0.2")
     if not parameterNode.GetParameter("FlipSegments"):
       parameterNode.SetParameter("FlipSegments", "()") 
     if not parameterNode.GetParameter("ToothTips"):
@@ -988,9 +1083,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
             
   def run(self, species, LowerJaw, UpperJaw, LeftJaw, RightJaw,
   segmentationNode, segmentList, flipcheckBox, pointNode, simulate, 
-  muscle1, force1, angle1, volume1,
-  muscle2, force2, angle2, volume2,
-  muscle3, force3, angle3, volume3,
+  muscle1, force1, angle1, volume1, penangle1, fmax1,
+  muscle2, force2, angle2, volume2, penangle2, fmax2,
+  muscle3, force3, angle3, volume3, penangle3, fmax3,
   tableNode, FlipsegmentList):
     """
     Run the processing algorithm.
@@ -1014,6 +1109,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
 
     if segmentationNode.GetSegmentation().GetConversionParameter("Conversion method") == "1":
       raise ValueError("Dental Dynamics is not compatible with the SurfaceNets method. Turn off to continue.")
+      
+    if segmentList == ():
+      raise ValueError("No tooth segments have been selected.")
     
     # Get visible segment ID list.
     # Get segment ID list
@@ -1026,13 +1124,13 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     table = tableNode.GetTable()
     
     SpeciesArray = vtk.vtkStringArray()
-    SpeciesArray.SetName("Species")
+    SpeciesArray.SetName("Specimen")
     
     JawIDArray = vtk.vtkStringArray()
     JawIDArray.SetName("Jaw ID")
     
     SideArray = vtk.vtkStringArray()
-    SideArray.SetName("Side of Face")
+    SideArray.SetName("Side ID")
     
     SegmentNameArray = vtk.vtkStringArray()
     SegmentNameArray.SetName("Tooth ID")
@@ -1058,13 +1156,20 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     SurfaceAreaArray = vtk.vtkFloatArray()
     SurfaceAreaArray.SetName("Surface Area (mm^2)")
     
+    OutLeverArray = vtk.vtkFloatArray()
+    OutLeverArray.SetName("Out-Lever (mm)")
+    
+        
     if muscle1 == True:
       InputForceArray1 = vtk.vtkFloatArray()
       InputForceArray1.SetName("M1 In Force (N)")
     
       InputAngleArray1 = vtk.vtkFloatArray()
       InputAngleArray1.SetName("M1 Angle (deg)")
-    
+      
+      InLeverArray1 = vtk.vtkFloatArray()
+      InLeverArray1.SetName("M1 In-Lever (mm)")  
+
       MechAdvArray1 = vtk.vtkFloatArray()
       MechAdvArray1.SetName("M1 Mech Adv")  
     
@@ -1077,7 +1182,12 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       
         VolumeArray1 = vtk.vtkFloatArray()
         VolumeArray1.SetName("M1 Volume (mm^3)")  
+        
+        PenAngleArray1 = vtk.vtkFloatArray()
+        PenAngleArray1.SetName("M1 Pen Angle (deg)")  
 
+        FmaxArray1 = vtk.vtkFloatArray()
+        FmaxArray1.SetName("M1 Fmax (N/mm^2)")  
       
     if muscle2 == True:
       InputForceArray2 = vtk.vtkFloatArray()
@@ -1085,7 +1195,10 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     
       InputAngleArray2 = vtk.vtkFloatArray()
       InputAngleArray2.SetName("M2 Angle (deg)")
-    
+
+      InLeverArray2 = vtk.vtkFloatArray()
+      InLeverArray2.SetName("M2 In-Lever (mm)")  
+
       MechAdvArray2 = vtk.vtkFloatArray()
       MechAdvArray2.SetName("M2 Mech Adv")  
     
@@ -1098,6 +1211,12 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
 
         VolumeArray2 = vtk.vtkFloatArray()
         VolumeArray2.SetName("M2 Volume (mm^3)")  
+        
+        PenAngleArray2 = vtk.vtkFloatArray()
+        PenAngleArray2.SetName("M2 Pen Angle (deg)")  
+
+        FmaxArray2 = vtk.vtkFloatArray()
+        FmaxArray2.SetName("M2 Fmax (N/mm^2)")  
 
     if muscle3 == True:
       InputForceArray3 = vtk.vtkFloatArray()
@@ -1106,19 +1225,27 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       InputAngleArray3 = vtk.vtkFloatArray()
       InputAngleArray3.SetName("M3 Angle (deg)")
     
+      InLeverArray3 = vtk.vtkFloatArray()
+      InLeverArray3.SetName("M3 In-Lever (mm)")  
+
       MechAdvArray3 = vtk.vtkFloatArray()
       MechAdvArray3.SetName("M3 Mech Adv")  
     
       FToothArray3 = vtk.vtkFloatArray()
       FToothArray3.SetName("M3 F-tooth (N)")  
-      
+
       if simulate == False: 
         FiberArray3 = vtk.vtkFloatArray()
         FiberArray3.SetName("M3 Fiber Length (mm)")  
 
         VolumeArray3 = vtk.vtkFloatArray()
         VolumeArray3.SetName("M3 Volume (mm^3)")  
+        
+        PenAngleArray3 = vtk.vtkFloatArray()
+        PenAngleArray3.SetName("M3 Pen Angle (deg)")  
 
+        FmaxArray3 = vtk.vtkFloatArray()
+        FmaxArray3.SetName("M3 Fmax (N/mm^2)")  
           
     FToothTotalArray = vtk.vtkFloatArray()
     FToothTotalArray.SetName("Total F-tooth (N)")  
@@ -1204,6 +1331,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     lengthLine.AddControlPoint(jointRAS)
     lengthLine.AddControlPoint(jawtipRAS)
     JawLength = lengthLine.GetMeasurement('length').GetValue()
+    shNode.SetItemParent(shNode.GetItemByDataNode(lengthLine), newFolder)
     #slicer.mrmlScene.RemoveNode(lengthLine)
     
     # measure in-lever
@@ -1263,7 +1391,8 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       fiberLine.AddControlPoint(originRAS)
       fiber1 = fiberLine.GetMeasurement('length').GetValue()
       slicer.mrmlScene.RemoveNode(fiberLine)
-      force1 = volume1/fiber1 * 0.2 # use default of 200 kPA of 
+      pcsa1 = volume1 * math.cos(math.radians(penangle1))/fiber1
+      force1 = pcsa1 * fmax1
       
     if muscle2 == True and simulate == False:
       insertRAS = [0,]*3
@@ -1280,7 +1409,8 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       fiberLine.AddControlPoint(originRAS)
       fiber2 = fiberLine.GetMeasurement('length').GetValue()
       slicer.mrmlScene.RemoveNode(fiberLine)
-      force2 = volume2/fiber2 * 0.8
+      pcsa2 = volume2 * math.cos(math.radians(penangle2))/fiber2
+      force2 = pcsa2 * fmax2
 
     if muscle3 == True and simulate == False:
       insertRAS = [0,]*3
@@ -1297,7 +1427,8 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       fiberLine.AddControlPoint(originRAS)
       fiber3 = fiberLine.GetMeasurement('length').GetValue()
       slicer.mrmlScene.RemoveNode(fiberLine)
-      force3 = volume3/fiber3 * 0.8
+      pcsa3 = volume3 * math.cos(math.radians(penangle3))/fiber3
+      force3 = pcsa3 * penangle3
       
     # measure muscle angle 
     if muscle1 == False and muscle2 == False and muscle3 == False:
@@ -1409,19 +1540,25 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
        if simulate == False:
          VolumeArray1.InsertNextValue(volume1)
          FiberArray1.InsertNextValue(fiber1)
+         PenAngleArray1.InsertNextValue(penangle1)
+         FmaxArray1.InsertNextValue(fmax1)
      if muscle2 == True:
        InputForceArray2.InsertNextValue(force2)
        InputAngleArray2.InsertNextValue(angle2)
        if simulate == False:
          VolumeArray2.InsertNextValue(volume2)
          FiberArray2.InsertNextValue(fiber2)
+         PenAngleArray2.InsertNextValue(penangle2)
+         FmaxArray2.InsertNextValue(fmax2)
      if muscle3 == True:
        InputForceArray3.InsertNextValue(force3)
        InputAngleArray3.InsertNextValue(angle3)
        if simulate == False:
          VolumeArray3.InsertNextValue(volume3)
          FiberArray3.InsertNextValue(fiber3)
-         
+         PenAngleArray3.InsertNextValue(penangle3)
+         FmaxArray3.InsertNextValue(fmax3)
+
      JawLengthArray.InsertNextValue(JawLength)
      
      # measure surface area
@@ -1641,6 +1778,7 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
      ToothTiplineNode.AddControlPoint(toothtipRAS)
      OutLever = ToothTiplineNode.GetMeasurement('length').GetValue()
      slicer.mrmlScene.RemoveNode(ToothTiplineNode)
+     OutLeverArray.InsertNextValue(OutLever)
      
      # get relative tooth position
      RelPosArray.InsertNextValue(ToothPos/JawLength)
@@ -1668,18 +1806,21 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
        MA1 = InLever1/OutLever
        ftooth_1 = force1 * math.sin(math.radians(angle1)) * MA1
        ftooth_total = ftooth_total + ftooth_1
+       InLeverArray1.InsertNextValue(InLever1)
        MechAdvArray1.InsertNextValue(MA1)
        FToothArray1.InsertNextValue(ftooth_1)
      if muscle2 == True:
        MA2 = InLever2/OutLever
        ftooth_2 = force2 * math.sin(math.radians(angle2)) * MA2
        ftooth_total = ftooth_total + ftooth_2
+       InLeverArray2.InsertNextValue(InLever2)
        MechAdvArray2.InsertNextValue(MA2)
        FToothArray2.InsertNextValue(ftooth_2)
      if muscle3 == True:
        MA3 = InLever3/OutLever
        ftooth_3 = force3 * math.sin(math.radians(angle3)) * MA3
        ftooth_total = ftooth_total + ftooth_3
+       InLeverArray3.InsertNextValue(InLever3)
        MechAdvArray3.InsertNextValue(MA3)
        FToothArray3.InsertNextValue(ftooth_3)
 
@@ -1730,25 +1871,44 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     tableNode.AddColumn(SurfaceAreaArray)
     tableNode.SetColumnDescription(SurfaceAreaArray.GetName(), "Tooth Surface Area")
     tableNode.SetColumnUnitLabel(SurfaceAreaArray.GetName(), "mm^2")  # TODO: use length unit
+
+    tableNode.AddColumn(OutLeverArray)
+    tableNode.SetColumnDescription(OutLeverArray.GetName(), "Out-Lever")
+    tableNode.SetColumnUnitLabel(OutLeverArray.GetName(), "mm")  # TODO: use length unit
+
     
     if muscle1 == True:
+      
+      tableNode.AddColumn(InLeverArray1)
+      tableNode.SetColumnDescription(InLeverArray1.GetName(), "Muscle 1 In-Lever")
+      tableNode.SetColumnUnitLabel(InLeverArray1.GetName(), "mm")  # TODO: use length unit
+     
       if simulate == False:
+        tableNode.AddColumn(VolumeArray1)
+        tableNode.SetColumnDescription(VolumeArray1.GetName(), "Muscle 1 Volume")
+        tableNode.SetColumnUnitLabel(VolumeArray1.GetName(), "mm^3")  # TODO: use length unit
+
         tableNode.AddColumn(FiberArray1)
         tableNode.SetColumnDescription(FiberArray1.GetName(), "Muscle 1 Fiber Length")
         tableNode.SetColumnUnitLabel(FiberArray1.GetName(), "mm")  # TODO: use length unit
-    
-        tableNode.AddColumn(VolumeArray1)
-        tableNode.SetColumnDescription(VolumeArray1.GetName(), "Muscle 1 Volume")
-        tableNode.SetColumnUnitLabel(VolumeArray1.GetName(), "mm^1")  # TODO: use length unit
+        
+        tableNode.AddColumn(PenAngleArray1)
+        tableNode.SetColumnDescription(PenAngleArray1.GetName(), "Muscle 1 Pennation Angle")
+        tableNode.SetColumnUnitLabel(PenAngleArray1.GetName(), "deg")  # TODO: use length unit
+        
+        tableNode.AddColumn(FmaxArray1)
+        tableNode.SetColumnDescription(FmaxArray1.GetName(), "Muscle 1 Max Isometric Stress")
+        tableNode.SetColumnUnitLabel(FmaxArray1.GetName(), "N/mm^2")  # TODO: use length unit
       
-      tableNode.AddColumn(InputAngleArray1)
-      tableNode.SetColumnDescription(InputAngleArray1.GetName(), "Muscle 1 Insertion Angle")
-      tableNode.SetColumnUnitLabel(InputAngleArray1.GetName(), "deg")  # TODO: use length unit
-         
       tableNode.AddColumn(InputForceArray1)
       tableNode.SetColumnDescription(InputForceArray1.GetName(), "Muscle 1 Input Force")
       tableNode.SetColumnUnitLabel(InputForceArray1.GetName(), "N")  # TODO: use length unit
     
+      tableNode.AddColumn(InputAngleArray1)
+      tableNode.SetColumnDescription(InputAngleArray1.GetName(), "Muscle 1 Insertion Angle")
+      tableNode.SetColumnUnitLabel(InputAngleArray1.GetName(), "deg")  # TODO: use length unit    
+
+
       tableNode.AddColumn(MechAdvArray1)
       tableNode.SetColumnDescription(MechAdvArray1.GetName(), "Muscle 1 Mechanical Advantage")
 
@@ -1757,23 +1917,36 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       tableNode.SetColumnUnitLabel(FToothArray1.GetName(), "N")  # TODO: use length unit
 
     if muscle2 == True:
-      if simulate == False:
+         
+      tableNode.AddColumn(InLeverArray2)
+      tableNode.SetColumnDescription(InLeverArray2.GetName(), "Muscle 2 In-Lever")
+      tableNode.SetColumnUnitLabel(InLeverArray2.GetName(), "mm")  # TODO: use length unit
+      
+      if simulate == False:    
+        tableNode.AddColumn(VolumeArray2)
+        tableNode.SetColumnDescription(VolumeArray2.GetName(), "Muscle 2 Volume")
+        tableNode.SetColumnUnitLabel(VolumeArray2.GetName(), "mm^3")  # TODO: use length unit
+
         tableNode.AddColumn(FiberArray2)
         tableNode.SetColumnDescription(FiberArray2.GetName(), "Muscle 2 Fiber Length")
         tableNode.SetColumnUnitLabel(FiberArray2.GetName(), "mm")  # TODO: use length unit
-    
-        tableNode.AddColumn(VolumeArray2)
-        tableNode.SetColumnDescription(VolumeArray2.GetName(), "Muscle 2 Volume")
-        tableNode.SetColumnUnitLabel(VolumeArray2.GetName(), "mm^2")  # TODO: use length unit
+        
+        tableNode.AddColumn(PenAngleArray2)
+        tableNode.SetColumnDescription(PenAngleArray2.GetName(), "Muscle 2 Pennation Angle")
+        tableNode.SetColumnUnitLabel(PenAngleArray2.GetName(), "deg")  # TODO: use length unit
+        
+        tableNode.AddColumn(FmaxArray2)
+        tableNode.SetColumnDescription(FmaxArray2.GetName(), "Muscle 2 Max Isometric Stress")
+        tableNode.SetColumnUnitLabel(FmaxArray2.GetName(), "N/mm^2")  # TODO: use length unit
       
-      tableNode.AddColumn(InputAngleArray2)
-      tableNode.SetColumnDescription(InputAngleArray2.GetName(), "Muscle 2 Insertion Angle")
-      tableNode.SetColumnUnitLabel(InputAngleArray2.GetName(), "deg")  # TODO: use length unit
-         
       tableNode.AddColumn(InputForceArray2)
       tableNode.SetColumnDescription(InputForceArray2.GetName(), "Muscle 2 Input Force")
       tableNode.SetColumnUnitLabel(InputForceArray2.GetName(), "N")  # TODO: use length unit
-    
+
+      tableNode.AddColumn(InputAngleArray2)
+      tableNode.SetColumnDescription(InputAngleArray2.GetName(), "Muscle 2 Insertion Angle")
+      tableNode.SetColumnUnitLabel(InputAngleArray2.GetName(), "deg")  # TODO: use length unit
+
       tableNode.AddColumn(MechAdvArray2)
       tableNode.SetColumnDescription(MechAdvArray2.GetName(), "Muscle 2 Mechanical Advantage")
 
@@ -1782,23 +1955,37 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       tableNode.SetColumnUnitLabel(FToothArray2.GetName(), "N")  # TODO: use length unit
 
     if muscle3 == True:
-      if simulate == False:
-        tableNode.AddColumn(FiberArray3)
-        tableNode.SetColumnDescription(FiberArray3.GetName(), "Muscle 3 Fiber Length")
-        tableNode.SetColumnUnitLabel(FiberArray3.GetName(), "mm")  # TODO: use length unit
-    
+         
+      tableNode.AddColumn(InLeverArray3)
+      tableNode.SetColumnDescription(InLeverArray3.GetName(), "Muscle 3 In-Lever")
+      tableNode.SetColumnUnitLabel(InLeverArray3.GetName(), "mm")  # TODO: use length unit
+      
+      if simulate == False:    
         tableNode.AddColumn(VolumeArray3)
         tableNode.SetColumnDescription(VolumeArray3.GetName(), "Muscle 3 Volume")
         tableNode.SetColumnUnitLabel(VolumeArray3.GetName(), "mm^3")  # TODO: use length unit
-      
-      tableNode.AddColumn(InputAngleArray3)
-      tableNode.SetColumnDescription(InputAngleArray3.GetName(), "Muscle 3 Insertion Angle")
-      tableNode.SetColumnUnitLabel(InputAngleArray3.GetName(), "deg")  # TODO: use length unit
-         
+        
+        tableNode.AddColumn(FiberArray3)
+        tableNode.SetColumnDescription(FiberArray3.GetName(), "Muscle 3 Fiber Length")
+        tableNode.SetColumnUnitLabel(FiberArray3.GetName(), "mm")  # TODO: use length unit
+
+        tableNode.AddColumn(PenAngleArray3)
+        tableNode.SetColumnDescription(PenAngleArray3.GetName(), "Muscle 3 Pennation Angle")
+        tableNode.SetColumnUnitLabel(PenAngleArray3.GetName(), "deg")  # TODO: use length unit
+        
+        tableNode.AddColumn(FmaxArray3)
+        tableNode.SetColumnDescription(FmaxArray3.GetName(), "Muscle 3 Max Isometric Stress")
+        tableNode.SetColumnUnitLabel(FmaxArray3.GetName(), "N/mm^2")  # TODO: use length unit
+
+
       tableNode.AddColumn(InputForceArray3)
       tableNode.SetColumnDescription(InputForceArray3.GetName(), "Muscle 3 Input Force")
       tableNode.SetColumnUnitLabel(InputForceArray3.GetName(), "N")  # TODO: use length unit
-    
+
+      tableNode.AddColumn(InputAngleArray3)
+      tableNode.SetColumnDescription(InputAngleArray3.GetName(), "Muscle 3 Insertion Angle")
+      tableNode.SetColumnUnitLabel(InputAngleArray3.GetName(), "deg")  # TODO: use length unit
+
       tableNode.AddColumn(MechAdvArray3)
       tableNode.SetColumnDescription(MechAdvArray3.GetName(), "Muscle 3 Mechanical Advantage")
 

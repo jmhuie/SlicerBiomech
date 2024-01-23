@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>1025</height>
+    <width>562</width>
+    <height>1066</height>
    </rect>
   </property>
   <layout class="QVBoxLayout">
@@ -323,7 +323,7 @@
          <item row="0" column="1">
           <widget class="QRadioButton" name="SimradioButton">
            <property name="text">
-            <string>Use Simulated Values</string>
+            <string>Simulate Values</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -339,7 +339,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Use Empirical Values</string>
+            <string>Empirical Values</string>
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
@@ -349,198 +349,471 @@
         </layout>
        </widget>
       </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QGroupBox" name="EmpgroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="0" column="1">
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="3" column="4">
+            <widget class="ctkDoubleSpinBox" name="PenAngleInputBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5">
+            <widget class="ctkDoubleSpinBox" name="FmaxInputBox1">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox3b">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 3:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="5">
+            <widget class="ctkDoubleSpinBox" name="FmaxInputBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="ctkDoubleSpinBox" name="PenAngleInputBox1">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Fmax (N/mm^2)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox1b">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 1:</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Pennation Angle (°)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5">
+            <widget class="ctkDoubleSpinBox" name="FmaxInputBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox2b">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 2:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="ctkDoubleSpinBox" name="PenAngleInputBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Volume (mm^3)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="ctkDoubleSpinBox" name="VolumeInputBox1">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="ctkDoubleSpinBox" name="VolumeInputBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="ctkDoubleSpinBox" name="VolumeInputBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item row="1" column="0" colspan="2">
-       <layout class="QGridLayout" name="gridLayout_6">
-        <item row="2" column="0">
-         <widget class="QCheckBox" name="MusclecheckBox2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Closing Muscle 2:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QCheckBox" name="MusclecheckBox3">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Closing Muscle 3:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Input Force (N)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="margin">
-           <number>-1</number>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Insertion Angle (°)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3">
-         <widget class="ctkDoubleSpinBox" name="ForceInputBox3">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="ctkDoubleSpinBox" name="ForceInputBox1">
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="4">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox3">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="ctkDoubleSpinBox" name="AngleInputBox1">
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>360.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>90.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="ctkDoubleSpinBox" name="ForceInputBox2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QCheckBox" name="MusclecheckBox1">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="text">
-           <string>Closing Muscle 1:</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-          <property name="autoExclusive">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Volume (cm3)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="5">
-         <widget class="ctkDoubleSpinBox" name="VolumeInputBox1"/>
-        </item>
-        <item row="2" column="5">
-         <widget class="ctkDoubleSpinBox" name="VolumeInputBox2"/>
-        </item>
-        <item row="3" column="5">
-         <widget class="ctkDoubleSpinBox" name="VolumeInputBox3"/>
-        </item>
-       </layout>
+       <widget class="QGroupBox" name="SimgroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QFormLayout" name="formLayout_4">
+         <item row="0" column="1">
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="2" column="4">
+            <widget class="ctkDoubleSpinBox" name="AngleInputBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>90.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="ctkDoubleSpinBox" name="ForceInputBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="ctkDoubleSpinBox" name="ForceInputBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 3:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="ctkDoubleSpinBox" name="AngleInputBox1">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::DecimalsAsMax</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>90.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox2">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 2:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="ctkDoubleSpinBox" name="ForceInputBox1">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Input Force (N)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="margin">
+              <number>-1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="MusclecheckBox1">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>Closing Muscle 1:</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="4">
+            <widget class="ctkDoubleSpinBox" name="AngleInputBox3">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="decimalsOption">
+              <set>ctkDoubleSpinBox::FixedDecimals</set>
+             </property>
+             <property name="minimum">
+              <double>0.010000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>360.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>90.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Insertion Angle (°)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </widget>
