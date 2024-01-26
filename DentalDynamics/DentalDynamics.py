@@ -165,10 +165,17 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # in batch mode, without a graphical user interface.
     self.logic = DentalDynamicsLogic()
     
+
     self.ui.SimpleMarkupsWidget.markupsSelectorComboBox().addEnabled = False
     slicer.modules.DentalDynamicsWidget.ui.label_Segment.text = "Select Teeth: "
     #self.ui.SegmentSelectorWidget.setCurrentNodeID('')
-        
+
+    # Create a new parameterNode
+    # This parameterNode stores all user choices in parameter values, node selections, etc.
+    # so that when the scene is saved and reloaded, these settings are restored.
+    self.ui.parameterNodeSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
+    self.setParameterNode(self.logic.getParameterNode())
+
     # Connections
 
     # These connections ensure that we update parameter node when scene is closed
@@ -177,6 +184,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
     # (in the selected parameter node).
+    self.ui.parameterNodeSelector.connect('currentNodeChanged(vtkMRMLNode*)', self.setParameterNode)
     self.ui.SpecieslineEdit.connect('textEdited(QString)', self.updateParameterNodeFromGUI)
     self.ui.LowerradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
     self.ui.UpperradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
@@ -231,8 +239,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.onTipVis()
     if self._parameterNode.GetParameter("ToothPos") == "True":
       self.onPositionVis()
-    if not self._parameterNode.GetNodeReference("JawPoints") and self._parameterNode.GetNodeReference("Segmentation") is not None:  
-      self.onTemplate()  
+    #if not self._parameterNode.GetNodeReference("JawPoints") and self._parameterNode.GetNodeReference("Segmentation") is not None:  
+    #  self.onTemplate()  
     
 
   def cleanup(self):
@@ -277,7 +285,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # Parameter node stores all user choices in parameter values, node selections, etc.
     # so that when the scene is saved and reloaded, these settings are restored.
 
-    self.setParameterNode(self.logic.getParameterNode())
+    #self.setParameterNode(self.logic.getParameterNode())
+    self.setParameterNode(self.ui.parameterNodeSelector.currentNode())
 
     # Select default input nodes if nothing is selected yet to save a few clicks for the user 
     if not self._parameterNode.GetNodeReference("Segmentation"):
@@ -288,21 +297,45 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.SegmentSelectorWidget.setSelectedSegmentIDs(Allsegments)
         
     if not self._parameterNode.GetNodeReference("JawPoints"):
-      jawPoints = slicer.mrmlScene.GetFirstNodeByName(f"Dental Dynamics Jaw Points")
+      jawPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points")
       if jawPoints:
         self._parameterNode.SetNodeReferenceID("JawPoints", jawPoints.GetID())  
         
-    if not self._parameterNode.GetNodeReference("JawPoints") and self._parameterNode.GetNodeReference("Segmentation") is not None:  
-      self.onTemplate()  
+    #if not self._parameterNode.GetNodeReference("JawPoints") and self._parameterNode.GetNodeReference("Segmentation") is not None:  
+    #  self.onTemplate()  
             
   def setParameterNode(self, inputParameterNode):
     """
     Set and observe parameter node.
     Observation is needed because when the parameter node is changed then the GUI must be updated immediately.
     """
-
+    
     if inputParameterNode:
       self.logic.setDefaultParameters(inputParameterNode)
+
+    # Set parameter node in the parameter node selector widget
+    wasBlocked = self.ui.parameterNodeSelector.blockSignals(True)
+    self.ui.parameterNodeSelector.setCurrentNode(inputParameterNode)
+    self.ui.parameterNodeSelector.blockSignals(wasBlocked)
+
+    if inputParameterNode == self._parameterNode:
+      # No change
+      return
+      
+    if self._parameterNode is not None and inputParameterNode != self._parameterNode:
+      if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+        pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
+        if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
+          pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
+      if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+        pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
+        if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
+          pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
+      if self._parameterNode.GetParameter("ToothTips") == "True":
+        self.onTipVis()
+      if self._parameterNode.GetParameter("ToothPos") == "True":
+        self.onPositionVis()
+
 
     # Unobserve previously selected parameter node and add an observer to the newly selected.
     # Changes of parameter node are observed so that whenever parameters are changed by a script or any other module
@@ -312,6 +345,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self._parameterNode = inputParameterNode
     if self._parameterNode is not None:
       self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self.updateGUIFromParameterNode)
+    self._parameterNode = inputParameterNode
 
     # Initial GUI update
     self.updateGUIFromParameterNode()
@@ -577,7 +611,10 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     Run processing when user clicks "Create new reference point list" button.
     """
-    pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Jaw Points")
+    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Jaw Points") is not None:
+      pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", slicer.mrmlScene.GenerateUniqueName("Dental Dynamics Jaw Points"))
+    else:  
+      pointListNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Jaw Points")
     pointListNode.GetDisplayNode().SetSelectedColor((1,1,1))
     pointListNode.GetDisplayNode().SetActiveColor((0.87843, 0.87843, 0.87843))
     pointListNode.GetDisplayNode().SetGlyphScale(4)
@@ -614,6 +651,19 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       pointListNode.RemoveObserver(TemplateObserver)
     if pointListNode is not None:  
       TemplateObserver = pointListNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, watchTemplate)
+      
+    if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+      pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
+      if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
+        pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
+    if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+      pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
+      if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
+        pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
+    if self._parameterNode.GetParameter("ToothTips") == "True":
+      self.onTipVis()
+    if self._parameterNode.GetParameter("ToothPos") == "True":
+      self.onPositionVis()
             
   def onSelectedControlPointChanged(self, controlPointIndex):
     """
@@ -627,19 +677,20 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       else:
         self.ui.SimpleMarkupsWidget.placeActive(0)
     
+  
   def onPointLabelVis(self):
     """
     Run process when user clicks "Tooth Label Vis" button.
     """  
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") != None:
-      pointNode = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points")
+    if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+      pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
       if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
         pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
       elif pointNode.GetDisplayNode().GetPointLabelsVisibility() == False:
         pointNode.GetDisplayNode().SetPointLabelsVisibility(1)
 
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
-      pointNode = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")
+    if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+      pointNode = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
       if pointNode.GetDisplayNode().GetPointLabelsVisibility() == True:
         pointNode.GetDisplayNode().SetPointLabelsVisibility(0)
       elif pointNode.GetDisplayNode().GetPointLabelsVisibility() == False:
@@ -651,7 +702,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run process when user clicks "Tooth Tip Vis" button.
     """  
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    outFolder = shNode.GetItemByName("Tooth Tips")
+    paraName = self._parameterNode.GetName()
+    outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
     
@@ -662,7 +714,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        outFolder = shNode.GetItemByName("Tooth Tips")
+        outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if outFolder > 0:
@@ -676,11 +728,11 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               ToothTiplineNode.SetNthControlPointPosition(0, jointRAS)     
 
     def outtoothMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") != None:
-        ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points")
+      if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+        ToothTipPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        outFolder = shNode.GetItemByName("Tooth Tips")
+        outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if outFolder > 0:
@@ -698,8 +750,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               ToothTiplineNode.SetNthControlPointPosition(1, toothtipRAS)     
 
         
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") != None:
-      ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points")
+    if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+      ToothTipPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
       if self.ui.SimpleMarkupsWidget.currentNode() != None:
         JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
@@ -710,8 +762,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         toothtipRAS = [0,]*3
         ToothTipPoints.GetNthControlPointPosition(i,toothtipRAS)
         segname = ToothTipPoints.GetNthControlPointLabel(i)
-        if slicer.mrmlScene.GetFirstNodeByName(segname + " Tooth Tip") == None:
-          ToothTiplineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", segname + " Tooth Tip")
+        if slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Tip") == None:
+          ToothTiplineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", paraName + " " + segname + " Tooth Tip")
           ToothTiplineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
           ToothTiplineNode.SetSaveWithScene(0)
           ToothTiplineNode.AddControlPoint(jointRAS)
@@ -722,7 +774,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           ToothTiplineNode.SetLocked(1)
           shNode.SetItemParent(shNode.GetItemByDataNode(ToothTiplineNode), outFolder)
         else: 
-          ToothTiplineNode = slicer.mrmlScene.GetFirstNodeByName(segname + " Tooth Tip")
+          ToothTiplineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Tip")
           if ToothTiplineNode.GetDisplayNode().GetVisibility() == 1:
             ToothTiplineNode.GetDisplayNode().SetVisibility(0)
           else:
@@ -730,7 +782,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       toothtipRAS = [0,]*3
       ToothTipPoints.GetNthControlPointPosition(0,toothtipRAS)
       segname = ToothTipPoints.GetNthControlPointLabel(0)
-      ToothTiplineNode = slicer.mrmlScene.GetFirstNodeByName(segname + " Tooth Tip")
+      ToothTiplineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Tip")
       if ToothTiplineNode.GetDisplayNode().GetVisibility() == 1:
         self._parameterNode.SetParameter("ToothTips","True")
       else:
@@ -741,7 +793,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run processing when user clicks "Tooth Position Vis" button.
     """
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    posFolder = shNode.GetItemByName("Tooth Positions")
+    paraName = self._parameterNode.GetName()
+    posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
     
@@ -752,7 +805,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        posFolder = shNode.GetItemByName("Tooth Positions")
+        posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if posFolder > 0:
@@ -766,11 +819,11 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               ToothPoslineNode.SetNthControlPointPosition(0, jointRAS)     
 
     def postoothMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
-        ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")
+      if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+        ToothPosPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        posFolder = shNode.GetItemByName("Tooth Positions")
+        posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if posFolder > 0:
@@ -781,15 +834,14 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               lineNames.append(shNode.GetItemDataNode(children.GetId(i)).GetName())
             lineNames = [sub.replace('Tooth Position', '') for sub in lineNames]
             for i in lineNames:
-              ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(i + "Tooth Position")
+              ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(i + " Tooth Position")
               toothposRAS = [0,]*3
               ptindex = ToothPosPoints.GetControlPointIndexByLabel(i)
               ToothPosPoints.GetNthControlPointPosition(ptindex,toothposRAS)
               ToothPoslineNode.SetNthControlPointPosition(1, toothposRAS)     
-
         
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
-      ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")
+    if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+      ToothPosPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
       if self.ui.SimpleMarkupsWidget.currentNode() != None:
         JawPoints = self.ui.SimpleMarkupsWidget.currentNode()
         jointRAS = [0,]*3
@@ -800,8 +852,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         toothposRAS = [0,]*3
         ToothPosPoints.GetNthControlPointPosition(i,toothposRAS)
         segname = ToothPosPoints.GetNthControlPointLabel(i)
-        if slicer.mrmlScene.GetFirstNodeByName(segname + "Tooth Position") == None:
-          ToothPoslineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", segname + "Tooth Position")
+        if slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + "Tooth Position") == None:
+          ToothPoslineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", paraName + " " + segname + " Tooth Position")
           ToothPoslineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
           ToothPoslineNode.GetDisplayNode().SetSelectedColor((0, 0.72, 0.92))
           ToothPoslineNode.GetDisplayNode().SetActiveColor((1, 0.65, 0.0))
@@ -814,7 +866,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           ToothPoslineNode.SetLocked(1)
           shNode.SetItemParent(shNode.GetItemByDataNode(ToothPoslineNode), posFolder)
         else: 
-          ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(segname + "Tooth Position")
+          ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Position")
           if ToothPoslineNode.GetDisplayNode().GetVisibility() == 1:
             ToothPoslineNode.GetDisplayNode().SetVisibility(0)
           else:
@@ -822,7 +874,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       toothposRAS = [0,]*3
       ToothPosPoints.GetNthControlPointPosition(0,toothposRAS)
       segname = ToothPosPoints.GetNthControlPointLabel(0)
-      ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(segname + "Tooth Position")
+      ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Position")
       if ToothPoslineNode.GetDisplayNode().GetVisibility() == 1:
         self._parameterNode.SetParameter("ToothPos","True")
       else:
@@ -834,12 +886,13 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run processing when user clicks "Reset" button.
     """
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    shFolderItemId = shNode.GetItemByName("Dental Dynamics Misc")
+    paraName = self._parameterNode.GetName()
+    shFolderItemId = shNode.GetItemByName(paraName + " Misc")
     if shFolderItemId != 0:
       shNode.RemoveItem(shFolderItemId)
     slicer.mrmlScene.RemoveNode(self.ui.tableSelector.currentNode())
 
-    outFolder = shNode.GetItemByName("Tooth Tips")
+    outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
     pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
     folderPlugin = pluginHandler.pluginByName("Folder")
     
@@ -850,7 +903,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        outFolder = shNode.GetItemByName("Tooth Tips")
+        outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if outFolder > 0:
@@ -864,11 +917,11 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               ToothTiplineNode.SetNthControlPointPosition(0, jointRAS)           
     
     def outtoothMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") != None:
-        ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points")
+      if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+        ToothTipPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        outFolder = shNode.GetItemByName("Tooth Tips")
+        outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if outFolder > 0:
@@ -892,7 +945,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         JawPoints.GetNthControlPointPosition(0,jointRAS)
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        posFolder = shNode.GetItemByName("Tooth Positions")
+        posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if posFolder > 0:
@@ -906,11 +959,11 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
               ToothPoslineNode.SetNthControlPointPosition(0, jointRAS)     
 
     def postoothMarkupChanged(unusedArg1=None, unusedArg2=None):
-      if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
-        ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")
+      if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+        ToothPosPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
         children = vtk.vtkIdList()
         shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-        posFolder = shNode.GetItemByName("Tooth Positions")
+        posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
         pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
         folderPlugin = pluginHandler.pluginByName("Folder")        
         if posFolder > 0:
@@ -934,20 +987,20 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       posjointMarkupsNodeObserver = JawPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, posjointMarkupChanged)
       JawPoints.RemoveObserver(posjointMarkupsNodeObserver)
 
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") != None:
-      ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points")
+    if self._parameterNode.GetNodeReferenceID("TipPoints") != None:
+      ToothTipPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("TipPoints"))
       outtoothMarkupsNodeObserver = ToothTipPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, outtoothMarkupChanged)
       ToothTipPoints.RemoveObserver(outtoothMarkupsNodeObserver)
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") != None:
-      ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points")      
+    if self._parameterNode.GetNodeReferenceID("PosPoints") != None:
+      ToothPosPoints = slicer.mrmlScene.GetNodeByID(self._parameterNode.GetNodeReferenceID("PosPoints"))
       postoothMarkupsNodeObserver = ToothPosPoints.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, postoothMarkupChanged)
       ToothPosPoints.RemoveObserver(postoothMarkupsNodeObserver)
-    
-    
+     
     self._parameterNode.SetParameter("ToothTips", "False")
     self._parameterNode.SetParameter("ToothPos", "False")
-
-    
+    self._parameterNode.SetNodeReferenceID("TipPoints", None)
+    self._parameterNode.SetNodeReferenceID("PosPoints", None)
+ 
     layoutManager = slicer.app.layoutManager()
     if layoutManager.layout == 166:
       layoutManager.setLayout(4)          
@@ -959,7 +1012,9 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     try:
       # Create nodes for results      
       tableNode = self.ui.tableSelector.currentNode()
-      expTable = "Dental Dynamics Table"
+      paraName = self._parameterNode.GetName()
+      expTable = paraName + " Table"
+      #expTable = "Dental Dynamics Table"
       if not tableNode:
         tableNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTableNode", expTable)
         self.ui.tableSelector.setCurrentNode(tableNode)
@@ -1112,7 +1167,17 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
       
     if segmentList == ():
       raise ValueError("No tooth segments have been selected.")
-    
+      
+    jointRAS = [0,]*3
+    pointNode.GetNthControlPointPosition(0,jointRAS)
+    if jointRAS == [0, 0, 0]:
+      raise ValueError("Jaw Joint not defined")
+
+    tipRAS = [0,]*3
+    pointNode.GetNthControlPointPosition(1,tipRAS)
+    if tipRAS == [0, 0, 0]:
+      raise ValueError("Jaw Tip not defined")
+      
     # Get visible segment ID list.
     # Get segment ID list
     visibleSegmentIds = vtk.vtkStringArray()
@@ -1266,25 +1331,26 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     elif RightJaw == True:
       side = "Right"
     shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
-    newFolder = shNode.GetItemByName("Dental Dynamics Misc")
-    outFolder = shNode.GetItemByName("Tooth Tips")
-    posFolder = shNode.GetItemByName("Tooth Positions")
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") == None:
-      ToothTipPoints = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Tooth Tip Points")
+    paraName = slicer.modules.DentalDynamicsWidget._parameterNode.GetName()
+    newFolder = shNode.GetItemByName(paraName + " Misc")
+    outFolder = shNode.GetItemByName(paraName + " Tooth Tips")
+    posFolder = shNode.GetItemByName(paraName + " Tooth Positions")
+    if slicer.modules.DentalDynamicsWidget._parameterNode.GetNodeReferenceID("TipPoints") == None:
+      ToothTipPoints = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", paraName + " Tooth Tip Points")
       ToothTipPoints.GetDisplayNode().SetPointLabelsVisibility(False)
     else:
-      ToothTipPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Tip Points") 
-    if slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") == None:
-      ToothPosPoints = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", "Dental Dynamics Tooth Position Points")
+      ToothTipPoints = slicer.mrmlScene.GetNodeByID(slicer.modules.DentalDynamicsWidget._parameterNode.GetNodeReferenceID("TipPoints"))
+    if slicer.modules.DentalDynamicsWidget._parameterNode.GetNodeReferenceID("PosPoints") == None:    
+      ToothPosPoints = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsFiducialNode", paraName + " Tooth Position Points")
       ToothPosPoints.GetDisplayNode().SetSelectedColor((0, 0.72, 0.92))
       ToothPosPoints.GetDisplayNode().SetActiveColor((1, 0.65, 0.0))
       ToothPosPoints.GetDisplayNode().SetPointLabelsVisibility(False)
     else:
-      ToothPosPoints = slicer.mrmlScene.GetFirstNodeByName("Dental Dynamics Tooth Position Points") 
+      ToothPosPoints = slicer.mrmlScene.GetNodeByID(slicer.modules.DentalDynamicsWidget._parameterNode.GetNodeReferenceID("PosPoints"))
     if newFolder == 0:
-      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Dental Dynamics Misc")      
-      outFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Tips")      
-      posFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Positions")
+      newFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), paraName + " Misc")      
+      outFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), paraName + " Tooth Tips")      
+      posFolder = shNode.CreateFolderItem(shNode.GetSceneItemID(), paraName + " Tooth Positions")
       pluginHandler = slicer.qSlicerSubjectHierarchyPluginHandler().instance()
       folderPlugin = pluginHandler.pluginByName("Folder")
       shNode.SetItemParent(shNode.GetItemByDataNode(ToothTipPoints), newFolder)
@@ -1295,10 +1361,10 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     shNode.SetItemExpanded(outFolder,0) 
     shNode.SetItemExpanded(posFolder,0) 
     # create models of the teeth
-    exportFolderItemId = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Segments")
+    exportFolderItemId = shNode.CreateFolderItem(shNode.GetSceneItemID(), paraName + " Tooth Segments")
     slicer.modules.segmentations.logic().ExportSegmentsToModels(segmentationNode, segmentList, exportFolderItemId)
     shNode.SetItemParent(exportFolderItemId, newFolder)
-    boxFolderItemId = shNode.CreateFolderItem(shNode.GetSceneItemID(), "Tooth Boxes")
+    boxFolderItemId = shNode.CreateFolderItem(shNode.GetSceneItemID(),  paraName + " Tooth Boxes")
     shNode.SetItemParent(boxFolderItemId, newFolder)
     shNode.SetItemExpanded(boxFolderItemId,0)
 
@@ -2020,6 +2086,9 @@ class DentalDynamicsLogic(ScriptedLoadableModuleLogic):
     # use custom layout
     customLayoutId=166
     layoutManager = slicer.app.layoutManager()
+    
+    slicer.modules.DentalDynamicsWidget._parameterNode.SetNodeReferenceID("PosPoints", ToothPosPoints.GetID())
+    slicer.modules.DentalDynamicsWidget._parameterNode.SetNodeReferenceID("TipPoints", ToothTipPoints.GetID())
 
     # Change layout to include plot and table      
     slicer.app.layoutManager().setLayout(customLayoutId)

@@ -15,6 +15,41 @@
   </property>
   <layout class="QVBoxLayout">
    <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>Set Project: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="qMRMLNodeComboBox" name="parameterNodeSelector">
+       <property name="nodeTypes">
+        <stringlist>
+         <string>vtkMRMLScriptedModuleNode</string>
+        </stringlist>
+       </property>
+       <property name="showHidden">
+        <bool>true</bool>
+       </property>
+       <property name="hideChildNodeTypes">
+        <stringlist notr="true"/>
+       </property>
+       <property name="baseName">
+        <string>DentalDynamics</string>
+       </property>
+       <property name="renameEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="interactionNodeSingletonTag">
+        <string notr="true"/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="ctkCollapsibleButton" name="specimenCollapsibleButton">
      <property name="text">
       <string>Specimen Data</string>
@@ -784,7 +819,7 @@
               <bool>false</bool>
              </property>
              <property name="decimals">
-              <number>1</number>
+              <number>3</number>
              </property>
              <property name="decimalsOption">
               <set>ctkDoubleSpinBox::FixedDecimals</set>
@@ -1173,6 +1208,22 @@
     <hint type="destinationlabel">
      <x>293</x>
      <y>681</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>DentalDynamics</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>parameterNodeSelector</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>532</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>337</x>
+     <y>21</y>
     </hint>
    </hints>
   </connection>
