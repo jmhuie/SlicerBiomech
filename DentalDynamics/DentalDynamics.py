@@ -254,7 +254,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Called each time the user opens this module.
     """
     # Make sure parameter node exists and observed
-    self.initializeParameterNode()
+    if self.ui.parameterNodeSelector.currentNode() is None:
+      self.setParameterNode(self.logic.getParameterNode())
 
   def exit(self):
     """
@@ -276,6 +277,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     """
     # If this module is shown while the scene is closed then recreate a new parameter node immediately
     if self.parent.isEntered:
+      self.setParameterNode(self.logic.getParameterNode())
       self.initializeParameterNode()
 
   def initializeParameterNode(self):
@@ -285,8 +287,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     # Parameter node stores all user choices in parameter values, node selections, etc.
     # so that when the scene is saved and reloaded, these settings are restored.
 
-    #self.setParameterNode(self.logic.getParameterNode())
-    self.setParameterNode(self.ui.parameterNodeSelector.currentNode())
+    self.setParameterNode(self.logic.getParameterNode())
 
     # Select default input nodes if nothing is selected yet to save a few clicks for the user 
     if not self._parameterNode.GetNodeReference("Segmentation"):
@@ -775,6 +776,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           shNode.SetItemParent(shNode.GetItemByDataNode(ToothTiplineNode), outFolder)
         else: 
           ToothTiplineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Tip")
+          ToothTiplineNode.SetNthControlPointPosition(0,jointRAS)
           if ToothTiplineNode.GetDisplayNode().GetVisibility() == 1:
             ToothTiplineNode.GetDisplayNode().SetVisibility(0)
           else:
@@ -852,7 +854,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         toothposRAS = [0,]*3
         ToothPosPoints.GetNthControlPointPosition(i,toothposRAS)
         segname = ToothPosPoints.GetNthControlPointLabel(i)
-        if slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + "Tooth Position") == None:
+        if slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Position") == None:
           ToothPoslineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode", paraName + " " + segname + " Tooth Position")
           ToothPoslineNode.GetDisplayNode().SetPropertiesLabelVisibility(False)
           ToothPoslineNode.GetDisplayNode().SetSelectedColor((0, 0.72, 0.92))
@@ -867,6 +869,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
           shNode.SetItemParent(shNode.GetItemByDataNode(ToothPoslineNode), posFolder)
         else: 
           ToothPoslineNode = slicer.mrmlScene.GetFirstNodeByName(paraName + " " + segname + " Tooth Position")
+          ToothPoslineNode.SetNthControlPointPosition(0,jointRAS)
           if ToothPoslineNode.GetDisplayNode().GetVisibility() == 1:
             ToothPoslineNode.GetDisplayNode().SetVisibility(0)
           else:

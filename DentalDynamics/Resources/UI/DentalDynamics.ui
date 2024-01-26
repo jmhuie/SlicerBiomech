@@ -1057,7 +1057,7 @@
    <item>
     <widget class="QPushButton" name="applyButton">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="toolTip">
       <string>Run the algorithm.</string>
