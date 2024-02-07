@@ -7,7 +7,7 @@ These inputs are used to automatically calculate jaw length and muscle in-levers
 
 ### Usage
 
-#### Inputs
+### Inputs
 
 **Specimen:** Name of the specimen.
 
@@ -39,7 +39,7 @@ These inputs are used to automatically calculate jaw length and muscle in-levers
 
 Coming Soon
 
-#### Tutorial
+### Tutorial
 
 Please see: https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials/DentalDynamics
 
