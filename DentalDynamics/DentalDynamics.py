@@ -105,7 +105,7 @@ def registerSampleData():
         fileNames="USNM279384_Aneides_lugubris_left_jaw.seg.nrrd",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="Dental Dynamics Jaw Segment",
+        nodeNames="Dental Dynamics Demo Segment",
         loadFileType='SegmentationFile',
     )
     
@@ -120,7 +120,7 @@ def registerSampleData():
         fileNames="Dental.Dynamics.Jaw.Points.mrk.json",
         #checksums="SHA256:1a64f3f422eb3d1c9b093d1a18da354b13bcf307907c66317e2463ee530b7a97",
         # This node name will be used when the data set is loaded
-        nodeNames="Dental Dynamics Jaw Points",
+        nodeNames="Dental Dynamics Demo Jaw Points",
         loadFileType='MarkupsFile',
     )
 
@@ -197,8 +197,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.updateParameterNodeFromGUI)
     self.ui.SimpleMarkupsWidget.connect("markupsNodeChanged()", self.onMarkupNodeChanged)
     self.ui.SimpleMarkupsWidget.connect("currentMarkupsControlPointSelectionChanged(int)", self.onSelectedControlPointChanged)
-    self.ui.SimradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
-    self.ui.EmpradioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+    self.ui.SimradioButton.connect('toggled(bool)', self.updateGUIFromParameterNode)
+    self.ui.EmpradioButton.connect('toggled(bool)', self.updateGUIFromParameterNode)
     self.ui.MusclecheckBox1.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.MusclecheckBox1b.connect("stateChanged(int)", self.updateParameterNodeFromGUI)
     self.ui.ForceInputBox1.connect("valueChanged(double)", self.updateParameterNodeFromGUI)
@@ -374,8 +374,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.SegmentSelectorWidget.setSelectedSegmentIDs(eval(self._parameterNode.GetParameter("Segments")))
     self.ui.FlipcheckBox.checked = (self._parameterNode.GetParameter("Flip") == "True")
     self.ui.SimpleMarkupsWidget.setCurrentNode(self._parameterNode.GetNodeReference("JawPoints"))
-    self.ui.SimradioButton.checked = (self._parameterNode.GetParameter("Simulate") == "True")
-    self.ui.EmpradioButton.checked = (self._parameterNode.GetParameter("Empirical") == "True")   
+    #self.ui.SimradioButton.checked = (self._parameterNode.GetParameter("Simulate") == "True")
+    #self.ui.EmpradioButton.checked = (self._parameterNode.GetParameter("Empirical") == "True")   
     self.ui.MusclecheckBox1.checked = (self._parameterNode.GetParameter("Muscle1") == "True")
     self.ui.MusclecheckBox1b.checked = (self._parameterNode.GetParameter("Muscle1b") == "True")
     self.ui.ForceInputBox1.value = float(self._parameterNode.GetParameter("Force1"))
@@ -472,28 +472,28 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.EmpradioButton.enabled = False
     
     # update parameters based on which muscles are selected
-    if self._parameterNode.GetParameter("Muscle1") == "True" and self.ui.MusclecheckBox1.enabled == True and self._parameterNode.GetParameter("Simulate") == "True":
+    if self._parameterNode.GetParameter("Muscle1") == "True" and self.ui.MusclecheckBox1.enabled == True and self.ui.SimradioButton.checked  == True:
       self.ui.ForceInputBox1.enabled = True
       self.ui.AngleInputBox1.enabled = True
     else:
       self.ui.ForceInputBox1.enabled = False
       self.ui.AngleInputBox1.enabled = False       
         
-    if self._parameterNode.GetParameter("Muscle2") == "True" and self.ui.MusclecheckBox2.enabled == True and self._parameterNode.GetParameter("Simulate") == "True":
+    if self._parameterNode.GetParameter("Muscle2") == "True" and self.ui.MusclecheckBox2.enabled == True and self.ui.SimradioButton.checked == True:
       self.ui.ForceInputBox2.enabled = True
       self.ui.AngleInputBox2.enabled = True
     else:
       self.ui.ForceInputBox2.enabled = False
       self.ui.AngleInputBox2.enabled = False
 
-    if self._parameterNode.GetParameter("Muscle3") == "True" and self.ui.MusclecheckBox3.enabled == True and self._parameterNode.GetParameter("Simulate") == "True":
+    if self._parameterNode.GetParameter("Muscle3") == "True" and self.ui.MusclecheckBox3.enabled == True and self.ui.SimradioButton.checked == True:
       self.ui.ForceInputBox3.enabled = True
       self.ui.AngleInputBox3.enabled = True
     else:
       self.ui.ForceInputBox3.enabled = False
       self.ui.AngleInputBox3.enabled = False
       
-    if self._parameterNode.GetParameter("Muscle1b") == "True" and self.ui.MusclecheckBox1b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle1b") == "True" and self.ui.MusclecheckBox1b.enabled == True and self.ui.EmpradioButton.checked == True:
       self.ui.VolumeInputBox1.enabled = True
       self.ui.PenAngleInputBox1.enabled = True     
       self.ui.FmaxInputBox1.enabled = True     
@@ -502,7 +502,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.PenAngleInputBox1.enabled = False     
       self.ui.FmaxInputBox1.enabled = False     
         
-    if self._parameterNode.GetParameter("Muscle2b") == "True" and self.ui.MusclecheckBox2b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle2b") == "True" and self.ui.MusclecheckBox2b.enabled == True and self.ui.EmpradioButton.checked == True:
       self.ui.VolumeInputBox2.enabled = True
       self.ui.PenAngleInputBox2.enabled = True     
       self.ui.FmaxInputBox2.enabled = True     
@@ -511,7 +511,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.ui.PenAngleInputBox2.enabled = False     
       self.ui.FmaxInputBox2.enabled = False     
 
-    if self._parameterNode.GetParameter("Muscle3b") == "True" and self.ui.MusclecheckBox3b.enabled == True and self._parameterNode.GetParameter("Empirical") == "True":
+    if self._parameterNode.GetParameter("Muscle3b") == "True" and self.ui.MusclecheckBox3b.enabled == True and self.ui.EmpradioButton.checked == True:
       self.ui.VolumeInputBox3.enabled = True
       self.ui.PenAngleInputBox3.enabled = True     
       self.ui.FmaxInputBox3.enabled = True     
@@ -555,8 +555,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self._parameterNode.SetNodeReferenceID("JawPoints", self.ui.SimpleMarkupsWidget.currentNode().GetID())
     else: 
       self._parameterNode.SetNodeReferenceID("JawPoints", None)
-    self._parameterNode.SetParameter("Simulate", str(self.ui.SimradioButton.checked))
-    self._parameterNode.SetParameter("Empirical", str(self.ui.EmpradioButton.checked))
+    #self._parameterNode.SetParameter("Simulate", str(self.ui.SimradioButton.checked))
+    #self._parameterNode.SetParameter("Empirical", str(self.ui.EmpradioButton.checked))
     self._parameterNode.SetParameter("Muscle1", str(self.ui.MusclecheckBox1.checked))      
     self._parameterNode.SetParameter("Muscle1b", str(self.ui.MusclecheckBox1b.checked))      
     self._parameterNode.SetParameter("Force1", str(self.ui.ForceInputBox1.value))
@@ -645,11 +645,13 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     Run process when user changes the point list.
     """    
     pointListNode = self.ui.SimpleMarkupsWidget.currentNode()
+    
     def watchTemplate(unusedArg1 = None, unusedArg2 = None):
       self.updateGUIFromParameterNode()
     if pointListNode is not None:
       TemplateObserver = pointListNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, watchTemplate)
       pointListNode.RemoveObserver(TemplateObserver)
+      slicer.modules.markups.logic().SetActiveListID(pointListNode)
     if pointListNode is not None:  
       TemplateObserver = pointListNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, watchTemplate)
       
@@ -665,6 +667,8 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       self.onTipVis()
     if self._parameterNode.GetParameter("ToothPos") == "True":
       self.onPositionVis()
+      
+    self.updateGUIFromParameterNode()
             
   def onSelectedControlPointChanged(self, controlPointIndex):
     """
@@ -1029,7 +1033,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.tableSelector.setCurrentNode(tableNode)
         
       # Compute output
-      if self._parameterNode.GetParameter("Simulate") == "True":
+      if self.ui.SimradioButton.checked == True:
         self.logic.run(self.ui.SpecieslineEdit.text, 
         self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
         self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,
@@ -1039,7 +1043,7 @@ class DentalDynamicsWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.MusclecheckBox2.checked, self.ui.ForceInputBox2.value, self.ui.AngleInputBox2.value, self.ui.VolumeInputBox2.value, self.ui.PenAngleInputBox2.value, self.ui.FmaxInputBox2.value, 
         self.ui.MusclecheckBox3.checked, self.ui.ForceInputBox3.value, self.ui.AngleInputBox3.value, self.ui.VolumeInputBox3.value, self.ui.PenAngleInputBox3.value, self.ui.FmaxInputBox3.value,       
         tableNode, self.ui.FlipSegmentSelectorWidget.selectedSegmentIDs())
-      if self._parameterNode.GetParameter("Simulate") == "False":
+      if self.ui.EmpradioButton.checked == True:
         self.logic.run(self.ui.SpecieslineEdit.text, 
         self.ui.LowerradioButton.checked, self.ui.UpperradioButton.checked,
         self.ui.LeftradioButton.checked, self.ui.RightradioButton.checked,

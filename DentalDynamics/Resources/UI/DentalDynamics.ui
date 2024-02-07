@@ -917,7 +917,7 @@
       <item row="5" column="0" colspan="2">
        <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
         <property name="title">
-         <string>Toggle visibility of out-lever and tooth position lines:</string>
+         <string>Toggle visibility of tooth labels and out-lever and tooth position lines:</string>
         </property>
         <property name="collapsed">
          <bool>false</bool>
@@ -960,7 +960,7 @@
       <item row="6" column="0" colspan="2">
        <widget class="ctkCollapsibleGroupBox" name="groupBox_2">
         <property name="title">
-         <string>Flip out-lever and position calculations for selected segments:</string>
+         <string>Flip the position of the tooth tip and base points for selected segments:</string>
         </property>
         <property name="collapsed">
          <bool>false</bool>
