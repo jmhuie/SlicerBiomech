@@ -1,4 +1,4 @@
-# Dental Dynamics Tutorial
+## Dental Dynamics Tutorial
 
 The `Dental Dynamics` module is used to model vertebrate jaw function and calculate several key jaw and tooth traits. 
 The module requires a segmentation file containing individually segmented teeth and user-defined anatomical landmarks (jaw joint, tip of the jaw, and the insertion and origin site of up to three jaw closing muscles). 
@@ -31,15 +31,15 @@ Then find `Dental Dynamics` module under the SlicerBiomech module menu folder an
 13. To analyze a new jaw, navigate to **Set Project** at the top of `Dental Dynamics` and Create a new ScriptedModule. Creating new projects for each jaw is recommended when using different reference points and parameters for each jaw.
  
 
-## Fixing incorrect tooth points
+### Fixing incorrect tooth points
 
 Let's say `Dental Dynamics` has incorrectly identified the position of the tooth tip and base for some or all of the teeth on the jaw. If the points are slightly off, they can be manually adjusted and the results table will be updated by clicking the **Apply** button. 
 If the tip and base of some teeth are swapped entirely, use the **Show/Hide Tooth Labels** button to identify which teeth need the tip and base points flipped, and use the **Segment** selector to select which teeth are incorrect and click **Apply** again. If the tip and base points are flipped for all of the teeth, click the **Clear Results** button, select the **Flip Calculations** check box, and click **Apply**.
 
-## Using 3D Meshes (.obj, .stl, .ply)
+### Using 3D Meshes (.obj, .stl, .ply)
 
 If you would like to use `Dental Dynamics` with a pre-existing 3D model of a jaw load it into 3D Slicer and navigate to the `Data` module. Right-click your model and select "Convert model to segmentation node". If the model needs additional segmenting, right-click the new segmentation node and select "Export visible segments to binary labelmap" to make a labelmap that can be used as segmentation node's reference volume in the `Segment Editor` module.
 
-## Additional Tips
+### Additional Tips
 
 1.  If a tooth segment has a hole in it or the base is hollow, then surface area measurements will be overestimated. Use the `SurfaceWrapSoldify` module to make the teeth solid before computing results.
