@@ -41,3 +41,5 @@ If the tip and base of some teeth are swapped entirely, use the **Show/Hide Toot
 If you would like to use `Dental Dynamics` with a pre-existing 3D model of a jaw load it into 3D Slicer and navigate to the `Data` module. Right-click your model and select "Convert model to segmentation node". If the model needs additional segmenting, right-click the new segmentation node and select "Export visible segments to binary labelmap" to make a labelmap that can be used as segmentation node's reference volume in the `Segment Editor` module.
 
 ## Additional Tips
+
+* If a tooth segment has a whole in it or the base is hollow, then surface area measurements will be overestimated. Use the `SurfaceWrapSoldify` module to make the teeth solid before computing results.
