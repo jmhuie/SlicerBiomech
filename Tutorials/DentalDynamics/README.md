@@ -5,7 +5,7 @@ The module requires a segmentation file containing individually segmented teeth 
 These inputs are used to automatically calculate jaw length and muscle in-levers, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress. 
 `Dental Dynamics` can also take additional user inputs to estimate muscle parameters such as input force and insertion angle to provide more informed estimates of bite force.
 
-To use `Dental Dynamics`, first go to the `Sample Data` module and download the **Demo Skull**, **Demo Segment**, and the **Demo Jaw Points**. In this example, we will being using data from a CT scan of the arboreal 
+To use `Dental Dynamics`, first go to the `Sample Data` module and download the **Demo Skull**, **Demo Segment**, and the **Demo Jaw Points**. In this example, we will be using data from a CT scan of the arboreal 
 salamander (*Aneides lugubris*), originally obtained from [MorphoSource](https://www.morphosource.org/concern/media/000085413?locale=en).
 
 Then find `Dental Dynamics` module under the SlicerBiomech module menu folder and:
@@ -43,3 +43,4 @@ If you would like to use `Dental Dynamics` with a pre-existing 3D model of a jaw
 ### Additional Tips
 
 1.  If a tooth segment has a hole in it or the base is hollow, then surface area measurements will be overestimated. Use the `SurfaceWrapSoldify` module to make the teeth solid before computing results.
+2.  Selecting the correct **Side of Face** is somewhat important because it’s used to help discern the tips and bases of the teeth.
