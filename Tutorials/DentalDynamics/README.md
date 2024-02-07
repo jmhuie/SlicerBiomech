@@ -26,12 +26,12 @@ Then find `Dental Dynamics` module under the SlicerBiomech module menu folder an
 
 <img src="DentalDynamicsTut2.png">
 
-11. Visually inspect the points to ensure that `Dental Dynamics` has correctly identified the tip and base of each tooth. Use **Show/Hide Out-lever lines** and **Show/Hide Position lines** to draw lines from the jaw joint to the tip and base of each tooth, respectively. If there is a mistake, see the Troubleshooting steps.
+11. Visually inspect the points to ensure that `Dental Dynamics` has correctly identified the tip and base of each tooth. Use **Show/Hide Out-lever lines** and **Show/Hide Position lines** to draw lines from the jaw joint to the tip and base of each tooth, respectively. If there is a mistake, see next section on fixing incorrect tooth points.
 12. Export results by navigating to the `Data` module. Right-click the results table and select "Export to file..." to export as a .csv file. Alternatively, copy cells from the table and paste directly into a spreadsheet.
 13. To analyze a new jaw, navigate to **Set Project** at the top of `Dental Dynamics` and Create a new ScriptedModule. Creating new projects for each jaw is recommended when using different reference points and parameters for each jaw.
  
 
-## Troubleshooting
+## Fixing incorrect tooth points
 
 Let's say `Dental Dynamics` has incorrectly identified the position of the tooth tip and base for some or all of the teeth on the jaw. If the points are slightly off, they can be manually adjusted and the results table will be updated by clicking the **Apply** button. 
 If the tip and base of some teeth are swapped entirely, use the **Show/Hide Tooth Labels** button to identify which teeth need the tip and base points flipped, and use the **Segment** selector to select which teeth are incorrect and click **Apply** again. If the tip and base points are flipped for all of the teeth, click the **Clear Results** button, select the **Flip Calculations** check box, and click **Apply**.
@@ -42,4 +42,4 @@ If you would like to use `Dental Dynamics` with a pre-existing 3D model of a jaw
 
 ## Additional Tips
 
-* If a tooth segment has a whole in it or the base is hollow, then surface area measurements will be overestimated. Use the `SurfaceWrapSoldify` module to make the teeth solid before computing results.
+1.  If a tooth segment has a hole in it or the base is hollow, then surface area measurements will be overestimated. Use the `SurfaceWrapSoldify` module to make the teeth solid before computing results.
