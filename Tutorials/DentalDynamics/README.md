@@ -1,63 +1,44 @@
 # DentalDynamics Tutorial
 
-This tutorial explains how to use `Dental Dynamics` to measure and calculate jaw and tooth mechanical traits. This is a SlicerBiomech specific function and in this example we are using the *Aneides lugubris* sample data set from the SlicerBiomech tab of the  `Sample Data`  module.
-
-Features of DentalDynamics:
-
--  Designed to calculate several jaw and tooth traits using a 3D Slicer segmentation with user-defined anatomical landmarks (jaw joint, tip of the jaw, and the insertion and origin of up to three jaw closing muscles). 
-- These inputs calculate jaw length and muscle in-levers, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress.
-- Optional user-defined muscle parameters can be provided to calculate more biologically accurate estimates of bite force.
-- Equipped with an easy-to-use graphical user interface that allows the user to edit specimen metadata, select inputs and place landmarks, and adjust additional muscle parameters. 
-- Results can then be readily imported into other statistical software 
-- The module may also be run on imported 3D mesh files (.obj, .ply, .stl) by easily converting them into segmentation nodes.
+The `Dental Dynamics` module is used to model vertebrate jaw function and calculate several key jaw and tooth traits. 
+The module requires a segmentation file containing individually segmented teeth and user-defined anatomical landmarks (jaw joint, tip of the jaw, and the insertion and origin site of up to three jaw closing muscles). 
+These inputs are used to automatically calculate jaw length and muscle in-levers, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress.  
+`Dental Dynamics` can also take additional user inputs to estimate muscle parameters such as input force and insertion angle to provide more informed estimates of bite force.
 
 
-## 
+To use `Dental Dynamics`, first go to the `Sample Data` module and download the **Demo Skull**, **Demo Segment**, and the **Demo Jaw Points**. In this example, we will being using data from a CT scan of the arboreal 
+salamander (*Aneides lugubris*), originally obtained from MorphoSource.
 
-1.  After segmenting your teeth and jaws, go to the  `Dental Dynamics`  module. Chose the segmentation node you want to modify, identify the jaw and click   **Create new reference point list** .
+Then find `Dental Dynamics` module under the SlicerBiomech module menu folder and:
 
-2.  Every side of a jaw should get its own segmentation node. For example, if you were to use the left and right sides of the lower jaw, they and their teeth should be separated into two different segmentation nodes. To copy or move segments between segmentation nodes, use the `Segementations`  module. You can also drag segments into different segmentation nodes in the `Data`  module.
+1. Start by entering in the **Specimen Data**. In this case, we will be analyzing the lower left jaw of *Aneides lugubris*
 
-3. The first segment of each segmentation node should be the jaw segment, followed by the individual tooth segments.
+2. Then select **Dental Dynamics Demo Segment** as the **Tooth Segmentation**. The **Dental Dynamics Demo Segment** may have already been selected by default.
 
-4. Be sure to name each tooth in a way that it can be easily found and controlled. For example, **Lower left tooth 1** should represent the same tooth in each species of your data set.
+3. **Select Teeth** to perform computations on. Here we will unselect the "LowerJaw_left" segment. You may use the **Select All** or **Select None** buttons to quickly select or deselect segments.
 
-5. Skip first segment – check this box if the first visible segment is the jaw segment. This will cause `DentalDynamics` to ignore the jaw segment when attempting compute traits for the individual teeth segments
+<img src="DentalDynamicsTut1.png">
 
-## Setting your points
+4. Under **Set Reference Points** select the **Dental Dynamics Demo Jaw Points**. If you are using your own data for the first time, click the **Create new reference point list** to create a blank point list.
 
-The reference list will populate with three empty variables: 
+5. The Jaw Joint, Tip of Jaw, Closing Muscle 1 Insertion, and Closing Muscle 1 Origin points are all predefined in the sample data. Clicking the label name of undefined points will activate point placement mode. To clear unwanted points, enter the position as 0,0,0 or right-click the point in the 3D view and select **Clear control point position**.
 
- 1. Jaw Joint
- 2. Tip of Jaw
- 3. Muscle insertion site
+6. Change the **Input Force** and **Insertion Angle** to simulate bite force with. Retaining the default values (1 and 90, respectively) will ensure tooth force calculations reflect variation in mechanical advantage. 
 
-Click on the first point item so that it is highlighted, then use the provided control point tool to place a point on the jaw joint. Repeat this step for the tip of the jaw and the muscle insertion site. 
+7. If more detailed information about muscles is known and the origin of at least one closing muscle is defined, select **Empirical Values** as the **Parameter Type** to use a different set of inputs. Only values for the selected **Parameter Type** will be used during calculations.
 
-You can next desired your muscle input force and insertion angle. Muscle input force is defined as the magnitude of closing force supplied by the jaw closing muscles. If force is not known, `DentalDynamics` assumes a default of 1 N.
+8. The option to add additional closing muscles and change their parameter values will remain disabled (greyed out) until the insertion point (Simulate) or the insertion and origin points (Empirical) have been defined for that muscle.
 
- If muscle insertion angle is not known, `DentalDynamics` assumes a default of 90 degrees
+9. If no **Results Table** has been selected, a new one will be created by default.
+
+10. Click the **Apply** button to perform calculations. Upon completion of the analysis, a results table should have populated the scene and points should have been placed at the tip (red) and base (blue) of each selected tooth. 
+
+<img src="DentalDynamicsTut1.png">
+
+11. Visually inspect the points to ensure that `Dental Dynamics` has correctly identified the tip and base of each tooth. 
+
+12. Export results by switching to the `Data` module, right-clicking the results table an export as a .csv file. Alternatively, copy cells from the table and paste directly into a spreadsheet.
  
-## Outputs
-
-Set the results table to *create new table*. You can rename the table file by clicking the drop down menu and selecting *rename current table* 
-
-Before hitting apply, make sure  **only** the desired jaw and tooth layers are visible and any unwanted segments are hidden. `DentalDynamics` will only perform calculations on the teeth segments are turned on and will ignore any that are turned off or invisible.  Leave all teeth visible.
-
-The output will be a table of values and points drawn that represents the point stress (red) and position of the teeth (blue). 
-
-To check your results, that all calculations are drawn properly toggle on visibility of tooth-levers and positions under the Advanced tab. If any point need to be moved simply drag them to the correct spot and hit apply. The table will be regenerated and overwrite the previous information
-
-## Exporting data
-
-To save your table we recommend navigating to the `Data` module, highlighting you table and exporting it directly as a .csv file. Alternatively, you can copy all cells in the generated table and paste it directly into a separate spreadsheet. 
-
-
-# Citation
-
-If you use this module please cite the following references in your posters, presentations, and manuscripts. 
-
-
 
 
 
