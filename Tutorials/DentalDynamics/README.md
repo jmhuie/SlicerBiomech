@@ -44,7 +44,7 @@ Then find `Dental Dynamics` module under the SlicerBiomech module menu folder an
 ## Troubleshooting
 
 Let's say `Dental Dynamics` has incorrectly identified the position of the tooth tip and base for some or all of the teeth on the jaw. If the points are slightly off, they can be manually adjusted and the results table will be updated by clicking the **Apply** button. 
-If the tip and base of some teeth are swapped entirely, use the **Show/Hide Tooth Labels** button to identify which teeth need the tip and base points flipped, and use the **Segment** selector to select which teeth are incorrect and click *Apply* again. If the tip and base points are flipped for all of the teeth, **Clear Results** and check the **Flip Calculations** check box.
+If the tip and base of some teeth are swapped entirely, use the **Show/Hide Tooth Labels** button to identify which teeth need the tip and base points flipped, and use the **Segment** selector to select which teeth are incorrect and click *Apply* again. If the tip and base points are flipped for all of the teeth, use the **Clear Results** button, select the **Flip Calculations** check box, and click **Apply**.
 
 
 
