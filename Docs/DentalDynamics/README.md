@@ -5,7 +5,7 @@ The module requires a segmentation file containing individually segmented teeth 
 These inputs are used to automatically calculate jaw length and muscle in-levers, and for each tooth its position along the jaw, height, width, aspect ratio, surface area, mechanical advantage, output force, and tooth stress. 
 `Dental Dynamics` can also take additional user inputs to estimate muscle parameters such as input force and insertion angle to provide more informed estimates of bite force.
 
-### Usage
+### USAGE
 
 ### Inputs
 
@@ -35,11 +35,11 @@ These inputs are used to automatically calculate jaw length and muscle in-levers
 
 **Fmax:** The max isometric stress of the closing muscle in Newtons per mm^2.
 
-### How to Cite
+### HOW TO CITE
 
 Coming Soon
 
-### Tutorial
+### TUTORIAl
 
 Please see: https://github.com/jmhuie/SlicerBiomech/tree/main/Tutorials/DentalDynamics
 
