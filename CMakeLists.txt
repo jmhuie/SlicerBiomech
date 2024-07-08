@@ -22,7 +22,7 @@ include(${Slicer_USE_FILE})
 add_subdirectory(SegmentGeometry)
 add_subdirectory(DentalDynamics)
 add_subdirectory(FractalDimension)
-
+add_subdirectory(SaveImageStack)
 
 ## NEXT_MODULE
 
