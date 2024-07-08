@@ -1,5 +1,6 @@
 import logging
 import os
+import qt
 from typing import Annotated, Optional
 
 import vtk
@@ -83,6 +84,8 @@ class SaveImageStackWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.logic = None
         self._parameterNode = None
         self._parameterNodeGuiTag = None
+        self.loadingIsInProgress = False
+        self.cancelRequested = False
 
     def setup(self) -> None:
         """Called when the user opens the module the first time and the widget is initialized."""
@@ -115,6 +118,8 @@ class SaveImageStackWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.ExportPathEdit.connect('currentPathChanged(QString)', self._checkCanApply)
         self.ui.FilenameBox.connect('textEdited(QString)', self._checkCanApply)
         self.ui.FormatcomboBox.connect('currentTextChanged(QString)', self._checkCanApply)
+        
+        self.ui.progressBar.hide()
         
         # Buttons
         self.ui.applyButton.connect("clicked(bool)", self.onApplyButton)
@@ -198,25 +203,50 @@ class SaveImageStackWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def _checkCanApply(self, caller=None, event=None) -> None:
         if self._parameterNode and self._parameterNode.inputVolume and self.ui.ExportPathEdit.currentPath != '' and self.ui.FilenameBox.text != '':
-            self.ui.applyButton.toolTip = _("Export image stack")
+            self.ui.applyButton.toolTip = _("Save image stack")
             self.ui.applyButton.enabled = True
         else:
             self.ui.applyButton.toolTip = _("Select input volume node and export parameters")
             self.ui.applyButton.enabled = False
-        # Clear Results Text
-        self.ui.ResultsText.setText('')
-        self.ui.ResultsText.setStyleSheet("background: transparent; border: transparent")
 
 
     def onApplyButton(self) -> None:
         """Run processing when user clicks "Apply" button."""
-        with slicer.util.tryWithErrorDisplay(_("Failed to compute results."), waitCursor=True):
-            # Compute output
-            self.logic.process(self.ui.inputSelector.currentNode(), self.ui.ExportPathEdit.currentPath,
-                               self.ui.FilenameBox.text, self.ui.FormatcomboBox.currentText, self.ui.ResultsText)
-                               
-        self.ui.ResultsText.setText("Export completed!")
-        self.ui.ResultsText.setStyleSheet("color: white; background: transparent; border: transparent")
+        
+        if self.loadingIsInProgress:
+            self.cancelRequested = True
+            return
+
+        self.loadingIsInProgress = True
+        self.ui.progressBar.value = 0
+        self.ui.progressBar.show()
+        self.ui.applyButton.text = "Cancel saving"
+
+        qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+        try:
+            slicer.app.pauseRender()
+            outputNode = self.logic.process(self.ui.inputSelector.currentNode(), self.ui.ExportPathEdit.currentPath,
+                               self.ui.FilenameBox.text, self.ui.FormatcomboBox.currentText, 
+                               progressCallback=self.onProgress)
+            #self.setCurrentNode(outputNode)
+            qt.QApplication.restoreOverrideCursor()
+        except Exception as e:
+            qt.QApplication.restoreOverrideCursor()
+            message, _, details = str(e).partition('\nDetails:\n')
+            slicer.util.errorDisplay("Saving failed: " + message, detailedText=details)
+            import traceback
+            traceback.print_exc()
+
+        slicer.app.resumeRender()
+        self.cancelRequested = False
+        self.loadingIsInProgress = False
+        self.ui.progressBar.hide()
+        self.ui.applyButton.text = "Save files"
+        
+    def onProgress(self, percentComplete):
+        self.ui.progressBar.value = int(self.ui.progressBar.maximum * percentComplete)
+        slicer.app.processEvents()
+        return not self.cancelRequested
 
 #
 # SaveImageStackLogic
@@ -245,7 +275,7 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
                 exportPath,
                 filename,
                 fileformat,
-                ResultsText):
+                progressCallback = None):
         """
         Run the processing algorithm.
         Can be used without GUI widget.
@@ -278,7 +308,12 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
           import imageio
 
         for i in range(len(VolumeArray)):
-          imageio.imwrite(f"{exportPath}/{filename}_{i:04}.{fileformat}", VolumeArray[i])
+          if progressCallback:
+            toContinue = progressCallback(i/len(VolumeArray))
+          if not toContinue:
+            raise ValueError("User requested cancel")       
+          n = i + 1
+          imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[i])
 
 
         stopTime = time.time()

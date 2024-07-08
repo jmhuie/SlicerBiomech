@@ -147,12 +147,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="ResultsText">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
      </property>
     </widget>
    </item>
