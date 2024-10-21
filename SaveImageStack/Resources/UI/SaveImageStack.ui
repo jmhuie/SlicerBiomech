@@ -48,6 +48,32 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Volume axis:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="axisSelectorBox">
+        <item>
+         <property name="text">
+          <string>Red (RS)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Green (PA)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yellow (RL)</string>
+         </property>
+        </item>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

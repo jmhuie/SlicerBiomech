@@ -225,7 +225,7 @@ class SaveImageStackWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
         try:
             slicer.app.pauseRender()
-            outputNode = self.logic.process(self.ui.inputSelector.currentNode(), self.ui.ExportPathEdit.currentPath,
+            outputNode = self.logic.process(self.ui.inputSelector.currentNode(), self.ui.axisSelectorBox.currentText, self.ui.ExportPathEdit.currentPath,
                                self.ui.FilenameBox.text, self.ui.FormatcomboBox.currentText, 
                                progressCallback=self.onProgress)
             #self.setCurrentNode(outputNode)
@@ -272,6 +272,7 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
 
     def process(self,
                 inputVolume,
+                axisIndex,
                 exportPath,
                 filename,
                 fileformat,
@@ -306,15 +307,28 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError:
           slicer.util.pip_install("imageio")
           import imageio
+        
+        dim = inputVolume.GetImageData().GetExtent()  
+        if axisIndex == "Red (RS)":
+          nslice = dim[5]+1 
+        if axisIndex == "Green (PA)":
+          nslice = dim[3]+1 
+        if axisIndex == "Yellow (RL)":
+          nslice = dim[1]+1 
+        print(nslice)
 
-        for i in range(len(VolumeArray)):
+        for i in range(nslice):
           if progressCallback:
-            toContinue = progressCallback(i/len(VolumeArray))
+            toContinue = progressCallback(i/nslice)
           if not toContinue:
             raise ValueError("User requested cancel")       
           n = i + 1
-          imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[i])
-
+          if axisIndex == "Red (RS)":
+            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[i,:,:])
+          if axisIndex == "Green (PA)":
+            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[:,i,:])
+          if axisIndex == "Yellow (RL)":
+            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[:,:,i])
 
         stopTime = time.time()
         logging.info(f"Processing completed in {stopTime-startTime:.2f} seconds")
