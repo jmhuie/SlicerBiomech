@@ -299,7 +299,8 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
         startTime = time.time()
         logging.info("Processing started")
 
-        # Save volume node as an image stack
+        
+        # establish volume metadata
         VolumeArray = slicer.util.arrayFromVolume(inputVolume)
 
         try:
@@ -315,8 +316,50 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
           nslice = dim[3]+1 
         if axisIndex == "Yellow (RL)":
           nslice = dim[1]+1 
-        print(nslice)
 
+        
+        # save log file     
+        import datetime
+        spacing = inputVolume.GetSpacing()
+        rounded_spacing = tuple(round(s, 9) for s in spacing)
+
+        # Get the current time and date
+        current_time = datetime.datetime.now()
+
+        # Specify the file path where you want to save the file
+        file_path = f"{exportPath}/{filename}_log.txt"  # Replace with your desired path
+
+        # Open the file at the specified path in write mode
+        with open(file_path, "w") as file:
+            file.write(f"Exported from 3D Slicer with Save ImageStack module\n\n")
+            # Write the current time and date as the first line
+            file.write(f"Date: {current_time}\n\n")
+    
+            # Write the remaining lines
+            file.write(f"Filename Prefix: {filename}\n")
+            file.write(f"File Format: {fileformat}\n")
+            file.write(f"Number of Images: {nslice}\n")
+            
+            if VolumeArray.dtype == "uint8":
+              file.write(f"Bit Type: 8-bit\n\n")
+            if VolumeArray.dtype == "uint16":
+              file.write(f"Bit Type: 16-bit\n\n")
+           
+            if axisIndex == "Red (RS)":
+              file.write(f"Image Spacing X: {rounded_spacing[0]}\n")
+              file.write(f"Image Spacing Y: {rounded_spacing[1]}\n")
+              file.write(f"Image Spacing Z: {rounded_spacing[2]}\n")
+            if axisIndex == "Green (PA)":
+              file.write(f"Image Spacing X: {rounded_spacing[0]}\n")
+              file.write(f"Image Spacing Y: {rounded_spacing[2]}\n")
+              file.write(f"Image Spacing Z: {rounded_spacing[1]}\n")
+            if axisIndex == "Yellow (RL)":
+              file.write(f"Image Spacing X: {rounded_spacing[1]}\n")
+              file.write(f"Image Spacing Y: {rounded_spacing[2]}\n")
+              file.write(f"Image Spacing Z: {rounded_spacing[0]}\n")
+            file.write(f"Image Spacing Units: mm")
+
+        # Save images
         for i in range(nslice):
           if progressCallback:
             toContinue = progressCallback(i/nslice)
