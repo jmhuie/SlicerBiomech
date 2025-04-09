@@ -132,13 +132,8 @@
          <string>tiff</string>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>2</number>
         </property>
-        <item>
-         <property name="text">
-          <string>bmp</string>
-         </property>
-        </item>
         <item>
          <property name="text">
           <string>jpg</string>

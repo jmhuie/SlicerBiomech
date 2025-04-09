@@ -190,7 +190,7 @@ class SaveImageStackWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       VolumeArray = slicer.util.arrayFromVolume(inputVolume)
       if VolumeArray.dtype == "uint8":
         self.ui.FormatcomboBox.clear()
-        self.ui.FormatcomboBox.addItem('bmp')
+        #self.ui.FormatcomboBox.addItem('bmp')
         self.ui.FormatcomboBox.addItem('jpg')
         self.ui.FormatcomboBox.addItem('png')
         self.ui.FormatcomboBox.addItem('tiff')
