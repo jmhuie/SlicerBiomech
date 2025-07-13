@@ -327,10 +327,13 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
         current_time = datetime.datetime.now()
 
         # Specify the file path where you want to save the file
-        file_path = f"{exportPath}/{filename}_log.txt"  # Replace with your desired path
+        file_path = f"{exportPath}/{filename}_stack"
+        if not os.path.exists(file_path):
+        	os.makedirs(file_path)
+        meta_path = f"{exportPath}/{filename}_log.txt"  # Replace with your desired path
 
         # Open the file at the specified path in write mode
-        with open(file_path, "w") as file:
+        with open(meta_path, "w") as file:
             file.write(f"Exported from 3D Slicer with Save ImageStack module\n\n")
             # Write the current time and date as the first line
             file.write(f"Date: {current_time}\n\n")
@@ -341,9 +344,10 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
             file.write(f"Number of Images: {nslice}\n")
             
             if VolumeArray.dtype == "uint8":
-              file.write(f"Bit Type: 8-bit\n\n")
+              file.write(f"Bit Type: 8-bit\n")
             if VolumeArray.dtype == "uint16":
-              file.write(f"Bit Type: 16-bit\n\n")
+              file.write(f"Bit Type: 16-bit\n")
+            file.write(f"\n")
            
             if axisIndex == "Red (RS)":
               file.write(f"Image Spacing X: {rounded_spacing[0]}\n")
