@@ -491,7 +491,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         finalTransform.Translate(rotationCenterPointCoord)
         finalTransform.Concatenate(rotationMatrix)
         finalTransform.Translate(-rotationCenterPointCoord[0], -rotationCenterPointCoord[1], -rotationCenterPointCoord[2])
-        transformNode.SetAndObserveMatrixTransformToParent(finalTransform.GetMatrix())
+        transformNode.SetMatrixTransformToParent(finalTransform.GetMatrix())
 
       rotationTransformNodeObserver = pointNode.AddObserver(slicer.vtkMRMLTransformNode.TransformModifiedEvent, updateFinalTransform)
       pointNode.RemoveObserver(rotationTransformNodeObserver)
@@ -538,7 +538,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     boundingBoxToRasTransform = np.row_stack((np.column_stack((obb_direction_ras_x, obb_direction_ras_y, obb_direction_ras_z, [0,0,0])), (0, 0, 0, 1)))
     boundingBoxToRasTransformMatrix = slicer.util.vtkMatrixFromArray(boundingBoxToRasTransform)
     transformNode = slicer.mrmlScene.GetFirstNodeByName(segName + " SegmentGeometry Transformation")
-    transformNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)
+    transformNode.SetMatrixTransformFromParent(boundingBoxToRasTransformMatrix)
     segmentationNode.SetAndObserveTransformNodeID(transformNode.GetID())
     volumeNode.SetAndObserveTransformNodeID(transformNode.GetID())
     slicer.modules.markups.logic().JumpSlicesToLocation(segcentroid_ras[0], segcentroid_ras[1], segcentroid_ras[2], True)
@@ -551,13 +551,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
     matrix = vtk.vtkMatrix4x4()
     trans_new.GetMatrixTransformToParent(matrix)
-    matrix.SetElement(0,3, trans_new.GetMatrixTransformToParent().GetElement(0,3) - Centroid_diff[0]) 
-    matrix.SetElement(1,3, trans_new.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
-    matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
+    matrix.SetElement(0,3, matrix.GetElement(0,3) - Centroid_diff[0]) 
+    matrix.SetElement(1,3, matrix.GetElement(1,3) - Centroid_diff[1])
+    matrix.SetElement(2,3, matrix.GetElement(2,3) - Centroid_diff[2]) 
     trans_new.SetMatrixTransformToParent(matrix)
     pointNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Point Transformation")
     if pointNode != None:
-      pointNode.SetAndObserveMatrixTransformFromParent(boundingBoxToRasTransformMatrix)  
+      pointNode.SetMatrixTransformFromParent(boundingBoxToRasTransformMatrix)  
 
     self.ui.OrientationcheckBox.checked = False  
     lineNode = slicer.mrmlScene.GetFirstNodeByName("SegmentGeometry Neutral Axis A")
@@ -612,6 +612,9 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       transform = transformNode.GetDisplayNode()
     transform.UpdateEditorBounds() 
     transform.SetEditorTranslationEnabled(0)
+    transform.SetEditorTranslationSliceEnabled(0)
+    segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
+    transformNode.SetCenterOfTransformation(segcentroid_ras)
     if transform.GetEditorVisibility() == False:
       transform.SetEditorVisibility(1)
       self.ui.RotatorSliders.enabled = False
@@ -625,7 +628,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         transformNode.GetMatrixTransformToParent(og_matrix)    
         for i in range(0,3):
           og_matrix.SetElement(i,3,0)
-        pointNode.SetAndObserveMatrixTransformToParent(og_matrix)  
+        pointNode.SetMatrixTransformToParent(og_matrix)  
         sliders=self.ui.RotatorSliders
         sliders.setMRMLScene(slicer.mrmlScene)
         sliders.TypeOfTransform = slicer.qMRMLTransformSliders.ROTATION
@@ -679,7 +682,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     transformNode.GetMatrixTransformToParent(og_matrix)    
     for i in range(0,3):
       og_matrix.SetElement(i,3,0)
-    pointNode.SetAndObserveMatrixTransformToParent(og_matrix)  
+    pointNode.SetMatrixTransformToParent(og_matrix)  
 
     def updateFinalTransform(unusedArg1=None, unusedArg2=None, unusedArg3=None):
       rotationMatrix = vtk.vtkMatrix4x4()
@@ -690,7 +693,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       finalTransform.Translate(rotationCenterPointCoord)
       finalTransform.Concatenate(rotationMatrix)
       finalTransform.Translate(-rotationCenterPointCoord[0], -rotationCenterPointCoord[1], -rotationCenterPointCoord[2])
-      transformNode.SetAndObserveMatrixTransformToParent(finalTransform.GetMatrix())
+      transformNode.SetMatrixTransformToParent(finalTransform.GetMatrix())
      
     if pointflag == 1:
       rotationTransformNodeObserver = pointNode.AddObserver(slicer.vtkMRMLTransformNode.TransformModifiedEvent, updateFinalTransform)
@@ -779,7 +782,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
       seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
-      segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+      segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
       linecenter = seg.GetSegmentCenterRAS(segName)
       
       # if tried to draw line not over the segment, jump to the center
@@ -815,7 +818,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
         slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
-        segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+        segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
         linecenter = seg.GetSegmentCenterRAS(segName)
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
@@ -1068,7 +1071,7 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
       seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
-      segName = segmentationNode.GetSegmentation().GetSegment(segmentId).GetName()
+      segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
       linecenter_new = seg.GetSegmentCenterRAS(segName)
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
@@ -1229,9 +1232,9 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       trans_new = slicer.mrmlScene.GetNodeByID(segmentationNode.GetTransformNodeID())
       matrix = vtk.vtkMatrix4x4()
       trans_new.GetMatrixTransformToParent(matrix)
-      matrix.SetElement(0,3, trans_new.GetMatrixTransformToParent().GetElement(0,3) - Centroid_diff[0]) 
-      matrix.SetElement(1,3, trans_new.GetMatrixTransformToParent().GetElement(1,3) - Centroid_diff[1])
-      matrix.SetElement(2,3, trans_new.GetMatrixTransformToParent().GetElement(2,3) - Centroid_diff[2]) 
+      matrix.SetElement(0,3, matrix.GetElement(0,3) - Centroid_diff[0]) 
+      matrix.SetElement(1,3, matrix.GetElement(1,3) - Centroid_diff[1])
+      matrix.SetElement(2,3, matrix.GetElement(2,3) - Centroid_diff[2]) 
       trans_new.SetMatrixTransformToParent(matrix) 
     
     # use crop volume to expand volume if segment is partially outside
