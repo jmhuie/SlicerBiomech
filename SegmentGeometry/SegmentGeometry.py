@@ -1705,12 +1705,12 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           coords_Kji = np.where(slicetemp > 0)
           coords_Ijk = [coords_Kji[1], coords_Kji[0]]
 
-          if np.count_nonzero(slicetemp) == 0:
+          if np.count_nonzero(slicetemp) == 0 and PerimcheckBox == True:
             PerimArray.InsertNextValue(0)
             CircularityArray.InsertNextValue(0)
            
           # calculate perimeter
-          elif segmentID == segmentNode:
+          elif segmentID == segmentNode and PerimcheckBox == True:
             startx = min(coords_Ijk[0])  
             starty = max(coords_Ijk[1][coords_Ijk[0] == startx])
             perimx = startx
