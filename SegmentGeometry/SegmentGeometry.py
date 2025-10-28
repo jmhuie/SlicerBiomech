@@ -783,7 +783,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
       segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
-      linecenter = seg.GetSegmentCenterRAS(segName)
+      
+      import SegmentStatistics
+      segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+      segStatLogic.getParameterNode().SetParameter("Segmentation", seg.GetID())
+      segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.centroid_ras.enabled", str(True))
+      segStatLogic.computeStatistics()
+      stats = segStatLogic.getStatistics()
+      
+      linecenter = stats[stats["SegmentIDs"][0],"LabelmapSegmentStatisticsPlugin.centroid_ras"]
       
       # if tried to draw line not over the segment, jump to the center
       if linecenter == None:
@@ -819,7 +827,15 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
         slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
         segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
-        linecenter = seg.GetSegmentCenterRAS(segName)
+        
+        import SegmentStatistics
+        segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+        segStatLogic.getParameterNode().SetParameter("Segmentation", seg.GetID())
+        segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.centroid_ras.enabled", str(True))
+        segStatLogic.computeStatistics()
+        stats = segStatLogic.getStatistics()
+      
+        linecenter = stats[stats["SegmentIDs"][0],"LabelmapSegmentStatisticsPlugin.centroid_ras"]
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(newVolume)
@@ -1069,10 +1085,18 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       segmentIds.InsertNextValue(segmentId)
       slicer.vtkSlicerSegmentationsModuleLogic.ExportSegmentsToLabelmapNode(segmentationNode, segmentIds, labelmapVolumeNode, newVolume)
 
-      seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
+      seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")      
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
       segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
-      linecenter_new = seg.GetSegmentCenterRAS(segName)
+      
+      import SegmentStatistics
+      segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
+      segStatLogic.getParameterNode().SetParameter("Segmentation", seg.GetID())
+      segStatLogic.getParameterNode().SetParameter("LabelmapSegmentStatisticsPlugin.centroid_ras.enabled", str(True))
+      segStatLogic.computeStatistics()
+      stats = segStatLogic.getStatistics()
+      
+      linecenter_new = stats[stats["SegmentIDs"][0],"LabelmapSegmentStatisticsPlugin.centroid_ras"]
     
       slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
       slicer.mrmlScene.RemoveNode(newVolume)
