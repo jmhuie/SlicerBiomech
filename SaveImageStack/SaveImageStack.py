@@ -371,11 +371,11 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
             raise ValueError("User requested cancel")       
           n = i + 1
           if axisIndex == "Red (RS)":
-            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[i,:,:])
+            imageio.imwrite(f"{file_path}/{filename}_{n:04}.{fileformat}", VolumeArray[i,:,:])
           if axisIndex == "Green (PA)":
-            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[:,i,:])
+            imageio.imwrite(f"{file_path}/{filename}_{n:04}.{fileformat}", VolumeArray[:,i,:])
           if axisIndex == "Yellow (RL)":
-            imageio.imwrite(f"{exportPath}/{filename}_{n:04}.{fileformat}", VolumeArray[:,:,i])
+            imageio.imwrite(f"{file_path}/{filename}_{n:04}.{fileformat}", VolumeArray[:,:,i])
 
         stopTime = time.time()
         logging.info(f"Processing completed in {stopTime-startTime:.2f} seconds")
