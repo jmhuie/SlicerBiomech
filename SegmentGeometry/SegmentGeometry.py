@@ -1399,7 +1399,10 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       RlaArray.SetName("Rla (mm)")
 
       FeretArray = vtk.vtkFloatArray()
-      FeretArray.SetName("Max Diameter (mm)")
+      FeretArray.SetName("Max Feret Diameter (mm)")
+      
+      MinFeretArray = vtk.vtkFloatArray()
+      MinFeretArray.SetName("Min Feret Diameter (mm)")
       
       PerimArray = vtk.vtkFloatArray()
       PerimArray.SetName("Perimeter (mm)")
@@ -2020,31 +2023,59 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
           #        y2 = coords_Ijk[1][j]
           #        Fdiam = max(Fdiam, np.sqrt((x2-x1)**2 +(y2-y1)**2) * PixelWidthMm)
           
+          # function to calculate minimum feret diameter
+          def min_feret(hull_pts):
+            n = len(hull_pts)
+            min_width = np.inf
+
+            for i in range(n):
+              p1 = hull_pts[i]
+              p2 = hull_pts[(i+1) % n]
+
+              edge = p2 - p1
+              edge = edge / np.linalg.norm(edge)
+
+              normal = np.array([-edge[1], edge[0]])
+
+              projections = hull_pts @ normal
+              width = projections.max() - projections.min()
+
+              if width < min_width:
+                min_width = width
+
+            return min_width
+          
           # calculate maximum diameter from convex hull
           if segmentID == segmentNode:
             from scipy.spatial.qhull import ConvexHull
-            from scipy.spatial.distance import euclidean
+            #from scipy.spatial.distance import euclidean
             Fdiam = 0
+            MinFdiam = 0
             if np.count_nonzero(slicetemp) == 0:
               Fdiam = 0
+              MinFdiam = 0
             elif isinstance(coords_Ijk[0],np.int64):
               Fdiam = 1
+              MinFdiam = 1
             elif len(coords_Ijk[0]) == 2:
               Fdiam = 2
+              MinFdiam = 1
             elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) > 1  and len(set(coords_Ijk[1])) > 1: 
               points = np.concatenate((coords_Ijk[0][:,None],coords_Ijk[1][:,None]),axis = 1)
               hull = ConvexHull(points)
-              Fdiam = 0
-              for h in hull.vertices:
-                pt1 = points[h]
-                for j in hull.vertices:
-                  pt2 = points[j]
-                  Fdiam = max(Fdiam, np.sqrt((pt2[0]-pt1[0])**2 +(pt2[1]-pt1[1])**2)* PixelWidthMm)
+              pts2d = points[:, :2] 
+              hull_pts = pts2d[hull.vertices]
+              from scipy.spatial.distance import pdist
+              Fdiam = pdist(hull_pts).max() * PixelWidthMm
+              MinFdiam = min_feret(hull_pts) * PixelWidthMm
             elif len(coords_Ijk[0]) >= 3 and len(set(coords_Ijk[0])) == 1:  
               Fdiam = max(coords_Ijk[1]) - min(coords_Ijk[1])
             elif len(coords_Ijk[1]) >= 3 and len(set(coords_Ijk[1])) == 1:  
               Fdiam = max(coords_Ijk[0]) - min(coords_Ijk[0])
+        
+              
             FeretArray.InsertNextValue(Fdiam)
+            MinFeretArray.InsertNextValue(MinFdiam)
             # find smallest, largest diameter to calculate aspect ratio
             sampleMin = int(max(sampleSlices)*.05)
             sampleMax = int(max(sampleSlices)*.95)
@@ -2304,7 +2335,11 @@ class SegmentGeometryLogic(ScriptedLoadableModuleLogic):
       if FeretcheckBox == True:
         tableNode.AddColumn(FeretArray)
         tableNode.SetColumnUnitLabel(FeretArray.GetName(), "mm")  # TODO: use length unit
-        tableNode.SetColumnDescription(FeretArray.GetName(), "Maximum feret diameter")    
+        tableNode.SetColumnDescription(FeretArray.GetName(), "Maximum feret diameter") 
+        
+        tableNode.AddColumn(MinFeretArray)
+        tableNode.SetColumnUnitLabel(FeretArray.GetName(), "mm")  # TODO: use length unit
+        tableNode.SetColumnDescription(FeretArray.GetName(), "Minimum feret diameter")    
       
       if PerimcheckBox == True:
         tableNode.AddColumn(PerimArray)
