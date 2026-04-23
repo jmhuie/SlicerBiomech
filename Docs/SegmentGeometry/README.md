@@ -39,9 +39,9 @@ Below contains brief information on the possible computations.
 
 - Length: Length of the segment is defined as the number of slices that make up the segment, multiplied by the image spacing.
 
-- Max Diameter: Maximum Feret diameter of the section.
+- Feret Diameter: Maximum and Minimum Feret diameter of the section.
 
-- Perimeter: Perimeter of the section. Note that calculation may be incorrect for cross-sections where inner vacuities connect to the outer edge or there is more than one island in the section. Perimeter calculations are intended to be conducted on closed form cross-sections.
+- Perimeter: Perimeter of the section. Note that calculation may be incorrect for cross-sections where inner vacuities connect to the outer edge or there is more than one island in the section.  Currently, the implemented method is not very robust. Perimeter calculations are intended to be conducted on closed form cross-sections.
 
 - Mean Brightness: Mean voxel brightness or average grey scale value of the section. 
 
