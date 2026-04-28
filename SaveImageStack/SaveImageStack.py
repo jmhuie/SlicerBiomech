@@ -347,6 +347,8 @@ class SaveImageStackLogic(ScriptedLoadableModuleLogic):
               file.write(f"Bit Type: 8-bit\n")
             if VolumeArray.dtype == "uint16":
               file.write(f"Bit Type: 16-bit\n")
+            if VolumeArray.dtype == "uint32":
+              file.write(f"Bit Type: 32-bit\n")
             file.write(f"\n")
            
             if axisIndex == "Red (RS)":
