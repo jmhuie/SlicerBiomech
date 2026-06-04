@@ -782,7 +782,6 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
       seg = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode")
       slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, seg)
-      segName = seg.GetDisplayNode().GetVisibleSegmentIDs()[0]
       
       import SegmentStatistics
       segStatLogic = SegmentStatistics.SegmentStatisticsLogic()
@@ -791,8 +790,13 @@ class SegmentGeometryWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
       segStatLogic.computeStatistics()
       stats = segStatLogic.getStatistics()
       
-      linecenter = stats[stats["SegmentIDs"][0],"LabelmapSegmentStatisticsPlugin.centroid_ras"]
-      
+      # check if the segment is in view; line won't draw if it is not
+      try:
+        linecenter = stats[stats["SegmentIDs"][0],"LabelmapSegmentStatisticsPlugin.centroid_ras"]
+      except Exception:
+        linecenter = None
+        
+              
       # if tried to draw line not over the segment, jump to the center
       if linecenter == None:
         segcentroid_ras = segmentationNode.GetSegmentCenterRAS(segmentId)
